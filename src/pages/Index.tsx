@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BottomNav, type TabId } from '@/components/BottomNav';
+import { HomeScreen } from '@/components/HomeScreen';
 import { CheckInScreen } from '@/components/CheckInScreen';
 import { TimelineScreen } from '@/components/TimelineScreen';
 import { TrendsScreen } from '@/components/TrendsScreen';
-import { EventsScreen } from '@/components/EventsScreen';
 import { SettingsScreen } from '@/components/SettingsScreen';
 import { EventForm } from '@/components/EventForm';
 import { Onboarding } from '@/components/Onboarding';
+import { getCheckIns, getEvents } from '@/lib/storage';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<TabId>('checkin');
+  const [activeTab, setActiveTab] = useState<TabId>('home');
   const [showEventForm, setShowEventForm] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [checkInCount, setCheckInCount] = useState(0);
+  const [eventCount, setEventCount] = useState(0);
 
   useEffect(() => {
     const onboarded = localStorage.getItem('waketrack_onboarded');
@@ -22,12 +25,31 @@ const Index = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const loadCounts = async () => {
+      const checkIns = await getCheckIns();
+      const events = await getEvents();
+      setCheckInCount(checkIns.length);
+      setEventCount(events.length);
+    };
+    loadCounts();
+  }, [refreshTrigger]);
+
   const handleDataChange = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
   const renderScreen = () => {
     switch (activeTab) {
+      case 'home':
+        return (
+          <HomeScreen
+            onLogWakeState={() => setActiveTab('checkin')}
+            onLogEvent={() => setShowEventForm(true)}
+            checkInCount={checkInCount}
+            eventCount={eventCount}
+          />
+        );
       case 'checkin':
         return (
           <CheckInScreen
@@ -40,13 +62,6 @@ const Index = () => {
         return <TimelineScreen refreshTrigger={refreshTrigger} />;
       case 'trends':
         return <TrendsScreen refreshTrigger={refreshTrigger} />;
-      case 'events':
-        return (
-          <EventsScreen
-            refreshTrigger={refreshTrigger}
-            onAddEvent={() => setShowEventForm(true)}
-          />
-        );
       case 'settings':
         return <SettingsScreen />;
       default:
@@ -56,14 +71,14 @@ const Index = () => {
 
   const getTitle = () => {
     switch (activeTab) {
+      case 'home':
+        return 'WakeTrack';
       case 'checkin':
         return 'Check-In';
       case 'timeline':
         return 'Timeline';
       case 'trends':
         return 'Trends';
-      case 'events':
-        return 'Events';
       case 'settings':
         return 'Settings';
       default:
@@ -86,9 +101,11 @@ const Index = () => {
         <header className="sticky top-0 z-40 glass border-b border-border/50 safe-area-top">
           <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
             <h1 className="text-xl font-bold text-foreground">{getTitle()}</h1>
-            <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
-              WakeTrack
-            </span>
+            {activeTab !== 'home' && (
+              <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
+                WakeTrack
+              </span>
+            )}
           </div>
         </header>
 
