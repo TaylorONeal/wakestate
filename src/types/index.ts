@@ -27,8 +27,36 @@ export interface CheckIn {
   note?: string;
 }
 
-export type EventType = 'major-cataplexy';
+export const EVENT_TYPES = [
+  { id: 'major-cataplexy', label: 'Major Cataplexy', category: 'cataplexy' },
+  { id: 'partial-cataplexy', label: 'Partial Cataplexy (Face/Jaw)', category: 'cataplexy' },
+  { id: 'knee-buckling', label: 'Knee Buckling', category: 'cataplexy' },
+  { id: 'head-drop', label: 'Head Drop', category: 'cataplexy' },
+  { id: 'sleep-attack', label: 'Sleep Attack', category: 'sleep' },
+  { id: 'unplanned-nap', label: 'Unplanned Nap', category: 'sleep' },
+  { id: 'planned-nap', label: 'Planned Nap', category: 'sleep' },
+  { id: 'fragmented-night', label: 'Fragmented Night Sleep', category: 'sleep' },
+  { id: 'sleep-paralysis', label: 'Sleep Paralysis', category: 'parasomnia' },
+  { id: 'hypnagogic-hallucination', label: 'Hypnagogic Hallucination', category: 'parasomnia' },
+  { id: 'hypnopompic-hallucination', label: 'Hypnopompic Hallucination', category: 'parasomnia' },
+  { id: 'vivid-dream', label: 'Vivid/Lucid Dream', category: 'parasomnia' },
+  { id: 'nightmare', label: 'Nightmare', category: 'parasomnia' },
+  { id: 'automatic-behavior', label: 'Automatic Behavior Episode', category: 'cognitive' },
+  { id: 'memory-gap', label: 'Memory Gap', category: 'cognitive' },
+  { id: 'brain-fog-severe', label: 'Severe Brain Fog', category: 'cognitive' },
+  { id: 'word-finding', label: 'Word Finding Difficulty', category: 'cognitive' },
+  { id: 'medication-taken', label: 'Medication Taken', category: 'treatment' },
+  { id: 'medication-missed', label: 'Medication Missed', category: 'treatment' },
+  { id: 'stimulant-dose', label: 'Stimulant Dose', category: 'treatment' },
+  { id: 'caffeine-use', label: 'Caffeine Use', category: 'treatment' },
+  { id: 'emotional-trigger', label: 'Emotional Trigger', category: 'trigger' },
+  { id: 'stress-episode', label: 'Stress Episode', category: 'trigger' },
+  { id: 'exercise-session', label: 'Exercise Session', category: 'activity' },
+  { id: 'driving-incident', label: 'Driving Near-Miss/Concern', category: 'safety' },
+] as const;
 
+export type EventType = typeof EVENT_TYPES[number]['id'];
+export type EventCategory = typeof EVENT_TYPES[number]['category'];
 export type SeverityTag = 'mild' | 'moderate' | 'severe';
 
 export interface TrackingEvent {
