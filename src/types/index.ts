@@ -103,7 +103,7 @@ export const WAKE_DOMAIN_CONFIG: Record<keyof WakeDomains, DomainConfig> = {
     anchors: { 1: 'Motivated', 3: 'Reluctant', 5: "Can't initiate" },
   },
   sleepPressure: {
-    label: 'Unrefreshing Sleep Pressure',
+    label: 'Sleep Pressure',
     color: 'domain-sleep-pressure',
     anchors: { 1: 'Rested', 3: 'Heavy', 5: 'Crushing' },
   },
