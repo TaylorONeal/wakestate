@@ -278,7 +278,12 @@ export function EventForm({ onClose, onSave }: EventFormProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep editing</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { setShowBackDialog(false); onClose(); }}>
+            <AlertDialogAction 
+              onClick={() => { 
+                setShowBackDialog(false);
+                setTimeout(() => onClose(), 0);
+              }}
+            >
               Discard & go back
             </AlertDialogAction>
           </AlertDialogFooter>

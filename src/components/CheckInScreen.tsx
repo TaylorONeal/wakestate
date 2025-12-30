@@ -383,7 +383,13 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep editing</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { setShowBackDialog(false); onBack(); }}>
+            <AlertDialogAction 
+              onClick={() => { 
+                localStorage.removeItem(DRAFT_STORAGE_KEY);
+                setShowBackDialog(false);
+                setTimeout(() => onBack(), 0);
+              }}
+            >
               Discard & go back
             </AlertDialogAction>
           </AlertDialogFooter>
