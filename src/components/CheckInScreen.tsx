@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
-import { ChevronDown, Save, RotateCcw, AlertTriangle, Plus } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Save, RotateCcw, AlertTriangle, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { DomainSlider } from '@/components/DomainSlider';
@@ -52,9 +52,10 @@ interface CheckInScreenProps {
   onEventClick: () => void;
   onSave: () => void;
   onNavigateToTrends: () => void;
+  onBack: () => void;
 }
 
-export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends }: CheckInScreenProps) {
+export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack }: CheckInScreenProps) {
   const { toast } = useToast();
   const [dateTime, setDateTime] = useState(new Date());
   const [wakeDomains, setWakeDomains] = useState<WakeDomains>(defaultWakeDomains);
@@ -64,6 +65,7 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends }: Chec
   const [showNote, setShowNote] = useState(false);
   const [contextExpanded, setContextExpanded] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
+  const [showBackDialog, setShowBackDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -71,6 +73,25 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends }: Chec
       setContextExpanded(settings.showContextByDefault);
     });
   }, []);
+
+  // Check if form has unsaved changes
+  const hasChanges = () => {
+    const wakeChanged = Object.keys(wakeDomains).some(
+      (key) => wakeDomains[key as keyof WakeDomains] !== 1
+    );
+    const contextChanged = contextExpanded && Object.keys(contextDomains).some(
+      (key) => contextDomains[key as keyof ContextDomains] !== 1
+    );
+    return wakeChanged || contextChanged || activeTags.length > 0 || note.trim().length > 0;
+  };
+
+  const handleBackClick = () => {
+    if (hasChanges()) {
+      setShowBackDialog(true);
+    } else {
+      onBack();
+    }
+  };
 
   const updateWakeDomain = (key: keyof WakeDomains, value: number) => {
     setWakeDomains(prev => ({ ...prev, [key]: value }));
@@ -125,6 +146,16 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends }: Chec
 
   return (
     <div className="space-y-6 pb-24">
+      {/* Back Button */}
+      <motion.button
+        onClick={handleBackClick}
+        className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors -ml-1"
+        whileTap={{ scale: 0.95 }}
+      >
+        <ChevronLeft className="w-5 h-5" />
+        <span className="text-sm font-medium">Back</span>
+      </motion.button>
+
       {/* Date/Time Picker */}
       <DateTimePicker date={dateTime} onChange={setDateTime} />
 
@@ -286,6 +317,27 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends }: Chec
           </Button>
         </div>
       </motion.div>
+
+      {/* Back Confirmation Dialog */}
+      <AlertDialog open={showBackDialog} onOpenChange={setShowBackDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-yellow-500" />
+              Unsaved changes
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved check-in data. Are you sure you want to go back? Your changes will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setShowBackDialog(false); onBack(); }}>
+              Discard & go back
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Reset Confirmation Dialog */}
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>

@@ -56,6 +56,7 @@ const Index = () => {
             onEventClick={() => setShowEventForm(true)}
             onSave={handleDataChange}
             onNavigateToTrends={() => setActiveTab('trends')}
+            onBack={() => setActiveTab('home')}
           />
         );
       case 'timeline':
