@@ -1,0 +1,169 @@
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { v4 as uuidv4 } from 'uuid';
+import { format } from 'date-fns';
+import { AlertTriangle, Save, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { TagGroup } from '@/components/TagChip';
+import { DateTimePicker } from '@/components/DateTimePicker';
+import { useToast } from '@/hooks/use-toast';
+import { saveEvent } from '@/lib/storage';
+import { EMOTION_TAGS, ACTIVITY_TAGS, type TrackingEvent, type SeverityTag } from '@/types';
+
+interface EventFormProps {
+  onClose: () => void;
+  onSave: () => void;
+}
+
+export function EventForm({ onClose, onSave }: EventFormProps) {
+  const { toast } = useToast();
+  const [dateTime, setDateTime] = useState(new Date());
+  const [severityTag, setSeverityTag] = useState<SeverityTag | undefined>();
+  const [emotionTags, setEmotionTags] = useState<string[]>([]);
+  const [activityTags, setActivityTags] = useState<string[]>([]);
+  const [note, setNote] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const toggleEmotionTag = (tag: string) => {
+    setEmotionTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const toggleActivityTag = (tag: string) => {
+    setActivityTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+
+    const event: TrackingEvent = {
+      id: uuidv4(),
+      type: 'major-cataplexy',
+      createdAt: new Date().toISOString(),
+      localDate: format(dateTime, 'yyyy-MM-dd'),
+      localTime: format(dateTime, 'HH:mm'),
+      severityTag,
+      contextTags: [...emotionTags, ...activityTags],
+      note: note.trim() || undefined,
+    };
+
+    await saveEvent(event);
+    
+    toast({
+      title: 'Event logged',
+      description: 'Cataplexy event recorded',
+    });
+
+    setIsSaving(false);
+    onSave();
+    onClose();
+  };
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm overflow-auto"
+      initial={{ opacity: 0, y: '100%' }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: '100%' }}
+      transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+    >
+      <div className="min-h-screen p-4 max-w-lg mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+            </div>
+            <h1 className="text-xl font-bold">Log Event</h1>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Event Type */}
+          <section className="section-card">
+            <h2 className="text-sm font-medium text-muted-foreground mb-2">Event Type</h2>
+            <p className="text-lg font-semibold">Major Cataplexy</p>
+          </section>
+
+          {/* Date/Time */}
+          <DateTimePicker date={dateTime} onChange={setDateTime} />
+
+          {/* Severity */}
+          <section className="space-y-3">
+            <h3 className="text-sm font-medium text-muted-foreground">Severity (optional)</h3>
+            <div className="flex gap-2">
+              {(['mild', 'moderate', 'severe'] as const).map((severity) => (
+                <motion.button
+                  key={severity}
+                  onClick={() => setSeverityTag(severityTag === severity ? undefined : severity)}
+                  className={`chip flex-1 capitalize ${
+                    severityTag === severity ? 'bg-destructive/20 text-destructive border-destructive/50' : ''
+                  }`}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {severity}
+                </motion.button>
+              ))}
+            </div>
+          </section>
+
+          {/* Emotion Triggers */}
+          <section className="space-y-3">
+            <h3 className="text-sm font-medium text-muted-foreground">Emotion triggers</h3>
+            <TagGroup
+              tags={EMOTION_TAGS}
+              activeTags={emotionTags}
+              onToggle={toggleEmotionTag}
+              variant="emotion"
+            />
+          </section>
+
+          {/* Activity Context */}
+          <section className="space-y-3">
+            <h3 className="text-sm font-medium text-muted-foreground">Activity context</h3>
+            <TagGroup
+              tags={ACTIVITY_TAGS}
+              activeTags={activityTags}
+              onToggle={toggleActivityTag}
+              variant="activity"
+            />
+          </section>
+
+          {/* Note */}
+          <section className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">
+              Note (optional, max 140 chars)
+            </label>
+            <Textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value.slice(0, 140))}
+              placeholder="What happened..."
+              className="input-field resize-none h-20"
+              maxLength={140}
+            />
+            <span className="text-xs text-muted-foreground text-right block">
+              {note.length}/140
+            </span>
+          </section>
+
+          {/* Save Button */}
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="w-full h-14 text-lg font-semibold bg-destructive hover:bg-destructive/90"
+          >
+            <Save className="w-5 h-5 mr-2" />
+            {isSaving ? 'Saving...' : 'Save Event'}
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
