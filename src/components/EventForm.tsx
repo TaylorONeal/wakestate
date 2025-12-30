@@ -2,14 +2,21 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
-import { AlertTriangle, Save, ChevronLeft } from 'lucide-react';
+import { AlertTriangle, Save, ChevronLeft, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { TagGroup } from '@/components/TagChip';
 import { DateTimePicker } from '@/components/DateTimePicker';
 import { useToast } from '@/hooks/use-toast';
 import { saveEvent } from '@/lib/storage';
-import { EMOTION_TAGS, ACTIVITY_TAGS, type TrackingEvent, type SeverityTag } from '@/types';
+import { 
+  EVENT_TYPES, 
+  EMOTION_TAGS, 
+  ACTIVITY_TAGS, 
+  type TrackingEvent, 
+  type SeverityTag,
+  type EventType 
+} from '@/types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,14 +27,44 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface EventFormProps {
   onClose: () => void;
   onSave: () => void;
 }
 
+// Group events by category
+const eventsByCategory = EVENT_TYPES.reduce((acc, event) => {
+  if (!acc[event.category]) {
+    acc[event.category] = [];
+  }
+  acc[event.category].push(event);
+  return acc;
+}, {} as Record<string, typeof EVENT_TYPES[number][]>);
+
+const categoryLabels: Record<string, string> = {
+  cataplexy: '⚡ Cataplexy',
+  sleep: '😴 Sleep Episodes',
+  parasomnia: '🌙 Parasomnias',
+  cognitive: '🧠 Cognitive',
+  treatment: '💊 Treatment',
+  trigger: '⚠️ Triggers',
+  activity: '🏃 Activity',
+  safety: '🚗 Safety',
+};
+
 export function EventForm({ onClose, onSave }: EventFormProps) {
   const { toast } = useToast();
+  const [eventType, setEventType] = useState<EventType>('major-cataplexy');
   const [dateTime, setDateTime] = useState(new Date());
   const [severityTag, setSeverityTag] = useState<SeverityTag | undefined>();
   const [emotionTags, setEmotionTags] = useState<string[]>([]);
@@ -69,7 +106,7 @@ export function EventForm({ onClose, onSave }: EventFormProps) {
 
     const event: TrackingEvent = {
       id: uuidv4(),
-      type: 'major-cataplexy',
+      type: eventType,
       createdAt: new Date().toISOString(),
       localDate: format(dateTime, 'yyyy-MM-dd'),
       localTime: format(dateTime, 'HH:mm'),
@@ -80,15 +117,18 @@ export function EventForm({ onClose, onSave }: EventFormProps) {
 
     await saveEvent(event);
     
+    const eventLabel = EVENT_TYPES.find(e => e.id === eventType)?.label || 'Event';
     toast({
       title: 'Event logged',
-      description: 'Cataplexy event recorded',
+      description: `${eventLabel} recorded`,
     });
 
     setIsSaving(false);
     onSave();
     onClose();
   };
+
+  const selectedEventLabel = EVENT_TYPES.find(e => e.id === eventType)?.label || 'Select event type';
 
   return (
     <>
@@ -120,10 +160,34 @@ export function EventForm({ onClose, onSave }: EventFormProps) {
           </div>
 
           <div className="space-y-6">
-            {/* Event Type */}
-            <section className="section-card">
-              <h2 className="text-sm font-medium text-muted-foreground mb-2">Event Type</h2>
-              <p className="text-lg font-semibold">Major Cataplexy</p>
+            {/* Event Type Dropdown */}
+            <section className="space-y-3">
+              <h2 className="text-sm font-medium text-muted-foreground">Event Type</h2>
+              <Select value={eventType} onValueChange={(val) => setEventType(val as EventType)}>
+                <SelectTrigger className="w-full h-14 text-left bg-card border-border">
+                  <SelectValue placeholder="Select event type">
+                    {selectedEventLabel}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border max-h-[60vh]">
+                  {Object.entries(eventsByCategory).map(([category, events]) => (
+                    <SelectGroup key={category}>
+                      <SelectLabel className="text-xs font-semibold text-muted-foreground px-2 py-2">
+                        {categoryLabels[category] || category}
+                      </SelectLabel>
+                      {events.map((event) => (
+                        <SelectItem 
+                          key={event.id} 
+                          value={event.id}
+                          className="py-3 cursor-pointer"
+                        >
+                          {event.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
             </section>
 
             {/* Date/Time */}

@@ -48,6 +48,17 @@ const defaultContextDomains: ContextDomains = {
   digestive: 1,
 };
 
+const DRAFT_STORAGE_KEY = 'waketrack_checkin_draft';
+
+interface CheckInDraft {
+  dateTime: string;
+  wakeDomains: WakeDomains;
+  contextDomains: ContextDomains;
+  activeTags: string[];
+  note: string;
+  contextExpanded: boolean;
+}
+
 interface CheckInScreenProps {
   onEventClick: () => void;
   onSave: () => void;
@@ -67,12 +78,50 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showBackDialog, setShowBackDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
 
+  // Load draft on mount
   useEffect(() => {
-    getSettings().then((settings: AppSettings) => {
-      setContextExpanded(settings.showContextByDefault);
-    });
+    const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (savedDraft) {
+      try {
+        const draft: CheckInDraft = JSON.parse(savedDraft);
+        setDateTime(new Date(draft.dateTime));
+        setWakeDomains(draft.wakeDomains);
+        setContextDomains(draft.contextDomains);
+        setActiveTags(draft.activeTags);
+        setNote(draft.note);
+        setShowNote(draft.note.length > 0);
+        setContextExpanded(draft.contextExpanded);
+        setDraftRestored(true);
+        toast({
+          title: 'Draft restored',
+          description: 'Your previous check-in was recovered',
+        });
+      } catch (e) {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+      }
+    } else {
+      getSettings().then((settings: AppSettings) => {
+        setContextExpanded(settings.showContextByDefault);
+      });
+    }
   }, []);
+
+  // Auto-save draft when values change
+  useEffect(() => {
+    if (draftRestored || hasChanges()) {
+      const draft: CheckInDraft = {
+        dateTime: dateTime.toISOString(),
+        wakeDomains,
+        contextDomains,
+        activeTags,
+        note,
+        contextExpanded,
+      };
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    }
+  }, [dateTime, wakeDomains, contextDomains, activeTags, note, contextExpanded]);
 
   // Check if form has unsaved changes
   const hasChanges = () => {
@@ -142,6 +191,8 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     setNote('');
     setShowNote(false);
     setShowResetDialog(false);
+    setDraftRestored(false);
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
   };
 
   return (
