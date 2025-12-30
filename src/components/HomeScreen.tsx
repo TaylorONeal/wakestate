@@ -54,8 +54,7 @@ export function HomeScreen({ onLogWakeState, onLogEvent, checkInCount, eventCoun
           Track Your <span className="text-primary">Wake State</span>
         </h2>
         <p className="text-muted-foreground text-sm leading-relaxed px-2">
-          Separate sleep-driven symptoms from anxiety, mood, and digestion overlays. 
-          Build patterns to share with your care team.
+          Track the different components of wakefulness and other symptoms to help understand your trends.
         </p>
       </motion.div>
 
