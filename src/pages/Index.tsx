@@ -33,6 +33,7 @@ const Index = () => {
           <CheckInScreen
             onEventClick={() => setShowEventForm(true)}
             onSave={handleDataChange}
+            onNavigateToTrends={() => setActiveTab('trends')}
           />
         );
       case 'timeline':
