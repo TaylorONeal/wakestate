@@ -51,9 +51,10 @@ const defaultContextDomains: ContextDomains = {
 interface CheckInScreenProps {
   onEventClick: () => void;
   onSave: () => void;
+  onNavigateToTrends: () => void;
 }
 
-export function CheckInScreen({ onEventClick, onSave }: CheckInScreenProps) {
+export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends }: CheckInScreenProps) {
   const { toast } = useToast();
   const [dateTime, setDateTime] = useState(new Date());
   const [wakeDomains, setWakeDomains] = useState<WakeDomains>(defaultWakeDomains);
@@ -109,6 +110,7 @@ export function CheckInScreen({ onEventClick, onSave }: CheckInScreenProps) {
     handleReset();
     setIsSaving(false);
     onSave();
+    onNavigateToTrends();
   };
 
   const handleReset = () => {
