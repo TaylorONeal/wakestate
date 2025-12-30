@@ -1,6 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DomainConfig } from '@/types';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface DomainSliderProps {
   domainKey: string;
@@ -63,9 +69,31 @@ export function DomainSlider({ domainKey, config, value, onChange }: DomainSlide
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-foreground/90">
-          {config.label}
-        </label>
+        <div className="flex items-center gap-1.5">
+          <label className="text-sm font-medium text-foreground/90">
+            {config.label}
+          </label>
+          {config.description && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="p-0.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-surface-3 transition-colors"
+                  aria-label={`Info about ${config.label}`}
+                >
+                  <Info className="w-3.5 h-3.5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent 
+                side="top" 
+                className="w-72 text-sm bg-popover border-border z-50"
+                sideOffset={8}
+              >
+                <p className="text-foreground/90">{config.description}</p>
+              </PopoverContent>
+            </Popover>
+          )}
+        </div>
         <AnimatePresence mode="wait">
           <motion.span
             key={value}

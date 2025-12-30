@@ -79,6 +79,7 @@ export interface DomainConfig {
   label: string;
   color: string;
   anchors: { 1: string; 3: string; 5: string };
+  description?: string;
 }
 
 export const WAKE_DOMAIN_CONFIG: Record<keyof WakeDomains, DomainConfig> = {
@@ -86,46 +87,55 @@ export const WAKE_DOMAIN_CONFIG: Record<keyof WakeDomains, DomainConfig> = {
     label: 'Cataplexy — Subtle',
     color: 'domain-cataplexy',
     anchors: { 1: 'None', 3: 'Slight weakness', 5: 'Noticeable' },
+    description: 'Subtle muscle weakness triggered by emotions. May feel like jaw loosening, head heaviness, or slight knee buckling.',
   },
   microsleeps: {
     label: 'Microsleeps / Automatic Mode',
     color: 'domain-microsleeps',
     anchors: { 1: 'Alert', 3: 'Drifting', 5: 'Losing time' },
+    description: 'Brief lapses into sleep lasting seconds. You may continue activities on autopilot with no memory of them.',
   },
   cognitive: {
     label: 'Cognitive Fuzziness',
     color: 'domain-cognitive',
     anchors: { 1: 'Sharp', 3: 'Foggy', 5: 'Very clouded' },
+    description: 'Difficulty with concentration, processing speed, and mental clarity. Often called "brain fog."',
   },
   effort: {
     label: 'Effort Aversion',
     color: 'domain-effort',
     anchors: { 1: 'Motivated', 3: 'Reluctant', 5: "Can't initiate" },
+    description: 'Difficulty starting or sustaining tasks, even ones you want to do. Different from laziness or lack of motivation.',
   },
   sleepPressure: {
     label: 'Sleep Pressure',
     color: 'domain-sleep-pressure',
     anchors: { 1: 'Rested', 3: 'Heavy', 5: 'Crushing' },
+    description: 'The overwhelming urge to sleep. May feel like a weight pressing down, making it hard to stay awake.',
   },
   motor: {
     label: 'Motor Control Degradation',
     color: 'domain-motor',
     anchors: { 1: 'Coordinated', 3: 'Clumsy', 5: 'Impaired' },
+    description: 'Reduced coordination and fine motor control. May drop things, bump into objects, or have trouble with precise movements.',
   },
   sensory: {
     label: 'Sensory Overload',
     color: 'domain-sensory',
     anchors: { 1: 'Comfortable', 3: 'Sensitive', 5: 'Overwhelmed' },
+    description: 'Heightened sensitivity to light, sound, touch, or other stimuli. Environments feel too intense.',
   },
   thermo: {
     label: 'Thermoregulatory Instability',
     color: 'domain-thermo',
     anchors: { 1: 'Stable', 3: 'Fluctuating', 5: 'Extreme' },
+    description: 'Difficulty regulating body temperature. May experience sudden hot flashes, chills, or sweating unrelated to environment.',
   },
   emotional: {
     label: 'Emotional Reactivity / Freeze',
     color: 'domain-emotional',
     anchors: { 1: 'Balanced', 3: 'Reactive', 5: 'Volatile/frozen' },
+    description: 'Heightened emotional responses or emotional numbness. May laugh/cry easily or feel emotionally flat.',
   },
 };
 
