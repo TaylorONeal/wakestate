@@ -196,7 +196,7 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
   };
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6 pb-24 overscroll-y-contain">
       {/* Back Button */}
       <motion.button
         onClick={handleBackClick}

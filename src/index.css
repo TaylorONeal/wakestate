@@ -129,9 +129,20 @@
     box-shadow: 0 4px 20px hsl(var(--glow-soft));
   }
 
-  .touch-target {
-    @apply min-h-[44px] min-w-[44px];
-  }
+.touch-target {
+  @apply min-h-[44px] min-w-[44px];
+  -webkit-overflow-scrolling: auto;
+}
+
+/* Reduce scroll sensitivity on touch devices */
+.overscroll-contain {
+  overscroll-behavior: contain;
+}
+
+input[type="range"] {
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+}
 
   .domain-slider {
     @apply relative h-12 rounded-xl overflow-hidden;
