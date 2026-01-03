@@ -210,7 +210,11 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     handleReset();
     setIsSaving(false);
     onSave();
-    onNavigateToTrends();
+    
+    // Delay navigation to let animation complete
+    setTimeout(() => {
+      onNavigateToTrends();
+    }, 1600);
   };
 
   const handleReset = () => {
