@@ -9,6 +9,7 @@ import type {
   MedicationAdministration,
   SleepEntry
 } from '@/types';
+import { ImportDataSchema } from './validation';
 
 const CHECKINS_KEY = 'wakestate_checkins';
 const EVENTS_KEY = 'wakestate_events';
@@ -211,21 +212,24 @@ export async function exportAllData(): Promise<string> {
 }
 
 export async function importData(jsonString: string): Promise<{ checkIns: number; events: number }> {
-  const data = JSON.parse(jsonString);
+  const parsed = JSON.parse(jsonString);
   
-  if (data.checkIns) {
-    await set(CHECKINS_KEY, data.checkIns);
+  // Validate import data with zod schema
+  const validated = ImportDataSchema.parse(parsed);
+  
+  if (validated.checkIns) {
+    await set(CHECKINS_KEY, validated.checkIns);
   }
-  if (data.events) {
-    await set(EVENTS_KEY, data.events);
+  if (validated.events) {
+    await set(EVENTS_KEY, validated.events);
   }
-  if (data.settings) {
-    await set(SETTINGS_KEY, data.settings);
+  if (validated.settings) {
+    await set(SETTINGS_KEY, validated.settings);
   }
   
   return {
-    checkIns: data.checkIns?.length || 0,
-    events: data.events?.length || 0,
+    checkIns: validated.checkIns?.length || 0,
+    events: validated.events?.length || 0,
   };
 }
 
