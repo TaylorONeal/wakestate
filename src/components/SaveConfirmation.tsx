@@ -41,11 +41,11 @@ export function SaveConfirmation({ isVisible, saveType, logType }: SaveConfirmat
   // Text varies by save type
   const zzText = isNew ? 'ZZzzz' : 'zz';
   
-  // Animation durations
-  const textDuration = isNew ? 0.45 : 0.3;
-  const cloudDuration = isNew ? 0.3 : 0.25;
+  // Animation durations - satisfying timing with ASMR-like fade
+  const textDuration = isNew ? 1.1 : 0.8;
+  const cloudDuration = isNew ? 0.9 : 0.6;
   const textDelay = 0;
-  const cloudDelay = isNew ? 0.35 : 0.2;
+  const cloudDelay = isNew ? 0.15 : 0.1;
 
   if (reducedMotion) {
     // Simple fade + checkmark for reduced motion
@@ -111,16 +111,17 @@ export function SaveConfirmation({ isVisible, saveType, logType }: SaveConfirmat
             }}
             animate={{ 
               y: isNew ? -30 : -15,
-              opacity: [0, 1, 1, 0],
+              opacity: [0, 1, 1, 0.8, 0],
               scale: 1,
             }}
             transition={{ 
               duration: textDuration,
               delay: textDelay,
-              ease: [0.34, 1.56, 0.64, 1], // bounce easing
+              ease: [0.25, 0.46, 0.45, 0.94], // smooth easing
               opacity: {
-                times: [0, 0.2, 0.7, 1],
+                times: [0, 0.15, 0.5, 0.75, 1],
                 duration: textDuration,
+                ease: 'easeOut',
               }
             }}
           >
@@ -140,13 +141,17 @@ export function SaveConfirmation({ isVisible, saveType, logType }: SaveConfirmat
               opacity: 0,
             }}
             animate={{ 
-              scale: isNew ? [0.3, 1.2, 1.5] : [0.5, 0.9, 1.1],
-              opacity: [0, isNew ? 0.6 : 0.3, 0],
+              scale: isNew ? [0.3, 1.2, 1.4] : [0.5, 0.9, 1.0],
+              opacity: [0, isNew ? 0.5 : 0.25, isNew ? 0.3 : 0.15, 0],
             }}
             transition={{ 
               duration: cloudDuration,
               delay: cloudDelay,
-              ease: 'easeOut',
+              ease: [0.25, 0.46, 0.45, 0.94],
+              opacity: {
+                times: [0, 0.3, 0.6, 1],
+                ease: 'easeOut',
+              }
             }}
           />
 
@@ -167,13 +172,14 @@ export function SaveConfirmation({ isVisible, saveType, logType }: SaveConfirmat
                   animate={{
                     x: [0, (i % 2 === 0 ? 1 : -1) * (20 + i * 10)],
                     y: [0, -20 - i * 8],
-                    opacity: [0, 0.8, 0],
-                    scale: [0, 1, 0.5],
+                    opacity: [0, 0.7, 0.4, 0],
+                    scale: [0, 1, 0.6],
                   }}
                   transition={{
-                    duration: 0.5,
-                    delay: 0.25 + i * 0.05,
-                    ease: 'easeOut',
+                    duration: 0.9,
+                    delay: 0.2 + i * 0.08,
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    opacity: { times: [0, 0.2, 0.6, 1] },
                   }}
                 />
               ))}
