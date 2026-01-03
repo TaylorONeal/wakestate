@@ -4,7 +4,6 @@ import { ArrowLeft, ExternalLink, ChevronDown, ChevronUp, Pill, FlaskConical, Mo
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -282,40 +281,31 @@ function MedicationCard({
   };
 
   return (
-    <TooltipProvider delayDuration={300}>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <CollapsibleTrigger asChild>
-              <motion.button
-                className="w-full p-4 flex items-center justify-between bg-surface-2 rounded-lg hover:bg-surface-3 transition-colors text-left"
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className={`w-2 h-2 rounded-full ${isTracking ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
-                  <div className="min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">
-                      {medication.brandName}
-                    </h3>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {medication.genericName}
-                    </p>
-                  </div>
-                </div>
-                {isOpen ? (
-                  <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                )}
-              </motion.button>
-            </CollapsibleTrigger>
-          </TooltipTrigger>
-          {medication.mechanism && (
-            <TooltipContent side="top" className="max-w-xs">
-              <p className="text-sm">{medication.mechanism}</p>
-            </TooltipContent>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger asChild>
+        <motion.button
+          title={medication.mechanism}
+          className="w-full p-4 flex items-center justify-between bg-surface-2 rounded-lg hover:bg-surface-3 transition-colors text-left"
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className={`w-2 h-2 rounded-full ${isTracking ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+            <div className="min-w-0">
+              <h3 className="font-semibold text-foreground truncate">
+                {medication.brandName}
+              </h3>
+              <p className="text-sm text-muted-foreground truncate">
+                {medication.genericName}
+              </p>
+            </div>
+          </div>
+          {isOpen ? (
+            <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
           )}
-        </Tooltip>
+        </motion.button>
+      </CollapsibleTrigger>
 
       <CollapsibleContent>
         <div className="px-4 pb-4 pt-2 space-y-4 bg-surface-2 rounded-b-lg -mt-2 border-t border-border/30">
@@ -468,7 +458,6 @@ function MedicationCard({
         </div>
       </CollapsibleContent>
     </Collapsible>
-    </TooltipProvider>
   );
 }
 
