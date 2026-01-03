@@ -8,7 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { DomainSlider } from '@/components/DomainSlider';
 import { TagGroup } from '@/components/TagChip';
 import { DateTimePicker } from '@/components/DateTimePicker';
+import { SaveConfirmation } from '@/components/SaveConfirmation';
 import { useToast } from '@/hooks/use-toast';
+import { useSaveConfirmation } from '@/hooks/useSaveConfirmation';
 import { saveCheckIn, getSettings } from '@/lib/storage';
 import {
   NARCOLEPSY_DOMAIN_CONFIG,
@@ -89,6 +91,7 @@ interface CheckInScreenProps {
 
 export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack }: CheckInScreenProps) {
   const { toast } = useToast();
+  const saveConfirmation = useSaveConfirmation();
   const [dateTime, setDateTime] = useState(new Date());
   const [narcolepsyDomains, setNarcolepsyDomains] = useState<NarcolepsyDomains>(defaultNarcolepsyDomains);
   const [overlappingDomains, setOverlappingDomains] = useState<OverlappingDomains>(defaultOverlappingDomains);
@@ -195,6 +198,9 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     };
 
     await saveCheckIn(checkIn);
+    
+    // Trigger save animation (wake-related, always new for check-ins)
+    saveConfirmation.trigger('new', 'wake');
     
     toast({
       title: 'Check-in saved',
@@ -477,6 +483,13 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Save Confirmation Animation */}
+      <SaveConfirmation
+        isVisible={saveConfirmation.isVisible}
+        saveType={saveConfirmation.saveType}
+        logType={saveConfirmation.logType}
+      />
     </div>
   );
 }
