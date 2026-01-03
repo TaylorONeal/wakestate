@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, ChevronDown, ChevronUp, Pill, FlaskConical, Mo
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -19,6 +20,7 @@ interface MedicationInfo {
   id: string;
   brandName: string;
   genericName: string;
+  mechanism?: string;
   description: string;
   manufacturerUrl: string;
   doseOptions?: string[];
@@ -57,6 +59,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'adderall',
         brandName: 'Adderall',
         genericName: 'amphetamine / dextroamphetamine',
+        mechanism: 'Dopamine & norepinephrine releasing agent',
         description: 'Adderall is a central nervous system stimulant that increases dopamine and norepinephrine to improve focus and wakefulness.',
         manufacturerUrl: 'https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/011522s043lbl.pdf',
         doseOptions: ['5 mg', '10 mg', '15 mg', '20 mg', '25 mg', '30 mg', 'Other'],
@@ -65,6 +68,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'ritalin',
         brandName: 'Ritalin',
         genericName: 'methylphenidate',
+        mechanism: 'Dopamine & norepinephrine reuptake inhibitor',
         description: 'Ritalin is a stimulant that increases dopamine activity to help with focus, attention, and wakefulness.',
         manufacturerUrl: 'https://www.novartis.com/us-en/our-products',
         doseOptions: ['5 mg', '10 mg', '20 mg', 'Other'],
@@ -73,6 +77,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'dexedrine',
         brandName: 'Dexedrine',
         genericName: 'dextroamphetamine',
+        mechanism: 'Dopamine & norepinephrine releasing agent',
         description: 'Dexedrine is a stimulant that promotes wakefulness by increasing dopamine and norepinephrine in the brain.',
         manufacturerUrl: 'https://www.amneal.com/products/',
         doseOptions: ['5 mg', '10 mg', '15 mg', 'Other'],
@@ -81,6 +86,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'vyvanse',
         brandName: 'Vyvanse',
         genericName: 'lisdexamfetamine',
+        mechanism: 'Prodrug → dopamine & norepinephrine releasing agent',
         description: 'Vyvanse is a prodrug stimulant that converts to dextroamphetamine in the body, providing longer-lasting wakefulness.',
         manufacturerUrl: 'https://www.takeda.com/what-we-do/our-medicines/',
         doseOptions: ['20 mg', '30 mg', '40 mg', '50 mg', '60 mg', '70 mg', 'Other'],
@@ -89,6 +95,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'sunosi',
         brandName: 'Sunosi',
         genericName: 'solriamfetol',
+        mechanism: 'Dopamine & norepinephrine reuptake inhibitor',
         description: 'Sunosi promotes wakefulness by increasing dopamine and norepinephrine (adrenaline-related signaling).',
         manufacturerUrl: 'https://www.sunosi.com',
         doseOptions: ['37.5 mg', '75 mg', '150 mg', 'Other'],
@@ -97,6 +104,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'provigil',
         brandName: 'Provigil',
         genericName: 'modafinil',
+        mechanism: 'Dopamine reuptake inhibitor (mechanism not fully understood)',
         description: 'Provigil promotes wakefulness through mechanisms that are not fully understood, but may involve dopamine reuptake inhibition.',
         manufacturerUrl: 'https://www.accessdata.fda.gov/drugsatfda_docs/label/2015/020717s037s038lbl.pdf',
         doseOptions: ['100 mg', '200 mg', 'Other'],
@@ -105,6 +113,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'nuvigil',
         brandName: 'Nuvigil',
         genericName: 'armodafinil',
+        mechanism: 'Dopamine reuptake inhibitor (R-enantiomer of modafinil)',
         description: 'Nuvigil is the R-enantiomer of modafinil, providing similar wake-promoting effects with a slightly different duration profile.',
         manufacturerUrl: 'https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/021875s023lbl.pdf',
         doseOptions: ['150 mg', '250 mg', 'Other'],
@@ -119,6 +128,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'wakix',
         brandName: 'Wakix',
         genericName: 'pitolisant',
+        mechanism: 'Histamine H3 receptor antagonist/inverse agonist',
         description: 'Wakix supports wakefulness by increasing histamine signaling in the brain through a different mechanism than stimulants.',
         manufacturerUrl: 'https://www.wakix.com',
         doseOptions: ['8.9 mg', '17.8 mg', '35.6 mg', 'Other'],
@@ -134,6 +144,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'xyrem',
         brandName: 'Xyrem',
         genericName: 'sodium oxybate',
+        mechanism: 'GABA-B receptor agonist',
         description: 'Xyrem promotes deep sleep consolidation by enhancing GABA-B receptor activity. Taken in split doses at night.',
         manufacturerUrl: 'https://www.xyrem.com',
         doseOptions: ['2.25 g', '3 g', '3.75 g', '4.5 g', 'Split dose', 'Other'],
@@ -142,6 +153,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'xywav',
         brandName: 'Xywav',
         genericName: 'calcium, magnesium, potassium, sodium oxybates',
+        mechanism: 'GABA-B receptor agonist (lower sodium)',
         description: 'Xywav is a lower-sodium formulation of oxybate that promotes deep sleep consolidation while reducing sodium intake.',
         manufacturerUrl: 'https://www.xywav.com',
         doseOptions: ['2.25 g', '3 g', '3.75 g', '4.5 g', 'Split dose', 'Other'],
@@ -150,6 +162,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'lumryz',
         brandName: 'Lumryz',
         genericName: 'extended-release sodium oxybate',
+        mechanism: 'GABA-B receptor agonist (extended-release)',
         description: 'Lumryz is an extended-release oxybate formulation taken once nightly instead of split doses.',
         manufacturerUrl: 'https://www.lumryz.com',
         doseOptions: ['4.5 g', '6 g', '7.5 g', '9 g', 'Other'],
@@ -165,6 +178,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'tak-861',
         brandName: 'TAK-861',
         genericName: 'orexin agonist',
+        mechanism: 'Orexin-2 receptor agonist (investigational)',
         description: 'TAK-861 is an investigational orexin receptor agonist designed to restore orexin signaling in narcolepsy patients.',
         manufacturerUrl: 'https://www.takeda.com/what-we-do/research-and-development/',
       },
@@ -172,6 +186,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'danavorexton',
         brandName: 'Danavorexton (TAK-925)',
         genericName: 'orexin agonist',
+        mechanism: 'Orexin-2 receptor agonist (IV, investigational)',
         description: 'Danavorexton is an investigational intravenous orexin receptor agonist being studied for acute and chronic use.',
         manufacturerUrl: 'https://www.takeda.com/what-we-do/research-and-development/',
       },
@@ -179,6 +194,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         id: 'alks-2680',
         brandName: 'ALKS-2680',
         genericName: 'orexin agonist',
+        mechanism: 'Orexin-2 receptor agonist (oral, investigational)',
         description: 'ALKS-2680 is an oral orexin receptor agonist in clinical development for narcolepsy type 1.',
         manufacturerUrl: 'https://www.alkermes.com/research-and-development/',
       },
@@ -266,30 +282,40 @@ function MedicationCard({
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger asChild>
-        <motion.button
-          className="w-full p-4 flex items-center justify-between bg-surface-2 rounded-lg hover:bg-surface-3 transition-colors text-left"
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className={`w-2 h-2 rounded-full ${isTracking ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
-            <div className="min-w-0">
-              <h3 className="font-semibold text-foreground truncate">
-                {medication.brandName}
-              </h3>
-              <p className="text-sm text-muted-foreground truncate">
-                {medication.genericName}
-              </p>
-            </div>
-          </div>
-          {isOpen ? (
-            <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-          )}
-        </motion.button>
-      </CollapsibleTrigger>
+    <TooltipProvider>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CollapsibleTrigger asChild>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <motion.button
+                className="w-full p-4 flex items-center justify-between bg-surface-2 rounded-lg hover:bg-surface-3 transition-colors text-left"
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className={`w-2 h-2 rounded-full ${isTracking ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-foreground truncate">
+                      {medication.brandName}
+                    </h3>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {medication.genericName}
+                    </p>
+                  </div>
+                </div>
+                {isOpen ? (
+                  <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                )}
+              </motion.button>
+            </TooltipTrigger>
+            {medication.mechanism && (
+              <TooltipContent side="top" className="max-w-xs">
+                <p className="text-sm">{medication.mechanism}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </CollapsibleTrigger>
 
       <CollapsibleContent>
         <div className="px-4 pb-4 pt-2 space-y-4 bg-surface-2 rounded-b-lg -mt-2 border-t border-border/30">
@@ -442,6 +468,7 @@ function MedicationCard({
         </div>
       </CollapsibleContent>
     </Collapsible>
+    </TooltipProvider>
   );
 }
 
