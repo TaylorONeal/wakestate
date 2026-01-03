@@ -142,6 +142,20 @@ export interface AppSettings {
   theme: 'midnight' | 'charcoal' | 'deep-ocean';
 }
 
+// ============= Medication Types =============
+export interface MedicationEntry {
+  id: string;
+  dose?: string;
+  timing?: string;
+  notes?: string;
+  isTrialParticipant?: boolean; // For clinical trial medications
+  lastUpdated: string;
+}
+
+export interface UserMedications {
+  [medicationId: string]: MedicationEntry;
+}
+
 export interface DomainConfig {
   label: string;
   color: string;

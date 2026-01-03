@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Upload, Shield, Info, ChevronRight } from 'lucide-react';
+import { Download, Upload, Shield, Info, ChevronRight, Pill } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -27,9 +27,10 @@ import {
 
 interface SettingsScreenProps {
   onNavigateToAbout?: () => void;
+  onNavigateToMedications?: () => void;
 }
 
-export function SettingsScreen({ onNavigateToAbout }: SettingsScreenProps) {
+export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications }: SettingsScreenProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [settings, setSettings] = useState<AppSettings>({
@@ -182,6 +183,24 @@ export function SettingsScreen({ onNavigateToAbout }: SettingsScreenProps) {
           Your tracking data never leaves your phone unless you export it.
         </p>
       </section>
+
+      {/* Medications Link */}
+      {onNavigateToMedications && (
+        <motion.button
+          onClick={onNavigateToMedications}
+          className="section-card w-full flex items-center justify-between hover:bg-surface-3 transition-colors"
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="flex items-center gap-3">
+            <Pill className="w-5 h-5 text-primary" />
+            <div className="text-left">
+              <h2 className="text-lg font-semibold">Medications</h2>
+              <p className="text-sm text-muted-foreground">Track your narcolepsy medications</p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+        </motion.button>
+      )}
 
       {/* About Link */}
       {onNavigateToAbout && (
