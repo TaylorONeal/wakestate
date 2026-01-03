@@ -304,11 +304,18 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
       >
         <button
           onClick={() => setOverlappingExpanded(!overlappingExpanded)}
-          className="w-full flex items-center justify-between py-2 text-left"
+          className="w-full flex items-center justify-between py-2 text-left group"
         >
-          <h2 className="text-base font-medium text-muted-foreground">
-            Other / Overlapping Symptoms
-          </h2>
+          <div>
+            <h2 className="text-base font-medium text-muted-foreground">
+              Other / Overlapping Symptoms
+            </h2>
+            {!overlappingExpanded && (
+              <p className="text-xs text-muted-foreground/60 mt-0.5">
+                Tap to expand
+              </p>
+            )}
+          </div>
           <motion.div
             animate={{ rotate: overlappingExpanded ? 180 : 0 }}
             transition={{ duration: 0.2 }}
