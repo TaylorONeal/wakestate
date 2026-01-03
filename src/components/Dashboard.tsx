@@ -4,16 +4,17 @@ import { format, parseISO, subDays, subMonths, subYears, eachDayOfInterval, star
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { getEvents, getCheckIns, getSleepEntries } from '@/lib/storage';
-import { Moon, Zap, TrendingUp, Clock, BedDouble } from 'lucide-react';
+import { Moon, Zap, TrendingUp, Clock, BedDouble, FileText } from 'lucide-react';
 import { NARCOLEPSY_DOMAIN_CONFIG, type TrackingEvent, type CheckIn, type NarcolepsyDomainKey, type SleepEntry } from '@/types';
 
 type ViewPeriod = 'day' | 'week' | 'month' | 'year';
 
 interface DashboardProps {
   refreshTrigger: number;
+  onNavigateToExport?: () => void;
 }
 
-export function Dashboard({ refreshTrigger }: DashboardProps) {
+export function Dashboard({ refreshTrigger, onNavigateToExport }: DashboardProps) {
   const [events, setEvents] = useState<TrackingEvent[]>([]);
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [sleepEntries, setSleepEntries] = useState<SleepEntry[]>([]);
@@ -448,16 +449,44 @@ export function Dashboard({ refreshTrigger }: DashboardProps) {
         </motion.section>
       )}
 
+      {/* Export & Reports Quick Access */}
+      {onNavigateToExport && (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="section-card border-primary/20 hover:border-primary/40 transition-colors cursor-pointer"
+          onClick={onNavigateToExport}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground">Export & Reports</h3>
+              <p className="text-xs text-muted-foreground">Generate reports or export your data</p>
+            </div>
+            <div className="text-muted-foreground">→</div>
+          </div>
+        </motion.section>
+      )}
+
       {/* Local Storage Notice */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
+        transition={{ delay: 0.45 }}
         className="section-card border-border/30 bg-surface-2/50"
       >
         <p className="text-xs text-muted-foreground text-center leading-relaxed">
           📱 Your data is stored locally on this device only.{' '}
-          <span className="text-foreground font-medium">Export regularly</span> in Settings → Export & Reports to keep a backup.
+          <button 
+            onClick={onNavigateToExport}
+            className="text-foreground font-medium underline underline-offset-2 hover:text-primary transition-colors"
+          >
+            Export regularly
+          </button>{' '}
+          to keep a backup.
         </p>
       </motion.section>
     </div>
