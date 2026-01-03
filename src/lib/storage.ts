@@ -9,12 +9,12 @@ import type {
   MedicationAdministration 
 } from '@/types';
 
-const CHECKINS_KEY = 'waketrack_checkins';
-const EVENTS_KEY = 'waketrack_events';
-const SETTINGS_KEY = 'waketrack_settings';
-const MEDICATIONS_KEY = 'waketrack_medications';
-const MED_CONFIG_KEY = 'waketrack_med_config';
-const MED_ADMIN_KEY = 'waketrack_med_administrations';
+const CHECKINS_KEY = 'wakestate_checkins';
+const EVENTS_KEY = 'wakestate_events';
+const SETTINGS_KEY = 'wakestate_settings';
+const MEDICATIONS_KEY = 'wakestate_medications';
+const MED_CONFIG_KEY = 'wakestate_med_config';
+const MED_ADMIN_KEY = 'wakestate_med_administrations';
 
 export const defaultSettings: AppSettings = {
   showContextByDefault: false,

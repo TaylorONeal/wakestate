@@ -95,7 +95,7 @@ export function MedicationSetup({ onComplete, onBack }: MedicationSetupProps) {
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <Pill className="w-5 h-5 text-primary" />
-            <h1 className="text-xl font-bold">WakeTrack</h1>
+            <h1 className="text-xl font-bold">WakeState</h1>
           </div>
           <p className="text-sm text-muted-foreground">
             Select your medications for quick logging

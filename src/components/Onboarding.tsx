@@ -8,7 +8,7 @@ interface OnboardingProps {
 
 export function Onboarding({ onComplete }: OnboardingProps) {
   const handleStart = () => {
-    localStorage.setItem('waketrack_onboarded', 'true');
+    localStorage.setItem('wakestate_onboarded', 'true');
     onComplete();
   };
 
@@ -37,7 +37,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           </motion.div>
           
           <h1 className="text-3xl font-bold text-foreground">
-            WakeTrack
+            WakeState
           </h1>
           
           <p className="text-muted-foreground leading-relaxed">

@@ -25,7 +25,7 @@ const Index = () => {
   const [eventCount, setEventCount] = useState(0);
 
   useEffect(() => {
-    const onboarded = localStorage.getItem('waketrack_onboarded');
+    const onboarded = localStorage.getItem('wakestate_onboarded');
     if (!onboarded) {
       setShowOnboarding(true);
     }
@@ -109,7 +109,7 @@ const Index = () => {
     if (showAbout) return 'About';
     switch (activeTab) {
       case 'home':
-        return 'WakeTrack';
+        return 'WakeState';
       case 'log':
         return 'Log Wake State';
       case 'timeline':
@@ -119,7 +119,7 @@ const Index = () => {
       case 'settings':
         return 'Settings';
       default:
-        return 'WakeTrack';
+        return 'WakeState';
     }
   };
 
@@ -135,12 +135,31 @@ const Index = () => {
       {/* Main App */}
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <header className="sticky top-0 z-40 glass border-b border-border/50 safe-area-top">
+        <header className="sticky top-0 z-40 glass border-b border-border/50 safe-area-top overflow-hidden">
+          {/* Animated Zzz Line */}
+          <div className="absolute top-0 left-0 right-0 h-1 flex items-center overflow-hidden opacity-30">
+            {[...Array(8)].map((_, i) => (
+              <motion.span
+                key={i}
+                className="text-[8px] text-primary font-bold"
+                initial={{ x: -20 }}
+                animate={{ x: '100vw' }}
+                transition={{
+                  duration: 8,
+                  delay: i * 1,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+              >
+                Z
+              </motion.span>
+            ))}
+          </div>
           <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
             <h1 className="text-xl font-bold text-foreground">{getTitle()}</h1>
             {activeTab !== 'home' && !showAbout && !showMedications && !showMedicationSetup && (
               <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
-                WakeTrack
+                WakeState
               </span>
             )}
           </div>

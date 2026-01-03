@@ -69,7 +69,7 @@ const toLegacyContextDomains = (overlapping: OverlappingDomains): ContextDomains
   digestive: overlapping.digestive,
 });
 
-const DRAFT_STORAGE_KEY = 'waketrack_checkin_draft_v2';
+const DRAFT_STORAGE_KEY = 'wakestate_checkin_draft_v2';
 
 interface CheckInDraft {
   dateTime: string;

@@ -277,11 +277,21 @@ export function HomeScreen({ onLogWakeState, onLogEvent, onMedicationSetup, chec
                 </h4>
                 <div className="space-y-2">
                   {Object.entries(NARCOLEPSY_DOMAIN_CONFIG).map(([key, config]) => (
-                    <div key={key} className="flex items-center gap-3">
+                    <div 
+                      key={key} 
+                      className="group relative flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-surface-3/50 transition-colors cursor-default"
+                    >
                       <div
                         className={`w-3 h-3 rounded-full flex-shrink-0 bg-${config.color}`}
                       />
                       <span className="text-sm text-foreground">{config.label}</span>
+                      {config.description && (
+                        <div className="absolute left-0 right-0 top-full z-10 hidden group-hover:block pt-1">
+                          <div className="bg-surface-2 border border-border/50 rounded-lg p-2 text-xs text-muted-foreground shadow-lg">
+                            {config.description}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -295,11 +305,21 @@ export function HomeScreen({ onLogWakeState, onLogEvent, onMedicationSetup, chec
                 </h4>
                 <div className="space-y-2">
                   {Object.entries(OVERLAPPING_DOMAIN_CONFIG).map(([key, config]) => (
-                    <div key={key} className="flex items-center gap-3">
+                    <div 
+                      key={key} 
+                      className="group relative flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-surface-3/50 transition-colors cursor-default"
+                    >
                       <div
                         className={`w-3 h-3 rounded-full flex-shrink-0 bg-${config.color}`}
                       />
                       <span className="text-sm text-foreground">{config.label}</span>
+                      {config.description && (
+                        <div className="absolute left-0 right-0 top-full z-10 hidden group-hover:block pt-1">
+                          <div className="bg-surface-2 border border-border/50 rounded-lg p-2 text-xs text-muted-foreground shadow-lg">
+                            {config.description}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
