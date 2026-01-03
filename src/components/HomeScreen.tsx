@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Brain, Activity, TrendingUp, Info, X, Moon } from 'lucide-react';
+import { Zap, Brain, Activity, TrendingUp, Info, X, Moon, BedDouble } from 'lucide-react';
 import { NARCOLEPSY_DOMAIN_CONFIG, OVERLAPPING_DOMAIN_CONFIG } from '@/types';
 import { MedicationsToday } from '@/components/MedicationsToday';
 import { InstallBanner } from '@/components/InstallBanner';
+import { getSleepEntryForDate } from '@/lib/storage';
+import { format, subDays } from 'date-fns';
 
 interface HomeScreenProps {
   onLogWakeState: () => void;
   onLogEvent: () => void;
+  onLogSleep: () => void;
   onMedicationSetup: () => void;
   checkInCount: number;
   eventCount: number;
@@ -30,9 +33,20 @@ const simonButtonVariants = {
   }
 };
 
-export function HomeScreen({ onLogWakeState, onLogEvent, onMedicationSetup, checkInCount, eventCount, refreshTrigger }: HomeScreenProps) {
+export function HomeScreen({ onLogWakeState, onLogEvent, onLogSleep, onMedicationSetup, checkInCount, eventCount, refreshTrigger }: HomeScreenProps) {
   const [showLegend, setShowLegend] = useState(false);
   const [pressedButton, setPressedButton] = useState<string | null>(null);
+  const [hasSleepLoggedToday, setHasSleepLoggedToday] = useState(false);
+
+  // Check if sleep was logged for last night
+  useEffect(() => {
+    const checkSleepLog = async () => {
+      const lastNight = format(subDays(new Date(), 1), 'yyyy-MM-dd');
+      const entry = await getSleepEntryForDate(lastNight);
+      setHasSleepLoggedToday(!!entry);
+    };
+    checkSleepLog();
+  }, [refreshTrigger]);
 
   const handleButtonPress = (id: string, action: () => void) => {
     setPressedButton(id);
@@ -111,10 +125,19 @@ export function HomeScreen({ onLogWakeState, onLogEvent, onMedicationSetup, chec
         transition={{ delay: 0.2 }}
         className="glass rounded-2xl p-4 space-y-3"
       >
-        <h3 className="font-semibold text-foreground flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-primary" />
-          Why Track?
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-primary" />
+            Why Track?
+          </h3>
+          <button
+            onClick={() => setShowLegend(true)}
+            className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+          >
+            <Info className="w-3.5 h-3.5" />
+            Categories
+          </button>
+        </div>
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li className="flex items-start gap-2">
             <span className="text-domain-cataplexy mt-0.5">•</span>
@@ -212,34 +235,37 @@ export function HomeScreen({ onLogWakeState, onLogEvent, onMedicationSetup, chec
           </span>
         </motion.button>
 
-        {/* Categories Legend */}
+        {/* Log Last Night's Sleep */}
         <motion.button
           variants={simonButtonVariants}
-          animate={pressedButton === 'legend' ? 'pressed' : 'idle'}
+          animate={pressedButton === 'sleep' ? 'pressed' : 'idle'}
           whileHover={{ scale: 1.02 }}
-          onTouchStart={() => setPressedButton('legend')}
-          onTouchEnd={() => handleButtonPress('legend', () => setShowLegend(true))}
-          onMouseDown={() => setPressedButton('legend')}
-          onMouseUp={() => handleButtonPress('legend', () => setShowLegend(true))}
+          onTouchStart={() => setPressedButton('sleep')}
+          onTouchEnd={() => handleButtonPress('sleep', onLogSleep)}
+          onMouseDown={() => setPressedButton('sleep')}
+          onMouseUp={() => handleButtonPress('sleep', onLogSleep)}
           onMouseLeave={() => setPressedButton(null)}
           className={`
             relative h-20 rounded-3xl font-semibold text-base
-            bg-gradient-to-br from-muted/50 to-muted
-            text-foreground
-            border-4 border-border/50
-            shadow-lg shadow-muted/20
+            bg-gradient-to-br from-indigo-500/70 to-indigo-600
+            text-white
+            border-4 border-indigo-500/30
+            shadow-lg shadow-indigo-500/20
             transition-all duration-150
-            ${pressedButton === 'legend' ? 'shadow-muted/50 shadow-2xl brightness-110' : ''}
+            ${pressedButton === 'sleep' ? 'shadow-indigo-500/50 shadow-2xl brightness-110' : ''}
           `}
         >
           <motion.div
-            animate={pressedButton === 'legend' ? { opacity: [0.3, 0.6, 0.3] } : { opacity: 0 }}
-            transition={{ duration: 0.3, repeat: pressedButton === 'legend' ? Infinity : 0 }}
-            className="absolute inset-0 rounded-3xl bg-foreground/10"
+            animate={pressedButton === 'sleep' ? { opacity: [0.5, 1, 0.5] } : { opacity: 0 }}
+            transition={{ duration: 0.3, repeat: pressedButton === 'sleep' ? Infinity : 0 }}
+            className="absolute inset-0 rounded-3xl bg-indigo-500/30"
           />
           <span className="relative flex flex-col items-center justify-center gap-1">
-            <Info className="w-5 h-5" />
-            <span>Categories</span>
+            <BedDouble className="w-5 h-5" />
+            <span className="text-sm">Last Night's Sleep</span>
+            {hasSleepLoggedToday && (
+              <span className="text-[10px] opacity-70">✓ logged</span>
+            )}
           </span>
         </motion.button>
       </motion.div>
