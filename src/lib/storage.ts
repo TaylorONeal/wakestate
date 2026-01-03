@@ -1,10 +1,20 @@
 import { get, set, del, keys } from 'idb-keyval';
-import type { CheckIn, TrackingEvent, AppSettings, MedicationEntry, UserMedications } from '@/types';
+import type { 
+  CheckIn, 
+  TrackingEvent, 
+  AppSettings, 
+  MedicationEntry, 
+  UserMedications,
+  UserMedicationConfig,
+  MedicationAdministration 
+} from '@/types';
 
 const CHECKINS_KEY = 'waketrack_checkins';
 const EVENTS_KEY = 'waketrack_events';
 const SETTINGS_KEY = 'waketrack_settings';
 const MEDICATIONS_KEY = 'waketrack_medications';
+const MED_CONFIG_KEY = 'waketrack_med_config';
+const MED_ADMIN_KEY = 'waketrack_med_administrations';
 
 export const defaultSettings: AppSettings = {
   showContextByDefault: false,
@@ -102,6 +112,50 @@ export async function removeMedicationEntry(medicationId: string): Promise<void>
   const medications = await getUserMedications();
   delete medications[medicationId];
   await set(MEDICATIONS_KEY, medications);
+}
+
+// Medication Configuration (Regimen)
+export async function getMedicationConfig(): Promise<UserMedicationConfig | null> {
+  try {
+    const data = await get<UserMedicationConfig>(MED_CONFIG_KEY);
+    return data || null;
+  } catch {
+    const stored = localStorage.getItem(MED_CONFIG_KEY);
+    return stored ? JSON.parse(stored) : null;
+  }
+}
+
+export async function saveMedicationConfig(config: UserMedicationConfig): Promise<void> {
+  await set(MED_CONFIG_KEY, config);
+}
+
+// Medication Administrations
+export async function getMedicationAdministrations(): Promise<MedicationAdministration[]> {
+  try {
+    const data = await get<MedicationAdministration[]>(MED_ADMIN_KEY);
+    return data || [];
+  } catch {
+    const stored = localStorage.getItem(MED_ADMIN_KEY);
+    return stored ? JSON.parse(stored) : [];
+  }
+}
+
+export async function saveMedicationAdministration(admin: MedicationAdministration): Promise<void> {
+  const administrations = await getMedicationAdministrations();
+  administrations.unshift(admin);
+  await set(MED_ADMIN_KEY, administrations);
+}
+
+export async function removeMedicationAdministration(id: string): Promise<void> {
+  const administrations = await getMedicationAdministrations();
+  const filtered = administrations.filter(a => a.id !== id);
+  await set(MED_ADMIN_KEY, filtered);
+}
+
+export async function getTodayAdministrations(medicationId: string): Promise<MedicationAdministration[]> {
+  const administrations = await getMedicationAdministrations();
+  const today = new Date().toISOString().split('T')[0];
+  return administrations.filter(a => a.medicationId === medicationId && a.localDate === today);
 }
 
 // Export/Import

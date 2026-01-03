@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
 import { getUserMedications, saveMedicationEntry, removeMedicationEntry } from '@/lib/storage';
-import type { MedicationEntry, UserMedications } from '@/types';
+import type { MedicationEntry, UserMedications, MedicationFrequency, MedicationTiming } from '@/types';
 
 interface MedicationsScreenProps {
   onBack: () => void;
@@ -20,7 +21,7 @@ interface MedicationInfo {
   genericName: string;
   description: string;
   manufacturerUrl: string;
-  doseHints?: string[];
+  doseOptions?: string[];
 }
 
 interface MedicationSection {
@@ -29,6 +30,23 @@ interface MedicationSection {
   description?: string;
   medications: MedicationInfo[];
 }
+
+const FREQUENCY_OPTIONS: { value: MedicationFrequency; label: string }[] = [
+  { value: '1x/day', label: '1x/day' },
+  { value: '2x/day', label: '2x/day' },
+  { value: '3x/day', label: '3x/day' },
+  { value: '4x/day', label: '4x/day' },
+  { value: 'PRN', label: 'As needed (PRN)' },
+  { value: 'other', label: 'Other' },
+];
+
+const TIMING_OPTIONS: { value: MedicationTiming; label: string }[] = [
+  { value: 'morning', label: 'Morning' },
+  { value: 'midday', label: 'Midday' },
+  { value: 'afternoon', label: 'Afternoon' },
+  { value: 'evening', label: 'Evening' },
+  { value: 'bedtime', label: 'Bedtime' },
+];
 
 const MEDICATION_SECTIONS: MedicationSection[] = [
   {
@@ -41,6 +59,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         genericName: 'amphetamine / dextroamphetamine',
         description: 'Adderall is a central nervous system stimulant that increases dopamine and norepinephrine to improve focus and wakefulness.',
         manufacturerUrl: 'https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/011522s043lbl.pdf',
+        doseOptions: ['5 mg', '10 mg', '15 mg', '20 mg', '25 mg', '30 mg', 'Other'],
       },
       {
         id: 'ritalin',
@@ -48,6 +67,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         genericName: 'methylphenidate',
         description: 'Ritalin is a stimulant that increases dopamine activity to help with focus, attention, and wakefulness.',
         manufacturerUrl: 'https://www.novartis.com/us-en/our-products',
+        doseOptions: ['5 mg', '10 mg', '20 mg', 'Other'],
       },
       {
         id: 'dexedrine',
@@ -55,6 +75,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         genericName: 'dextroamphetamine',
         description: 'Dexedrine is a stimulant that promotes wakefulness by increasing dopamine and norepinephrine in the brain.',
         manufacturerUrl: 'https://www.amneal.com/products/',
+        doseOptions: ['5 mg', '10 mg', '15 mg', 'Other'],
       },
       {
         id: 'vyvanse',
@@ -62,6 +83,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         genericName: 'lisdexamfetamine',
         description: 'Vyvanse is a prodrug stimulant that converts to dextroamphetamine in the body, providing longer-lasting wakefulness.',
         manufacturerUrl: 'https://www.takeda.com/what-we-do/our-medicines/',
+        doseOptions: ['20 mg', '30 mg', '40 mg', '50 mg', '60 mg', '70 mg', 'Other'],
       },
       {
         id: 'sunosi',
@@ -69,7 +91,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         genericName: 'solriamfetol',
         description: 'Sunosi promotes wakefulness by increasing dopamine and norepinephrine (adrenaline-related signaling).',
         manufacturerUrl: 'https://www.sunosi.com',
-        doseHints: ['37.5 mg', '75 mg', '150 mg'],
+        doseOptions: ['37.5 mg', '75 mg', '150 mg', 'Other'],
       },
       {
         id: 'provigil',
@@ -77,7 +99,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         genericName: 'modafinil',
         description: 'Provigil promotes wakefulness through mechanisms that are not fully understood, but may involve dopamine reuptake inhibition.',
         manufacturerUrl: 'https://www.accessdata.fda.gov/drugsatfda_docs/label/2015/020717s037s038lbl.pdf',
-        doseHints: ['100 mg', '200 mg'],
+        doseOptions: ['100 mg', '200 mg', 'Other'],
       },
       {
         id: 'nuvigil',
@@ -85,7 +107,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         genericName: 'armodafinil',
         description: 'Nuvigil is the R-enantiomer of modafinil, providing similar wake-promoting effects with a slightly different duration profile.',
         manufacturerUrl: 'https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/021875s023lbl.pdf',
-        doseHints: ['150 mg', '250 mg'],
+        doseOptions: ['150 mg', '250 mg', 'Other'],
       },
     ],
   },
@@ -99,7 +121,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         genericName: 'pitolisant',
         description: 'Wakix supports wakefulness by increasing histamine signaling in the brain through a different mechanism than stimulants.',
         manufacturerUrl: 'https://www.wakix.com',
-        doseHints: ['8.9 mg daily', '17.8 mg daily', '17.8 mg twice daily'],
+        doseOptions: ['8.9 mg', '17.8 mg', '35.6 mg', 'Other'],
       },
     ],
   },
@@ -114,6 +136,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         genericName: 'sodium oxybate',
         description: 'Xyrem promotes deep sleep consolidation by enhancing GABA-B receptor activity. Taken in split doses at night.',
         manufacturerUrl: 'https://www.xyrem.com',
+        doseOptions: ['2.25 g', '3 g', '3.75 g', '4.5 g', 'Split dose', 'Other'],
       },
       {
         id: 'xywav',
@@ -121,6 +144,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         genericName: 'calcium, magnesium, potassium, sodium oxybates',
         description: 'Xywav is a lower-sodium formulation of oxybate that promotes deep sleep consolidation while reducing sodium intake.',
         manufacturerUrl: 'https://www.xywav.com',
+        doseOptions: ['2.25 g', '3 g', '3.75 g', '4.5 g', 'Split dose', 'Other'],
       },
       {
         id: 'lumryz',
@@ -128,6 +152,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         genericName: 'extended-release sodium oxybate',
         description: 'Lumryz is an extended-release oxybate formulation taken once nightly instead of split doses.',
         manufacturerUrl: 'https://www.lumryz.com',
+        doseOptions: ['4.5 g', '6 g', '7.5 g', '9 g', 'Other'],
       },
     ],
   },
@@ -176,7 +201,10 @@ function MedicationCard({
 }) {
   const [isOpen, setIsOpen] = useState(!!entry);
   const [dose, setDose] = useState(entry?.dose || '');
-  const [timing, setTiming] = useState(entry?.timing || '');
+  const [doseOther, setDoseOther] = useState(entry?.doseOther || '');
+  const [frequency, setFrequency] = useState<MedicationFrequency | ''>(entry?.frequency || '');
+  const [frequencyOther, setFrequencyOther] = useState(entry?.frequencyOther || '');
+  const [timings, setTimings] = useState<MedicationTiming[]>(entry?.timings || []);
   const [notes, setNotes] = useState(entry?.notes || '');
   const [isTrialParticipant, setIsTrialParticipant] = useState(entry?.isTrialParticipant || false);
   const [isTracking, setIsTracking] = useState(!!entry);
@@ -186,14 +214,20 @@ function MedicationCard({
     if (checked) {
       onUpdate({
         dose,
-        timing,
+        doseOther: dose === 'Other' ? doseOther : undefined,
+        frequency: frequency || undefined,
+        frequencyOther: frequency === 'other' ? frequencyOther : undefined,
+        timings,
         notes,
         isTrialParticipant: isTrialMed ? isTrialParticipant : undefined,
       });
     } else {
       onRemove();
       setDose('');
-      setTiming('');
+      setDoseOther('');
+      setFrequency('');
+      setFrequencyOther('');
+      setTimings([]);
       setNotes('');
       setIsTrialParticipant(false);
     }
@@ -203,7 +237,28 @@ function MedicationCard({
     if (isTracking) {
       onUpdate({
         dose,
-        timing,
+        doseOther: dose === 'Other' ? doseOther : undefined,
+        frequency: frequency || undefined,
+        frequencyOther: frequency === 'other' ? frequencyOther : undefined,
+        timings,
+        notes,
+        isTrialParticipant: isTrialMed ? isTrialParticipant : undefined,
+      });
+    }
+  };
+
+  const toggleTiming = (timing: MedicationTiming) => {
+    const newTimings = timings.includes(timing)
+      ? timings.filter(t => t !== timing)
+      : [...timings, timing];
+    setTimings(newTimings);
+    if (isTracking) {
+      onUpdate({
+        dose,
+        doseOther: dose === 'Other' ? doseOther : undefined,
+        frequency: frequency || undefined,
+        frequencyOther: frequency === 'other' ? frequencyOther : undefined,
+        timings: newTimings,
         notes,
         isTrialParticipant: isTrialMed ? isTrialParticipant : undefined,
       });
@@ -272,34 +327,75 @@ function MedicationCard({
                 exit={{ opacity: 0, height: 0 }}
                 className="space-y-4 overflow-hidden"
               >
-                {/* Dose */}
+                {/* Dose Dropdown */}
+                {medication.doseOptions && (
+                  <div className="space-y-2">
+                    <Label className="text-sm">Dose</Label>
+                    <Select value={dose} onValueChange={(val) => { setDose(val); setTimeout(handleFieldChange, 0); }}>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Select dose" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border border-border z-50">
+                        {medication.doseOptions.map((opt) => (
+                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {dose === 'Other' && (
+                      <Input
+                        value={doseOther}
+                        onChange={(e) => setDoseOther(e.target.value)}
+                        onBlur={handleFieldChange}
+                        placeholder="Enter custom dose"
+                        className="bg-background mt-2"
+                      />
+                    )}
+                  </div>
+                )}
+
+                {/* Frequency Dropdown */}
                 <div className="space-y-2">
-                  <Label htmlFor={`dose-${medication.id}`} className="text-sm">
-                    Dose {medication.doseHints && <span className="text-muted-foreground">(optional)</span>}
-                  </Label>
-                  <Input
-                    id={`dose-${medication.id}`}
-                    value={dose}
-                    onChange={(e) => setDose(e.target.value)}
-                    onBlur={handleFieldChange}
-                    placeholder={medication.doseHints?.join(' · ') || 'e.g., 100 mg'}
-                    className="bg-background"
-                  />
+                  <Label className="text-sm">Frequency</Label>
+                  <Select value={frequency} onValueChange={(val) => { setFrequency(val as MedicationFrequency); setTimeout(handleFieldChange, 0); }}>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border border-border z-50">
+                      {FREQUENCY_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {frequency === 'other' && (
+                    <Input
+                      value={frequencyOther}
+                      onChange={(e) => setFrequencyOther(e.target.value)}
+                      onBlur={handleFieldChange}
+                      placeholder="Enter custom frequency"
+                      className="bg-background mt-2"
+                    />
+                  )}
                 </div>
 
-                {/* Timing */}
+                {/* Timing Chips */}
                 <div className="space-y-2">
-                  <Label htmlFor={`timing-${medication.id}`} className="text-sm">
-                    Timing <span className="text-muted-foreground">(optional)</span>
-                  </Label>
-                  <Input
-                    id={`timing-${medication.id}`}
-                    value={timing}
-                    onChange={(e) => setTiming(e.target.value)}
-                    onBlur={handleFieldChange}
-                    placeholder="e.g., Morning, twice daily"
-                    className="bg-background"
-                  />
+                  <Label className="text-sm">Timing</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {TIMING_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => toggleTiming(opt.value)}
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                          timings.includes(opt.value)
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Trial participation (for clinical trial meds only) */}
@@ -313,7 +409,10 @@ function MedicationCard({
                         if (isTracking) {
                           onUpdate({
                             dose,
-                            timing,
+                            doseOther: dose === 'Other' ? doseOther : undefined,
+                            frequency: frequency || undefined,
+                            frequencyOther: frequency === 'other' ? frequencyOther : undefined,
+                            timings,
                             notes,
                             isTrialParticipant: checked,
                           });
@@ -469,3 +568,7 @@ export function MedicationsScreen({ onBack }: MedicationsScreenProps) {
     </div>
   );
 }
+
+// Export medication data for use in other components
+export { MEDICATION_SECTIONS };
+export type { MedicationInfo };

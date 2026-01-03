@@ -143,10 +143,16 @@ export interface AppSettings {
 }
 
 // ============= Medication Types =============
+export type MedicationFrequency = '1x/day' | '2x/day' | '3x/day' | '4x/day' | 'PRN' | 'other';
+export type MedicationTiming = 'morning' | 'midday' | 'afternoon' | 'evening' | 'bedtime';
+
 export interface MedicationEntry {
   id: string;
   dose?: string;
-  timing?: string;
+  doseOther?: string; // When "Other" is selected
+  frequency?: MedicationFrequency;
+  frequencyOther?: string; // When "other" is selected
+  timings?: MedicationTiming[];
   notes?: string;
   isTrialParticipant?: boolean; // For clinical trial medications
   lastUpdated: string;
@@ -154,6 +160,35 @@ export interface MedicationEntry {
 
 export interface UserMedications {
   [medicationId: string]: MedicationEntry;
+}
+
+// Medication Regimen - user's configured medications for quick logging
+export interface MedicationRegimen {
+  medicationId: string;
+  brandName: string;
+  genericName: string;
+  defaultDose: string;
+  defaultFrequency: MedicationFrequency;
+  defaultTimings: MedicationTiming[];
+  frequencyCount: number; // How many times per day (1-4)
+}
+
+// Medication Administration - individual "taken" events
+export interface MedicationAdministration {
+  id: string;
+  medicationId: string;
+  brandName: string;
+  timestamp: string;
+  localDate: string;
+  localTime: string;
+  doseSelected: string;
+  adminNumberForDay?: number; // e.g., 1 of 2
+}
+
+export interface UserMedicationConfig {
+  isConfigured: boolean;
+  regimen: MedicationRegimen[];
+  lastUpdated: string;
 }
 
 export interface DomainConfig {
