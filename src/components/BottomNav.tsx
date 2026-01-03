@@ -1,19 +1,19 @@
 import { motion } from 'framer-motion';
-import { Home, Clock, BarChart3, Calendar, Settings } from 'lucide-react';
+import { Home, Brain, Calendar, BarChart3, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type TabId = 'home' | 'checkin' | 'timeline' | 'trends' | 'settings';
+export type TabId = 'home' | 'log' | 'timeline' | 'dashboard' | 'settings';
 
 interface BottomNavProps {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
 }
 
-const tabs: { id: TabId; label: string; icon: typeof Clock }[] = [
+const tabs: { id: TabId; label: string; icon: typeof Brain }[] = [
   { id: 'home', label: 'Home', icon: Home },
-  { id: 'checkin', label: 'Check-In', icon: Clock },
+  { id: 'log', label: 'Log', icon: Brain },
   { id: 'timeline', label: 'Timeline', icon: Calendar },
-  { id: 'trends', label: 'Trends', icon: BarChart3 },
+  { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 

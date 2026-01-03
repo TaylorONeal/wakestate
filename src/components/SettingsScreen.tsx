@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Upload, Shield, Eye, EyeOff, Info } from 'lucide-react';
+import { Download, Upload, Shield, Info, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -25,7 +25,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-export function SettingsScreen() {
+interface SettingsScreenProps {
+  onNavigateToAbout?: () => void;
+}
+
+export function SettingsScreen({ onNavigateToAbout }: SettingsScreenProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [settings, setSettings] = useState<AppSettings>({
@@ -120,9 +124,9 @@ export function SettingsScreen() {
         
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label className="text-base">Show Context Modulators</Label>
+            <Label className="text-base">Show Overlapping Symptoms</Label>
             <p className="text-sm text-muted-foreground">
-              Expand context section by default
+              Expand other symptoms section by default
             </p>
           </div>
           <Switch
@@ -179,31 +183,28 @@ export function SettingsScreen() {
         </p>
       </section>
 
-      {/* Safety Note */}
-      <section className="section-card space-y-4 border-primary/30">
-        <div className="flex items-center gap-3">
-          <Info className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold">Safety Planning</h2>
-        </div>
-        
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          If you're experiencing major cataplexy events, consider discussing safety 
-          planning with your clinician. They can help you develop strategies for 
-          managing symptoms in different situations.
-        </p>
-      </section>
+      {/* About Link */}
+      {onNavigateToAbout && (
+        <motion.button
+          onClick={onNavigateToAbout}
+          className="section-card w-full flex items-center justify-between hover:bg-surface-3 transition-colors"
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="flex items-center gap-3">
+            <Info className="w-5 h-5 text-primary" />
+            <div className="text-left">
+              <h2 className="text-lg font-semibold">About WakeTrack</h2>
+              <p className="text-sm text-muted-foreground">Resources, how to use, and more</p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+        </motion.button>
+      )}
 
-      {/* About */}
-      <section className="section-card space-y-3">
-        <h2 className="text-lg font-semibold">About WakeTrack</h2>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          WakeTrack is a snapshot tool, not a verdict. Track patterns to separate 
-          sleep-state instability from overlays like anxiety, mood, or digestion.
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Version 1.0 • Not a medical device
-        </p>
-      </section>
+      {/* Version */}
+      <p className="text-xs text-muted-foreground text-center">
+        Version 1.0 • Not a medical device
+      </p>
 
       {/* Hidden file input */}
       <input

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
-import { ChevronDown, ChevronLeft, Save, RotateCcw, AlertTriangle, Plus } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Save, RotateCcw, Zap, Plus, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { DomainSlider } from '@/components/DomainSlider';
@@ -11,9 +11,11 @@ import { DateTimePicker } from '@/components/DateTimePicker';
 import { useToast } from '@/hooks/use-toast';
 import { saveCheckIn, getSettings } from '@/lib/storage';
 import {
-  WAKE_DOMAIN_CONFIG,
-  CONTEXT_DOMAIN_CONFIG,
+  NARCOLEPSY_DOMAIN_CONFIG,
+  OVERLAPPING_DOMAIN_CONFIG,
   TAGS,
+  type NarcolepsyDomains,
+  type OverlappingDomains,
   type WakeDomains,
   type ContextDomains,
   type CheckIn,
@@ -30,33 +32,52 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-const defaultWakeDomains: WakeDomains = {
-  cataplexy: 1,
+const defaultNarcolepsyDomains: NarcolepsyDomains = {
+  sleepPressure: 1,
   microsleeps: 1,
+  sleepInertia: 1,
   cognitive: 1,
   effort: 1,
-  sleepPressure: 1,
-  motor: 1,
-  sensory: 1,
-  thermo: 1,
-  emotional: 1,
 };
 
-const defaultContextDomains: ContextDomains = {
+const defaultOverlappingDomains: OverlappingDomains = {
   anxiety: 1,
   mood: 1,
   digestive: 1,
+  thermo: 1,
+  motor: 1,
+  emotional: 1,
+  sensory: 1,
 };
 
-const DRAFT_STORAGE_KEY = 'waketrack_checkin_draft';
+// Convert to legacy format for backward compatibility
+const toLegacyWakeDomains = (narcolepsy: NarcolepsyDomains, overlapping: OverlappingDomains): WakeDomains => ({
+  sleepPressure: narcolepsy.sleepPressure,
+  microsleeps: narcolepsy.microsleeps,
+  cognitive: narcolepsy.cognitive,
+  effort: narcolepsy.effort,
+  cataplexy: 1, // No longer tracked via slider
+  motor: overlapping.motor,
+  sensory: overlapping.sensory,
+  thermo: overlapping.thermo,
+  emotional: overlapping.emotional,
+});
+
+const toLegacyContextDomains = (overlapping: OverlappingDomains): ContextDomains => ({
+  anxiety: overlapping.anxiety,
+  mood: overlapping.mood,
+  digestive: overlapping.digestive,
+});
+
+const DRAFT_STORAGE_KEY = 'waketrack_checkin_draft_v2';
 
 interface CheckInDraft {
   dateTime: string;
-  wakeDomains: WakeDomains;
-  contextDomains: ContextDomains;
+  narcolepsyDomains: NarcolepsyDomains;
+  overlappingDomains: OverlappingDomains;
   activeTags: string[];
   note: string;
-  contextExpanded: boolean;
+  overlappingExpanded: boolean;
 }
 
 interface CheckInScreenProps {
@@ -69,12 +90,12 @@ interface CheckInScreenProps {
 export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack }: CheckInScreenProps) {
   const { toast } = useToast();
   const [dateTime, setDateTime] = useState(new Date());
-  const [wakeDomains, setWakeDomains] = useState<WakeDomains>(defaultWakeDomains);
-  const [contextDomains, setContextDomains] = useState<ContextDomains>(defaultContextDomains);
+  const [narcolepsyDomains, setNarcolepsyDomains] = useState<NarcolepsyDomains>(defaultNarcolepsyDomains);
+  const [overlappingDomains, setOverlappingDomains] = useState<OverlappingDomains>(defaultOverlappingDomains);
   const [activeTags, setActiveTags] = useState<string[]>([]);
   const [note, setNote] = useState('');
   const [showNote, setShowNote] = useState(false);
-  const [contextExpanded, setContextExpanded] = useState(false);
+  const [overlappingExpanded, setOverlappingExpanded] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showBackDialog, setShowBackDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -87,12 +108,12 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
       try {
         const draft: CheckInDraft = JSON.parse(savedDraft);
         setDateTime(new Date(draft.dateTime));
-        setWakeDomains(draft.wakeDomains);
-        setContextDomains(draft.contextDomains);
+        setNarcolepsyDomains(draft.narcolepsyDomains);
+        setOverlappingDomains(draft.overlappingDomains);
         setActiveTags(draft.activeTags);
         setNote(draft.note);
         setShowNote(draft.note.length > 0);
-        setContextExpanded(draft.contextExpanded);
+        setOverlappingExpanded(draft.overlappingExpanded);
         setDraftRestored(true);
         toast({
           title: 'Draft restored',
@@ -103,7 +124,7 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
       }
     } else {
       getSettings().then((settings: AppSettings) => {
-        setContextExpanded(settings.showContextByDefault);
+        setOverlappingExpanded(settings.showContextByDefault);
       });
     }
   }, []);
@@ -113,25 +134,25 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     if (draftRestored || hasChanges()) {
       const draft: CheckInDraft = {
         dateTime: dateTime.toISOString(),
-        wakeDomains,
-        contextDomains,
+        narcolepsyDomains,
+        overlappingDomains,
         activeTags,
         note,
-        contextExpanded,
+        overlappingExpanded,
       };
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
     }
-  }, [dateTime, wakeDomains, contextDomains, activeTags, note, contextExpanded]);
+  }, [dateTime, narcolepsyDomains, overlappingDomains, activeTags, note, overlappingExpanded]);
 
   // Check if form has unsaved changes
   const hasChanges = () => {
-    const wakeChanged = Object.keys(wakeDomains).some(
-      (key) => wakeDomains[key as keyof WakeDomains] !== 1
+    const narcoChanged = Object.keys(narcolepsyDomains).some(
+      (key) => narcolepsyDomains[key as keyof NarcolepsyDomains] !== 1
     );
-    const contextChanged = contextExpanded && Object.keys(contextDomains).some(
-      (key) => contextDomains[key as keyof ContextDomains] !== 1
+    const overlappingChanged = overlappingExpanded && Object.keys(overlappingDomains).some(
+      (key) => overlappingDomains[key as keyof OverlappingDomains] !== 1
     );
-    return wakeChanged || contextChanged || activeTags.length > 0 || note.trim().length > 0;
+    return narcoChanged || overlappingChanged || activeTags.length > 0 || note.trim().length > 0;
   };
 
   const handleBackClick = () => {
@@ -142,12 +163,12 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     }
   };
 
-  const updateWakeDomain = (key: keyof WakeDomains, value: number) => {
-    setWakeDomains(prev => ({ ...prev, [key]: value }));
+  const updateNarcolepsyDomain = (key: keyof NarcolepsyDomains, value: number) => {
+    setNarcolepsyDomains(prev => ({ ...prev, [key]: value }));
   };
 
-  const updateContextDomain = (key: keyof ContextDomains, value: number) => {
-    setContextDomains(prev => ({ ...prev, [key]: value }));
+  const updateOverlappingDomain = (key: keyof OverlappingDomains, value: number) => {
+    setOverlappingDomains(prev => ({ ...prev, [key]: value }));
   };
 
   const toggleTag = (tag: string) => {
@@ -164,8 +185,11 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
       createdAt: new Date().toISOString(),
       localDate: format(dateTime, 'yyyy-MM-dd'),
       localTime: format(dateTime, 'HH:mm'),
-      wakeDomains,
-      contextDomains: contextExpanded ? contextDomains : undefined,
+      narcolepsyDomains,
+      overlappingDomains: overlappingExpanded ? overlappingDomains : undefined,
+      // Legacy format for backward compatibility
+      wakeDomains: toLegacyWakeDomains(narcolepsyDomains, overlappingExpanded ? overlappingDomains : defaultOverlappingDomains),
+      contextDomains: overlappingExpanded ? toLegacyContextDomains(overlappingDomains) : undefined,
       tags: activeTags,
       note: note.trim() || undefined,
     };
@@ -185,8 +209,8 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
 
   const handleReset = () => {
     setDateTime(new Date());
-    setWakeDomains(defaultWakeDomains);
-    setContextDomains(defaultContextDomains);
+    setNarcolepsyDomains(defaultNarcolepsyDomains);
+    setOverlappingDomains(defaultOverlappingDomains);
     setActiveTags([]);
     setNote('');
     setShowNote(false);
@@ -194,6 +218,11 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     setDraftRestored(false);
     localStorage.removeItem(DRAFT_STORAGE_KEY);
   };
+
+  // Order for overlapping domains (sensory last)
+  const overlappingDomainOrder: (keyof OverlappingDomains)[] = [
+    'anxiety', 'mood', 'digestive', 'thermo', 'motor', 'emotional', 'sensory'
+  ];
 
   return (
     <div className="space-y-6 pb-24 overscroll-y-contain">
@@ -210,31 +239,59 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
       {/* Date/Time Picker */}
       <DateTimePicker date={dateTime} onChange={setDateTime} />
 
-      {/* Wake-State Section */}
+      {/* Narcolepsy-Related Symptoms Section */}
       <motion.section
         className="space-y-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <h2 className="text-lg font-semibold text-primary">Wake-State</h2>
-        
-        <div className="space-y-4">
-          {(Object.keys(WAKE_DOMAIN_CONFIG) as Array<keyof WakeDomains>).map((key, index) => (
-            <motion.div
-              key={key}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 + index * 0.03 }}
-            >
-              <DomainSlider
-                domainKey={key}
-                config={WAKE_DOMAIN_CONFIG[key]}
-                value={wakeDomains[key]}
-                onChange={(val) => updateWakeDomain(key, val)}
-              />
-            </motion.div>
-          ))}
+        <div className="section-card border-primary/30">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+              <Zap className="w-4 h-4 text-primary" />
+            </div>
+            <h2 className="text-lg font-semibold text-foreground">Narcolepsy-Related</h2>
+          </div>
+          
+          <div className="space-y-4">
+            {(Object.keys(NARCOLEPSY_DOMAIN_CONFIG) as Array<keyof NarcolepsyDomains>).map((key, index) => (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 + index * 0.03 }}
+              >
+                <DomainSlider
+                  domainKey={key}
+                  config={NARCOLEPSY_DOMAIN_CONFIG[key]}
+                  value={narcolepsyDomains[key]}
+                  onChange={(val) => updateNarcolepsyDomain(key, val)}
+                />
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Cataplexy Note */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="mt-4 pt-4 border-t border-border/50"
+          >
+            <div className="flex items-start gap-2 text-sm text-muted-foreground">
+              <Info className="w-4 h-4 mt-0.5 flex-shrink-0 text-domain-cataplexy" />
+              <p>
+                <span className="text-domain-cataplexy font-medium">Cataplexy</span> is logged as an event, not a slider.{' '}
+                <button 
+                  onClick={onEventClick}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Log cataplexy event →
+                </button>
+              </p>
+            </div>
+          </motion.div>
         </div>
       </motion.section>
 
@@ -246,14 +303,14 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
         transition={{ delay: 0.2 }}
       >
         <button
-          onClick={() => setContextExpanded(!contextExpanded)}
+          onClick={() => setOverlappingExpanded(!overlappingExpanded)}
           className="w-full flex items-center justify-between py-2 text-left"
         >
-          <h2 className="text-lg font-semibold text-muted-foreground">
-            Context Modulators
+          <h2 className="text-base font-medium text-muted-foreground">
+            Other / Overlapping Symptoms
           </h2>
           <motion.div
-            animate={{ rotate: contextExpanded ? 180 : 0 }}
+            animate={{ rotate: overlappingExpanded ? 180 : 0 }}
             transition={{ duration: 0.2 }}
           >
             <ChevronDown className="w-5 h-5 text-muted-foreground" />
@@ -261,23 +318,25 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
         </button>
 
         <AnimatePresence>
-          {contextExpanded && (
+          {overlappingExpanded && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="overflow-hidden space-y-4"
+              className="overflow-hidden"
             >
-              {(Object.keys(CONTEXT_DOMAIN_CONFIG) as Array<keyof ContextDomains>).map((key) => (
-                <DomainSlider
-                  key={key}
-                  domainKey={key}
-                  config={CONTEXT_DOMAIN_CONFIG[key]}
-                  value={contextDomains[key]}
-                  onChange={(val) => updateContextDomain(key, val)}
-                />
-              ))}
+              <div className="section-card border-border/30 space-y-4">
+                {overlappingDomainOrder.map((key) => (
+                  <DomainSlider
+                    key={key}
+                    domainKey={key}
+                    config={OVERLAPPING_DOMAIN_CONFIG[key]}
+                    value={overlappingDomains[key]}
+                    onChange={(val) => updateOverlappingDomain(key, val)}
+                  />
+                ))}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -352,9 +411,9 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
           <Button
             variant="outline"
             onClick={onEventClick}
-            className="flex-1 h-12 gap-2"
+            className="flex-1 h-12 gap-2 border-domain-cataplexy/50 text-domain-cataplexy hover:bg-domain-cataplexy/10"
           >
-            <AlertTriangle className="w-4 h-4" />
+            <Zap className="w-4 h-4" />
             Log Event
           </Button>
           
@@ -374,7 +433,7 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-yellow-500" />
+              <Info className="w-5 h-5 text-yellow-500" />
               Unsaved changes
             </AlertDialogTitle>
             <AlertDialogDescription>

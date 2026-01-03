@@ -1,3 +1,24 @@
+// ============= Narcolepsy-Related Symptom Domains =============
+export interface NarcolepsyDomains {
+  sleepPressure: number;      // Excessive Daytime Sleepiness / Sleep Pressure
+  microsleeps: number;        // Microsleeps / Automatic Behavior
+  sleepInertia: number;       // Sleep Inertia / Unrefreshing Naps
+  cognitive: number;          // Cognitive Fog
+  effort: number;             // Effort Aversion
+}
+
+// ============= Other / Overlapping Symptom Domains =============
+export interface OverlappingDomains {
+  anxiety: number;            // Anxiety / Nervous System Activation
+  mood: number;               // Mood Tone (Low / Flat / Heavy)
+  digestive: number;          // Digestive Load
+  thermo: number;             // Thermoregulatory Instability
+  motor: number;              // Motor Control Degradation (non-emotional)
+  emotional: number;          // Emotional Reactivity / Freeze
+  sensory: number;            // Sensory Overload (always last)
+}
+
+// Legacy interfaces for backward compatibility
 export interface WakeDomains {
   cataplexy: number;
   microsleeps: number;
@@ -21,12 +42,51 @@ export interface CheckIn {
   createdAt: string;
   localDate: string;
   localTime: string;
+  // New structure
+  narcolepsyDomains?: NarcolepsyDomains;
+  overlappingDomains?: OverlappingDomains;
+  // Legacy structure (backward compat)
   wakeDomains: WakeDomains;
   contextDomains?: ContextDomains;
   tags: string[];
   note?: string;
 }
 
+// ============= Event Types =============
+export type SeverityTag = 'mild' | 'moderate' | 'severe';
+export type RefreshedLevel = 'yes' | 'somewhat' | 'no';
+export type SleepInertiaDuration = '<5m' | '5-15m' | '15-30m' | '30m+';
+
+export interface CataplextyEvent {
+  id: string;
+  type: 'cataplexy';
+  createdAt: string;
+  localDate: string;
+  localTime: string;
+  severity: SeverityTag;
+  emotionTriggers: string[];
+  activityContext: string[];
+  note?: string;
+}
+
+export interface NapEvent {
+  id: string;
+  type: 'nap';
+  createdAt: string;
+  localDate: string;
+  localTime: string;
+  startTime: string;
+  endTime: string;
+  planned: boolean;
+  refreshed: RefreshedLevel;
+  sleepInertiaDuration?: SleepInertiaDuration;
+  note?: string;
+}
+
+// Union type for structured events
+export type StructuredEvent = CataplextyEvent | NapEvent;
+
+// Legacy event types for backward compatibility
 export const EVENT_TYPES = [
   { id: 'major-cataplexy', label: 'Major Cataplexy', category: 'cataplexy' },
   { id: 'partial-cataplexy', label: 'Partial Cataplexy (Face/Jaw)', category: 'cataplexy' },
@@ -57,17 +117,24 @@ export const EVENT_TYPES = [
 
 export type EventType = typeof EVENT_TYPES[number]['id'];
 export type EventCategory = typeof EVENT_TYPES[number]['category'];
-export type SeverityTag = 'mild' | 'moderate' | 'severe';
 
 export interface TrackingEvent {
   id: string;
-  type: EventType;
+  type: EventType | 'cataplexy' | 'nap';
   createdAt: string;
   localDate: string;
   localTime: string;
   severityTag?: SeverityTag;
   contextTags: string[];
   note?: string;
+  // Extended fields for structured events
+  startTime?: string;
+  endTime?: string;
+  planned?: boolean;
+  refreshed?: RefreshedLevel;
+  sleepInertiaDuration?: SleepInertiaDuration;
+  emotionTriggers?: string[];
+  activityContext?: string[];
 }
 
 export interface AppSettings {
@@ -82,6 +149,87 @@ export interface DomainConfig {
   description?: string;
 }
 
+// ============= Narcolepsy-Related Domain Config =============
+export const NARCOLEPSY_DOMAIN_CONFIG: Record<keyof NarcolepsyDomains, DomainConfig> = {
+  sleepPressure: {
+    label: 'Excessive Daytime Sleepiness',
+    color: 'domain-sleep-pressure',
+    anchors: { 1: 'Alert', 3: 'Heavy', 5: 'Crushing' },
+    description: 'The overwhelming urge to sleep. May feel like a weight pressing down, making it hard to stay awake.',
+  },
+  microsleeps: {
+    label: 'Microsleeps / Automatic Behavior',
+    color: 'domain-microsleeps',
+    anchors: { 1: 'Present', 3: 'Drifting', 5: 'Losing time' },
+    description: 'Brief lapses into sleep lasting seconds. You may continue activities on autopilot with no memory of them.',
+  },
+  sleepInertia: {
+    label: 'Sleep Inertia / Unrefreshing Naps',
+    color: 'domain-cognitive',
+    anchors: { 1: 'Refreshed', 3: 'Groggy', 5: 'Worse after sleep' },
+    description: 'Difficulty waking up or feeling worse after sleep. Naps may not feel restorative.',
+  },
+  cognitive: {
+    label: 'Cognitive Fog',
+    color: 'domain-effort',
+    anchors: { 1: 'Sharp', 3: 'Foggy', 5: 'Very clouded' },
+    description: 'Difficulty with concentration, processing speed, and mental clarity. Often called "brain fog."',
+  },
+  effort: {
+    label: 'Effort Aversion',
+    color: 'domain-motor',
+    anchors: { 1: 'Motivated', 3: 'Reluctant', 5: "Can't initiate" },
+    description: 'Difficulty starting or sustaining tasks, even ones you want to do. Different from laziness or lack of motivation.',
+  },
+};
+
+// ============= Other / Overlapping Domain Config =============
+export const OVERLAPPING_DOMAIN_CONFIG: Record<keyof OverlappingDomains, DomainConfig> = {
+  anxiety: {
+    label: 'Anxiety / Nervous System Activation',
+    color: 'domain-anxiety',
+    anchors: { 1: 'Calm', 3: 'Activated', 5: 'Highly anxious' },
+    description: 'General nervous system arousal, worry, or anxiety unrelated to sleep symptoms.',
+  },
+  mood: {
+    label: 'Mood Tone (Low / Flat / Heavy)',
+    color: 'domain-mood',
+    anchors: { 1: 'Bright', 3: 'Flat', 5: 'Very low' },
+    description: 'Overall mood state that may affect or be affected by sleep symptoms.',
+  },
+  digestive: {
+    label: 'Digestive Load',
+    color: 'domain-digestive',
+    anchors: { 1: 'Light', 3: 'Processing', 5: 'Heavy burden' },
+    description: 'How much your digestive system is affecting your energy and alertness.',
+  },
+  thermo: {
+    label: 'Thermoregulatory Instability',
+    color: 'domain-thermo',
+    anchors: { 1: 'Stable', 3: 'Fluctuating', 5: 'Extreme' },
+    description: 'Difficulty regulating body temperature. May experience sudden hot flashes, chills, or sweating.',
+  },
+  motor: {
+    label: 'Motor Control Degradation',
+    color: 'domain-cataplexy',
+    anchors: { 1: 'Coordinated', 3: 'Clumsy', 5: 'Impaired' },
+    description: 'Reduced coordination and fine motor control unrelated to emotional triggers (non-cataplexy).',
+  },
+  emotional: {
+    label: 'Emotional Reactivity / Freeze',
+    color: 'domain-emotional',
+    anchors: { 1: 'Balanced', 3: 'Reactive', 5: 'Volatile/frozen' },
+    description: 'Heightened emotional responses or emotional numbness. May laugh/cry easily or feel emotionally flat.',
+  },
+  sensory: {
+    label: 'Sensory Overload',
+    color: 'domain-sensory',
+    anchors: { 1: 'Comfortable', 3: 'Sensitive', 5: 'Overwhelmed' },
+    description: 'Heightened sensitivity to light, sound, touch, or other stimuli. Environments feel too intense.',
+  },
+};
+
+// Legacy configs for backward compatibility
 export const WAKE_DOMAIN_CONFIG: Record<keyof WakeDomains, DomainConfig> = {
   sleepPressure: {
     label: 'Sleep Pressure',
@@ -189,8 +337,12 @@ export const ACTIVITY_TAGS = [
   'other',
 ] as const;
 
+export const SLEEP_INERTIA_DURATIONS = ['<5m', '5-15m', '15-30m', '30m+'] as const;
+
 export type WakeDomainKey = keyof WakeDomains;
 export type ContextDomainKey = keyof ContextDomains;
+export type NarcolepsyDomainKey = keyof NarcolepsyDomains;
+export type OverlappingDomainKey = keyof OverlappingDomains;
 export type Tag = (typeof TAGS)[number];
 export type EmotionTag = (typeof EMOTION_TAGS)[number];
 export type ActivityTag = (typeof ACTIVITY_TAGS)[number];
