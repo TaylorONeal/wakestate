@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion';
-import { ExternalLink, Info, Heart, BookOpen, Shield, ChevronLeft, Coffee } from 'lucide-react';
+import { ExternalLink, Info, Heart, BookOpen, Shield, ChevronLeft, Coffee, MessageSquare } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface AboutScreenProps {
   onBack?: () => void;
+  onNavigateToFeedback?: () => void;
 }
 
-export function AboutScreen({ onBack }: AboutScreenProps) {
+export function AboutScreen({ onBack, onNavigateToFeedback }: AboutScreenProps) {
   const resources = [
     {
       name: 'American Academy of Sleep Medicine (AASM)',
@@ -198,6 +200,34 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
             Buy me a coffee ☕
           </span>
         </a>
+      </motion.section>
+
+      {/* Feedback Box */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.45 }}
+        className="section-card border-primary/20"
+      >
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+            <MessageSquare className="w-5 h-5 text-primary" />
+          </div>
+          <h2 className="text-lg font-semibold text-foreground">Share Feedback</h2>
+        </div>
+
+        <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+          Have a suggestion, found a bug, or want to share what's working well? Your feedback helps shape WakeState for the narcolepsy community.
+        </p>
+
+        <Button
+          onClick={onNavigateToFeedback}
+          variant="outline"
+          className="w-full"
+        >
+          <MessageSquare className="w-4 h-4 mr-2" />
+          Give Feedback
+        </Button>
       </motion.section>
 
       {/* Version */}
