@@ -6,7 +6,8 @@ import type {
   MedicationEntry, 
   UserMedications,
   UserMedicationConfig,
-  MedicationAdministration 
+  MedicationAdministration,
+  SleepEntry
 } from '@/types';
 
 const CHECKINS_KEY = 'wakestate_checkins';
@@ -15,6 +16,7 @@ const SETTINGS_KEY = 'wakestate_settings';
 const MEDICATIONS_KEY = 'wakestate_medications';
 const MED_CONFIG_KEY = 'wakestate_med_config';
 const MED_ADMIN_KEY = 'wakestate_med_administrations';
+const SLEEP_ENTRIES_KEY = 'wakestate_sleep_entries';
 
 export const defaultSettings: AppSettings = {
   showContextByDefault: false,
@@ -156,6 +158,41 @@ export async function getTodayAdministrations(medicationId: string): Promise<Med
   const administrations = await getMedicationAdministrations();
   const today = new Date().toISOString().split('T')[0];
   return administrations.filter(a => a.medicationId === medicationId && a.localDate === today);
+}
+
+// Sleep Entries
+export async function getSleepEntries(): Promise<SleepEntry[]> {
+  try {
+    const data = await get<SleepEntry[]>(SLEEP_ENTRIES_KEY);
+    return data || [];
+  } catch {
+    const stored = localStorage.getItem(SLEEP_ENTRIES_KEY);
+    return stored ? JSON.parse(stored) : [];
+  }
+}
+
+export async function getSleepEntryForDate(date: string): Promise<SleepEntry | null> {
+  const entries = await getSleepEntries();
+  return entries.find(e => e.date === date) || null;
+}
+
+export async function saveSleepEntry(entry: SleepEntry): Promise<void> {
+  const entries = await getSleepEntries();
+  const existingIndex = entries.findIndex(e => e.date === entry.date);
+  
+  if (existingIndex !== -1) {
+    entries[existingIndex] = entry;
+  } else {
+    entries.unshift(entry);
+  }
+  
+  await set(SLEEP_ENTRIES_KEY, entries);
+}
+
+export async function deleteSleepEntry(id: string): Promise<void> {
+  const entries = await getSleepEntries();
+  const filtered = entries.filter(e => e.id !== id);
+  await set(SLEEP_ENTRIES_KEY, filtered);
 }
 
 // Export/Import

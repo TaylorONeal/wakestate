@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format, parseISO, subDays, subMonths, subYears, eachDayOfInterval, startOfDay, endOfDay, isWithinInterval, startOfWeek, endOfWeek, eachHourOfInterval, getHours } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 'recharts';
 import { Button } from '@/components/ui/button';
-import { getEvents, getCheckIns } from '@/lib/storage';
-import { Moon, Zap, TrendingUp, Clock } from 'lucide-react';
-import { NARCOLEPSY_DOMAIN_CONFIG, type TrackingEvent, type CheckIn, type NarcolepsyDomainKey } from '@/types';
+import { getEvents, getCheckIns, getSleepEntries } from '@/lib/storage';
+import { Moon, Zap, TrendingUp, Clock, BedDouble } from 'lucide-react';
+import { NARCOLEPSY_DOMAIN_CONFIG, type TrackingEvent, type CheckIn, type NarcolepsyDomainKey, type SleepEntry } from '@/types';
 
 type ViewPeriod = 'day' | 'week' | 'month' | 'year';
 
@@ -16,6 +16,7 @@ interface DashboardProps {
 export function Dashboard({ refreshTrigger }: DashboardProps) {
   const [events, setEvents] = useState<TrackingEvent[]>([]);
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
+  const [sleepEntries, setSleepEntries] = useState<SleepEntry[]>([]);
   const [napPeriod, setNapPeriod] = useState<ViewPeriod>('week');
   const [cataplextyPeriod, setCataplextyPeriod] = useState<ViewPeriod>('week');
 
@@ -24,12 +25,14 @@ export function Dashboard({ refreshTrigger }: DashboardProps) {
   }, [refreshTrigger]);
 
   const loadData = async () => {
-    const [eventsData, checkInsData] = await Promise.all([
+    const [eventsData, checkInsData, sleepData] = await Promise.all([
       getEvents(),
       getCheckIns(),
+      getSleepEntries(),
     ]);
     setEvents(eventsData);
     setCheckIns(checkInsData);
+    setSleepEntries(sleepData);
   };
 
   const getDateRange = (period: ViewPeriod) => {
@@ -350,6 +353,68 @@ export function Dashboard({ refreshTrigger }: DashboardProps) {
               color="hsl(350, 70%, 60%" 
             />
           </div>
+        </motion.section>
+      )}
+
+      {/* Sleep Context (Light Integration) */}
+      {sleepEntries.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="section-card border-indigo-500/20"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <BedDouble className="w-4 h-4 text-indigo-400" />
+            <h3 className="font-medium text-muted-foreground">Sleep Context</h3>
+          </div>
+
+          {/* Recent sleep summary */}
+          <div className="space-y-2">
+            {sleepEntries.slice(0, 3).map((entry) => {
+              const hours = Math.floor(entry.totalSleepMinutes / 60);
+              const mins = entry.totalSleepMinutes % 60;
+              return (
+                <div 
+                  key={entry.id} 
+                  className="flex items-center justify-between p-2 rounded-lg bg-surface-3"
+                >
+                  <span className="text-xs text-muted-foreground">
+                    {format(parseISO(entry.date), 'EEE, MMM d')}
+                  </span>
+                  <span className="text-sm font-medium text-foreground">
+                    {hours}h {mins > 0 ? `${mins}m` : ''}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Insight - only show if enough data */}
+          {sleepEntries.length >= 5 && (() => {
+            const avgMinutes = sleepEntries.reduce((sum, e) => sum + e.totalSleepMinutes, 0) / sleepEntries.length;
+            const avgHours = Math.floor(avgMinutes / 60);
+            const avgMins = Math.round(avgMinutes % 60);
+            const shortNights = sleepEntries.filter(e => e.totalSleepMinutes < 360).length; // Less than 6 hours
+            
+            return (
+              <div className="mt-3 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+                <p className="text-xs text-muted-foreground">
+                  Average: <span className="text-foreground font-medium">{avgHours}h {avgMins}m</span>
+                  {shortNights > 0 && (
+                    <span className="ml-2">
+                      · {shortNights} short night{shortNights > 1 ? 's' : ''} (&lt;6h)
+                    </span>
+                  )}
+                </p>
+                {shortNights >= 2 && (
+                  <p className="text-xs text-indigo-300/70 mt-1 italic">
+                    Short sleep nights are often followed by higher sleep pressure the next day.
+                  </p>
+                )}
+              </div>
+            );
+          })()}
         </motion.section>
       )}
 

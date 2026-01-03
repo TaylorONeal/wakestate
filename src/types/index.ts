@@ -142,6 +142,22 @@ export interface AppSettings {
   theme: 'midnight' | 'charcoal' | 'deep-ocean';
 }
 
+// ============= Sleep Entry Types =============
+export type WakeupCategory = 'none' | '1-2' | '3-4' | '5+';
+
+export interface SleepEntry {
+  id: string;
+  date: string; // The night of sleep (YYYY-MM-DD)
+  createdAt: string;
+  updatedAt: string;
+  totalSleepMinutes: number;
+  wakeupsCategory?: WakeupCategory;
+  hallucinations?: boolean;
+  hallucinationsNote?: string; // max 140 chars
+  vividDreams?: boolean;
+  ahi?: number; // optional AHI value
+}
+
 // ============= Medication Types =============
 export type MedicationFrequency = '1x/day' | '2x/day' | '3x/day' | '4x/day' | 'PRN' | 'other';
 export type MedicationTiming = 'morning' | 'midday' | 'afternoon' | 'evening' | 'bedtime';

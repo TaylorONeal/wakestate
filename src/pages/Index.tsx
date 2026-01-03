@@ -11,6 +11,7 @@ import { MedicationsScreen } from '@/components/MedicationsScreen';
 import { MedicationSetup } from '@/components/MedicationSetup';
 import { ExportScreen } from '@/components/ExportScreen';
 import { FeedbackScreen } from '@/components/FeedbackScreen';
+import { SleepLogScreen } from '@/components/SleepLogScreen';
 import { EventForm } from '@/components/EventForm';
 import { Onboarding } from '@/components/Onboarding';
 import { getCheckIns, getEvents, getMedicationConfig } from '@/lib/storage';
@@ -24,6 +25,7 @@ const Index = () => {
   const [showMedicationSetup, setShowMedicationSetup] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showSleepLog, setShowSleepLog] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [checkInCount, setCheckInCount] = useState(0);
   const [eventCount, setEventCount] = useState(0);
@@ -50,12 +52,17 @@ const Index = () => {
   };
 
   const renderScreen = () => {
-    if (showFeedback) {
-      return <FeedbackScreen onBack={() => setShowFeedback(false)} />;
+    if (showSleepLog) {
+      return (
+        <SleepLogScreen 
+          onBack={() => setShowSleepLog(false)} 
+          onSave={handleDataChange}
+        />
+      );
     }
 
-    if (showExport) {
-      return <ExportScreen onBack={() => setShowExport(false)} />;
+    if (showFeedback) {
+      return <FeedbackScreen onBack={() => setShowFeedback(false)} />;
     }
 
     if (showMedicationSetup) {
@@ -92,6 +99,7 @@ const Index = () => {
           <HomeScreen
             onLogWakeState={() => setActiveTab('log')}
             onLogEvent={() => setShowEventForm(true)}
+            onLogSleep={() => setShowSleepLog(true)}
             onMedicationSetup={() => setShowMedicationSetup(true)}
             checkInCount={checkInCount}
             eventCount={eventCount}
@@ -125,6 +133,7 @@ const Index = () => {
   };
 
   const getTitle = () => {
+    if (showSleepLog) return "Last Night's Sleep";
     if (showFeedback) return 'Feedback';
     if (showExport) return 'Export & Reports';
     if (showMedicationSetup) return 'Set Up Medications';
@@ -204,7 +213,7 @@ const Index = () => {
         </main>
 
         {/* Bottom Navigation */}
-        <BottomNav activeTab={activeTab} onTabChange={(tab) => { setShowAbout(false); setShowMedications(false); setShowMedicationSetup(false); setShowExport(false); setShowFeedback(false); setActiveTab(tab); }} />
+        <BottomNav activeTab={activeTab} onTabChange={(tab) => { setShowAbout(false); setShowMedications(false); setShowMedicationSetup(false); setShowExport(false); setShowFeedback(false); setShowSleepLog(false); setActiveTab(tab); }} />
       </div>
 
       {/* Event Form Modal */}
