@@ -118,7 +118,7 @@ const Index = () => {
       case 'timeline':
         return <TimelineScreen refreshTrigger={refreshTrigger} />;
       case 'dashboard':
-        return <Dashboard refreshTrigger={refreshTrigger} />;
+        return <Dashboard refreshTrigger={refreshTrigger} onNavigateToExport={() => setShowExport(true)} />;
       case 'settings':
         return (
           <SettingsScreen
