@@ -146,20 +146,20 @@ const Index = () => {
         <header className="sticky top-0 z-40 glass border-b border-border/50 safe-area-top overflow-hidden">
           {/* Animated Zzz Line */}
           <div className="absolute top-0 left-0 right-0 h-1 flex items-center overflow-hidden opacity-30">
-            {[...Array(8)].map((_, i) => (
+            {[...Array(6)].map((_, i) => (
               <motion.span
                 key={i}
-                className="text-[8px] text-primary font-bold"
-                initial={{ x: -20 }}
+                className="text-[8px] text-primary font-bold whitespace-nowrap"
+                initial={{ x: -30 }}
                 animate={{ x: '100vw' }}
                 transition={{
-                  duration: 8,
-                  delay: i * 1,
+                  duration: 10,
+                  delay: i * 1.6,
                   repeat: Infinity,
                   ease: 'linear',
                 }}
               >
-                Z
+                Zzz
               </motion.span>
             ))}
           </div>

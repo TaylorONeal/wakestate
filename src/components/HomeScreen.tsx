@@ -63,6 +63,14 @@ export function HomeScreen({ onLogWakeState, onLogEvent, onMedicationSetup, chec
         <p className="text-muted-foreground text-sm leading-relaxed px-2">
           Track the different components of wakefulness and other symptoms to help understand your trends.
         </p>
+        <a
+          href="https://buymeacoffee.com/tayloroneal"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block text-xs text-muted-foreground/70 hover:text-primary transition-colors pt-1"
+        >
+          Getting value? I'm just a PWN (person with narcolepsy) ☕ buy me a coffee — I sure need one
+        </a>
       </motion.div>
 
       {/* Stats Row */}
