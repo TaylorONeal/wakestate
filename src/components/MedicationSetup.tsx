@@ -116,7 +116,7 @@ export function MedicationSetup({ onComplete, onBack }: MedicationSetupProps) {
                 <motion.button
                   key={med.id}
                   onClick={() => toggleMedication(med.id)}
-                  className={`p-3 rounded-xl border-2 transition-all text-left ${
+                  className={`group relative overflow-visible p-3 rounded-xl border-2 transition-all text-left ${
                     selectedMeds.has(med.id)
                       ? 'border-primary bg-primary/10'
                       : 'border-border bg-surface-2 hover:bg-surface-3'
@@ -138,6 +138,15 @@ export function MedicationSetup({ onComplete, onBack }: MedicationSetupProps) {
                       <p className="text-xs text-muted-foreground truncate">{med.genericName}</p>
                     </div>
                   </div>
+
+                  {med.mechanism && (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute left-3 top-full mt-2 hidden group-hover:block z-50 max-w-xs rounded-md border border-border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md animate-fade-in"
+                    >
+                      {med.mechanism}
+                    </span>
+                  )}
                 </motion.button>
               ))}
             </div>
