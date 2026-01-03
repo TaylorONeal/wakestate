@@ -28,18 +28,23 @@ export function SaveConfirmation({ isVisible, saveType, logType }: SaveConfirmat
 
   const isNew = saveType === 'new';
   const isSleep = logType === 'sleep';
+  const isMedication = logType === 'medication';
   
   // Color based on log type
   const primaryColor = isSleep 
     ? 'hsl(250, 60%, 65%)' // soft purple/blue for sleep
+    : isMedication
+    ? 'hsl(45, 90%, 55%)' // warm gold/yellow for meds
     : 'hsl(145, 55%, 55%)'; // soft green for wake
   
   const secondaryColor = isSleep
     ? 'hsl(250, 50%, 75%)'
+    : isMedication
+    ? 'hsl(45, 80%, 65%)'
     : 'hsl(145, 45%, 65%)';
 
-  // Text varies by save type
-  const zzText = isNew ? 'ZZzzz' : 'zz';
+  // Text/icon varies by save type and log type
+  const displayText = isMedication ? '⚡' : (isNew ? 'ZZzzz' : 'zz');
   
   // Animation durations - satisfying timing with ASMR-like fade
   const textDuration = isNew ? 1.1 : 0.8;
@@ -125,7 +130,7 @@ export function SaveConfirmation({ isVisible, saveType, logType }: SaveConfirmat
               }
             }}
           >
-            {zzText}
+            {displayText}
           </motion.span>
 
           {/* Cloud Poof */}
