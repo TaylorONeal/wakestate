@@ -282,11 +282,11 @@ function MedicationCard({
   };
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={300}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger asChild>
-          <Tooltip>
-            <TooltipTrigger asChild>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <CollapsibleTrigger asChild>
               <motion.button
                 className="w-full p-4 flex items-center justify-between bg-surface-2 rounded-lg hover:bg-surface-3 transition-colors text-left"
                 whileTap={{ scale: 0.98 }}
@@ -308,14 +308,14 @@ function MedicationCard({
                   <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                 )}
               </motion.button>
-            </TooltipTrigger>
-            {medication.mechanism && (
-              <TooltipContent side="top" className="max-w-xs">
-                <p className="text-sm">{medication.mechanism}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </CollapsibleTrigger>
+            </CollapsibleTrigger>
+          </TooltipTrigger>
+          {medication.mechanism && (
+            <TooltipContent side="top" className="max-w-xs">
+              <p className="text-sm">{medication.mechanism}</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
 
       <CollapsibleContent>
         <div className="px-4 pb-4 pt-2 space-y-4 bg-surface-2 rounded-b-lg -mt-2 border-t border-border/30">
