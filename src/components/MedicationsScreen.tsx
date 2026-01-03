@@ -285,7 +285,7 @@ function MedicationCard({
       <CollapsibleTrigger asChild>
         <motion.button
           title={medication.mechanism}
-          className="w-full p-4 flex items-center justify-between bg-surface-2 rounded-lg hover:bg-surface-3 transition-colors text-left"
+          className="group relative w-full overflow-visible p-4 flex items-center justify-between bg-surface-2 rounded-lg hover:bg-surface-3 transition-colors text-left"
           whileTap={{ scale: 0.98 }}
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -303,6 +303,15 @@ function MedicationCard({
             <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
           ) : (
             <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+          )}
+
+          {medication.mechanism && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute left-4 top-full mt-2 hidden group-hover:block z-50 max-w-xs rounded-md border border-border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md animate-fade-in"
+            >
+              {medication.mechanism}
+            </span>
           )}
         </motion.button>
       </CollapsibleTrigger>
