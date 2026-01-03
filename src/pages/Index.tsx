@@ -4,8 +4,9 @@ import { BottomNav, type TabId } from '@/components/BottomNav';
 import { HomeScreen } from '@/components/HomeScreen';
 import { CheckInScreen } from '@/components/CheckInScreen';
 import { TimelineScreen } from '@/components/TimelineScreen';
-import { TrendsScreen } from '@/components/TrendsScreen';
+import { Dashboard } from '@/components/Dashboard';
 import { SettingsScreen } from '@/components/SettingsScreen';
+import { AboutScreen } from '@/components/AboutScreen';
 import { EventForm } from '@/components/EventForm';
 import { Onboarding } from '@/components/Onboarding';
 import { getCheckIns, getEvents } from '@/lib/storage';
@@ -14,6 +15,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [showEventForm, setShowEventForm] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [checkInCount, setCheckInCount] = useState(0);
   const [eventCount, setEventCount] = useState(0);
@@ -40,46 +42,51 @@ const Index = () => {
   };
 
   const renderScreen = () => {
+    if (showAbout) {
+      return <AboutScreen onBack={() => setShowAbout(false)} />;
+    }
+
     switch (activeTab) {
       case 'home':
         return (
           <HomeScreen
-            onLogWakeState={() => setActiveTab('checkin')}
+            onLogWakeState={() => setActiveTab('log')}
             onLogEvent={() => setShowEventForm(true)}
             checkInCount={checkInCount}
             eventCount={eventCount}
           />
         );
-      case 'checkin':
+      case 'log':
         return (
           <CheckInScreen
             onEventClick={() => setShowEventForm(true)}
             onSave={handleDataChange}
-            onNavigateToTrends={() => setActiveTab('trends')}
+            onNavigateToTrends={() => setActiveTab('dashboard')}
             onBack={() => setActiveTab('home')}
           />
         );
       case 'timeline':
         return <TimelineScreen refreshTrigger={refreshTrigger} />;
-      case 'trends':
-        return <TrendsScreen refreshTrigger={refreshTrigger} />;
+      case 'dashboard':
+        return <Dashboard refreshTrigger={refreshTrigger} />;
       case 'settings':
-        return <SettingsScreen />;
+        return <SettingsScreen onNavigateToAbout={() => setShowAbout(true)} />;
       default:
         return null;
     }
   };
 
   const getTitle = () => {
+    if (showAbout) return 'About';
     switch (activeTab) {
       case 'home':
         return 'WakeTrack';
-      case 'checkin':
-        return 'Check-In';
+      case 'log':
+        return 'Log Wake State';
       case 'timeline':
         return 'Timeline';
-      case 'trends':
-        return 'Trends';
+      case 'dashboard':
+        return 'Dashboard';
       case 'settings':
         return 'Settings';
       default:
@@ -102,7 +109,7 @@ const Index = () => {
         <header className="sticky top-0 z-40 glass border-b border-border/50 safe-area-top">
           <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
             <h1 className="text-xl font-bold text-foreground">{getTitle()}</h1>
-            {activeTab !== 'home' && (
+            {activeTab !== 'home' && !showAbout && (
               <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
                 WakeTrack
               </span>
@@ -114,7 +121,7 @@ const Index = () => {
         <main className="px-4 py-4 max-w-lg mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
-              key={activeTab}
+              key={showAbout ? 'about' : activeTab}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -126,7 +133,7 @@ const Index = () => {
         </main>
 
         {/* Bottom Navigation */}
-        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNav activeTab={activeTab} onTabChange={(tab) => { setShowAbout(false); setActiveTab(tab); }} />
       </div>
 
       {/* Event Form Modal */}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Brain, Activity, TrendingUp, Info, X } from 'lucide-react';
-import { WAKE_DOMAIN_CONFIG, CONTEXT_DOMAIN_CONFIG } from '@/types';
+import { Zap, Brain, Activity, TrendingUp, Info, X, Moon } from 'lucide-react';
+import { NARCOLEPSY_DOMAIN_CONFIG, OVERLAPPING_DOMAIN_CONFIG } from '@/types';
 
 interface HomeScreenProps {
   onLogWakeState: () => void;
@@ -98,16 +98,16 @@ export function HomeScreen({ onLogWakeState, onLogEvent, checkInCount, eventCoun
       >
         <h3 className="font-semibold text-foreground flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-primary" />
-          Why Track Categories?
+          Why Track?
         </h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li className="flex items-start gap-2">
             <span className="text-domain-cataplexy mt-0.5">•</span>
-            <span>Distinguish <strong className="text-foreground">sleep symptoms</strong> from anxiety or mood</span>
+            <span>Distinguish <strong className="text-foreground">narcolepsy symptoms</strong> from other factors</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-domain-effort mt-0.5">•</span>
-            <span>Spot <strong className="text-foreground">time-of-day patterns</strong> in your wake instability</span>
+            <span>Spot <strong className="text-foreground">time-of-day patterns</strong> in your symptoms</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-domain-cognitive mt-0.5">•</span>
@@ -180,9 +180,11 @@ export function HomeScreen({ onLogWakeState, onLogEvent, checkInCount, eventCoun
             className="absolute inset-0 rounded-3xl bg-domain-cataplexy/30"
           />
           <span className="relative flex flex-col items-center justify-center gap-1">
-            <Zap className="w-5 h-5" />
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5" />
+              <Moon className="w-4 h-4" />
+            </div>
             <span>Log Event</span>
-            <span className="text-xs opacity-80">e.g. Cataplexy</span>
           </span>
         </motion.button>
 
@@ -214,7 +216,6 @@ export function HomeScreen({ onLogWakeState, onLogEvent, checkInCount, eventCoun
           <span className="relative flex flex-col items-center justify-center gap-1">
             <Info className="w-5 h-5" />
             <span>Categories</span>
-            <span className="text-xs text-muted-foreground">Legend</span>
           </span>
         </motion.button>
       </motion.div>
@@ -226,7 +227,7 @@ export function HomeScreen({ onLogWakeState, onLogEvent, checkInCount, eventCoun
         transition={{ delay: 0.5 }}
         className="text-center text-xs text-muted-foreground px-4"
       >
-        💡 Quick 30-second check-ins throughout the day build the best patterns
+        Quick 30-second check-ins throughout the day build the best patterns
       </motion.p>
 
       {/* Legend Modal */}
@@ -256,18 +257,17 @@ export function HomeScreen({ onLogWakeState, onLogEvent, checkInCount, eventCoun
                 </button>
               </div>
 
-              {/* Wake Domains */}
+              {/* Narcolepsy-Related */}
               <div className="mb-4">
                 <h4 className="text-sm font-semibold text-primary mb-2 flex items-center gap-2">
-                  <Activity className="w-4 h-4" />
-                  Wake-State Domains
+                  <Zap className="w-4 h-4" />
+                  Narcolepsy-Related
                 </h4>
                 <div className="space-y-2">
-                  {Object.entries(WAKE_DOMAIN_CONFIG).map(([key, config]) => (
+                  {Object.entries(NARCOLEPSY_DOMAIN_CONFIG).map(([key, config]) => (
                     <div key={key} className="flex items-center gap-3">
                       <div
-                        className="w-3 h-3 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: `hsl(var(--domain-${key}))` }}
+                        className={`w-3 h-3 rounded-full flex-shrink-0 bg-${config.color}`}
                       />
                       <span className="text-sm text-foreground">{config.label}</span>
                     </div>
@@ -275,18 +275,17 @@ export function HomeScreen({ onLogWakeState, onLogEvent, checkInCount, eventCoun
                 </div>
               </div>
 
-              {/* Context Domains */}
+              {/* Other / Overlapping */}
               <div>
                 <h4 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
-                  <Brain className="w-4 h-4" />
-                  Context Modulators
+                  <Activity className="w-4 h-4" />
+                  Other / Overlapping
                 </h4>
                 <div className="space-y-2">
-                  {Object.entries(CONTEXT_DOMAIN_CONFIG).map(([key, config]) => (
+                  {Object.entries(OVERLAPPING_DOMAIN_CONFIG).map(([key, config]) => (
                     <div key={key} className="flex items-center gap-3">
                       <div
-                        className="w-3 h-3 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: `hsl(var(--context-${key}))` }}
+                        className={`w-3 h-3 rounded-full flex-shrink-0 bg-${config.color}`}
                       />
                       <span className="text-sm text-foreground">{config.label}</span>
                     </div>
