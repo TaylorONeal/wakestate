@@ -5,7 +5,9 @@ import { format, differenceInMinutes } from 'date-fns';
 import { Moon, Save, ChevronLeft, Info, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { SaveConfirmation } from '@/components/SaveConfirmation';
 import { useToast } from '@/hooks/use-toast';
+import { useSaveConfirmation } from '@/hooks/useSaveConfirmation';
 import { saveEvent } from '@/lib/storage';
 import { SLEEP_INERTIA_DURATIONS, type TrackingEvent, type RefreshedLevel, type SleepInertiaDuration } from '@/types';
 import {
@@ -27,6 +29,7 @@ interface NapEventFormProps {
 
 export function NapEventForm({ onClose, onBack, onSave }: NapEventFormProps) {
   const { toast } = useToast();
+  const saveConfirmation = useSaveConfirmation();
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
   const [planned, setPlanned] = useState<boolean | undefined>();
@@ -85,6 +88,9 @@ export function NapEventForm({ onClose, onBack, onSave }: NapEventFormProps) {
 
     await saveEvent(event);
     
+    // Trigger save animation (nap is sleep-related, always new)
+    saveConfirmation.trigger('new', 'sleep');
+    
     toast({
       title: 'Nap logged',
       description: `${planned ? 'Planned' : 'Unplanned'} nap recorded`,
@@ -92,7 +98,9 @@ export function NapEventForm({ onClose, onBack, onSave }: NapEventFormProps) {
 
     setIsSaving(false);
     onSave();
-    onClose();
+    
+    // Small delay for animation
+    setTimeout(() => onClose(), 400);
   };
 
   const formatTimeInput = (date: Date) => format(date, 'HH:mm');
@@ -292,6 +300,13 @@ export function NapEventForm({ onClose, onBack, onSave }: NapEventFormProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Save Confirmation Animation */}
+      <SaveConfirmation
+        isVisible={saveConfirmation.isVisible}
+        saveType={saveConfirmation.saveType}
+        logType={saveConfirmation.logType}
+      />
     </>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Pill, Plus, Undo2, Clock, Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { SaveConfirmation } from '@/components/SaveConfirmation';
 import { 
   getMedicationConfig, 
   getMedicationAdministrations, 
@@ -10,6 +11,7 @@ import {
   getTodayAdministrations 
 } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
+import { useSaveConfirmation } from '@/hooks/useSaveConfirmation';
 import type { MedicationRegimen, MedicationAdministration, UserMedicationConfig } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,6 +29,7 @@ interface MedStatus {
 
 export function MedicationsToday({ onSetupClick, refreshTrigger }: MedicationsTodayProps) {
   const { toast } = useToast();
+  const saveConfirmation = useSaveConfirmation();
   const [config, setConfig] = useState<UserMedicationConfig | null>(null);
   const [medStatuses, setMedStatuses] = useState<MedStatus[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +75,9 @@ export function MedicationsToday({ onSetupClick, refreshTrigger }: MedicationsTo
     };
 
     await saveMedicationAdministration(admin);
+    
+    // Trigger save animation (wake-related, always new for meds)
+    saveConfirmation.trigger('new', 'wake');
     
     // Haptic feedback
     if ('vibrate' in navigator) {
@@ -233,6 +239,13 @@ export function MedicationsToday({ onSetupClick, refreshTrigger }: MedicationsTo
         <Edit2 className="w-3 h-3" />
         Edit medications
       </button>
+
+      {/* Save Confirmation Animation */}
+      <SaveConfirmation
+        isVisible={saveConfirmation.isVisible}
+        saveType={saveConfirmation.saveType}
+        logType={saveConfirmation.logType}
+      />
     </div>
   );
 }
