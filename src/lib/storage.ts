@@ -1,9 +1,10 @@
 import { get, set, del, keys } from 'idb-keyval';
-import type { CheckIn, TrackingEvent, AppSettings } from '@/types';
+import type { CheckIn, TrackingEvent, AppSettings, MedicationEntry, UserMedications } from '@/types';
 
 const CHECKINS_KEY = 'waketrack_checkins';
 const EVENTS_KEY = 'waketrack_events';
 const SETTINGS_KEY = 'waketrack_settings';
+const MEDICATIONS_KEY = 'waketrack_medications';
 
 export const defaultSettings: AppSettings = {
   showContextByDefault: false,
@@ -78,6 +79,29 @@ export async function getSettings(): Promise<AppSettings> {
 
 export async function saveSettings(settings: AppSettings): Promise<void> {
   await set(SETTINGS_KEY, settings);
+}
+
+// Medications
+export async function getUserMedications(): Promise<UserMedications> {
+  try {
+    const data = await get<UserMedications>(MEDICATIONS_KEY);
+    return data || {};
+  } catch {
+    const stored = localStorage.getItem(MEDICATIONS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  }
+}
+
+export async function saveMedicationEntry(entry: MedicationEntry): Promise<void> {
+  const medications = await getUserMedications();
+  medications[entry.id] = entry;
+  await set(MEDICATIONS_KEY, medications);
+}
+
+export async function removeMedicationEntry(medicationId: string): Promise<void> {
+  const medications = await getUserMedications();
+  delete medications[medicationId];
+  await set(MEDICATIONS_KEY, medications);
 }
 
 // Export/Import
