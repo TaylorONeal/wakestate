@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 
 export type SaveType = 'new' | 'edit';
-export type LogType = 'wake' | 'sleep';
+export type LogType = 'wake' | 'sleep' | 'medication';
 
 interface SaveConfirmationState {
   isVisible: boolean;
@@ -27,7 +27,7 @@ export function useSaveConfirmation() {
     // Auto-hide after animation completes
     setTimeout(() => {
       setState(prev => ({ ...prev, isVisible: false }));
-    }, 800);
+    }, 1200);
   }, []);
 
   const hide = useCallback(() => {

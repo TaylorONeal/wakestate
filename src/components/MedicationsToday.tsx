@@ -76,8 +76,8 @@ export function MedicationsToday({ onSetupClick, refreshTrigger }: MedicationsTo
 
     await saveMedicationAdministration(admin);
     
-    // Trigger save animation (wake-related, always new for meds)
-    saveConfirmation.trigger('new', 'wake');
+    // Trigger save animation (medication type for lightning bolts)
+    saveConfirmation.trigger('new', 'medication');
     
     // Haptic feedback
     if ('vibrate' in navigator) {
