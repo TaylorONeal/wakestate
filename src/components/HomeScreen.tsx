@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Brain, Activity, TrendingUp, Info, X, Moon } from 'lucide-react';
 import { NARCOLEPSY_DOMAIN_CONFIG, OVERLAPPING_DOMAIN_CONFIG } from '@/types';
+import { MedicationsToday } from '@/components/MedicationsToday';
 
 interface HomeScreenProps {
   onLogWakeState: () => void;
   onLogEvent: () => void;
+  onMedicationSetup: () => void;
   checkInCount: number;
   eventCount: number;
+  refreshTrigger?: number;
 }
 
 const simonButtonVariants = {
@@ -26,7 +29,7 @@ const simonButtonVariants = {
   }
 };
 
-export function HomeScreen({ onLogWakeState, onLogEvent, checkInCount, eventCount }: HomeScreenProps) {
+export function HomeScreen({ onLogWakeState, onLogEvent, onMedicationSetup, checkInCount, eventCount, refreshTrigger }: HomeScreenProps) {
   const [showLegend, setShowLegend] = useState(false);
   const [pressedButton, setPressedButton] = useState<string | null>(null);
 
@@ -114,6 +117,15 @@ export function HomeScreen({ onLogWakeState, onLogEvent, checkInCount, eventCoun
             <span>Share <strong className="text-foreground">objective trends</strong> with your care team</span>
           </li>
         </ul>
+      </motion.div>
+
+      {/* Medications Today */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+      >
+        <MedicationsToday onSetupClick={onMedicationSetup} refreshTrigger={refreshTrigger} />
       </motion.div>
 
       {/* Simon Says Buttons */}

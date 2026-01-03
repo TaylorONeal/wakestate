@@ -8,9 +8,10 @@ import { Dashboard } from '@/components/Dashboard';
 import { SettingsScreen } from '@/components/SettingsScreen';
 import { AboutScreen } from '@/components/AboutScreen';
 import { MedicationsScreen } from '@/components/MedicationsScreen';
+import { MedicationSetup } from '@/components/MedicationSetup';
 import { EventForm } from '@/components/EventForm';
 import { Onboarding } from '@/components/Onboarding';
-import { getCheckIns, getEvents } from '@/lib/storage';
+import { getCheckIns, getEvents, getMedicationConfig } from '@/lib/storage';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -18,6 +19,7 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showMedications, setShowMedications] = useState(false);
+  const [showMedicationSetup, setShowMedicationSetup] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [checkInCount, setCheckInCount] = useState(0);
   const [eventCount, setEventCount] = useState(0);
@@ -44,6 +46,18 @@ const Index = () => {
   };
 
   const renderScreen = () => {
+    if (showMedicationSetup) {
+      return (
+        <MedicationSetup
+          onComplete={() => {
+            setShowMedicationSetup(false);
+            handleDataChange();
+          }}
+          onBack={() => setShowMedicationSetup(false)}
+        />
+      );
+    }
+
     if (showMedications) {
       return <MedicationsScreen onBack={() => setShowMedications(false)} />;
     }
@@ -58,8 +72,10 @@ const Index = () => {
           <HomeScreen
             onLogWakeState={() => setActiveTab('log')}
             onLogEvent={() => setShowEventForm(true)}
+            onMedicationSetup={() => setShowMedicationSetup(true)}
             checkInCount={checkInCount}
             eventCount={eventCount}
+            refreshTrigger={refreshTrigger}
           />
         );
       case 'log':
@@ -88,6 +104,7 @@ const Index = () => {
   };
 
   const getTitle = () => {
+    if (showMedicationSetup) return 'Set Up Medications';
     if (showMedications) return 'Medications';
     if (showAbout) return 'About';
     switch (activeTab) {
@@ -121,7 +138,7 @@ const Index = () => {
         <header className="sticky top-0 z-40 glass border-b border-border/50 safe-area-top">
           <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
             <h1 className="text-xl font-bold text-foreground">{getTitle()}</h1>
-            {activeTab !== 'home' && !showAbout && !showMedications && (
+            {activeTab !== 'home' && !showAbout && !showMedications && !showMedicationSetup && (
               <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
                 WakeTrack
               </span>
@@ -133,7 +150,7 @@ const Index = () => {
         <main className="px-4 py-4 max-w-lg mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
-              key={showMedications ? 'medications' : showAbout ? 'about' : activeTab}
+              key={showMedicationSetup ? 'med-setup' : showMedications ? 'medications' : showAbout ? 'about' : activeTab}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -145,7 +162,7 @@ const Index = () => {
         </main>
 
         {/* Bottom Navigation */}
-        <BottomNav activeTab={activeTab} onTabChange={(tab) => { setShowAbout(false); setShowMedications(false); setActiveTab(tab); }} />
+        <BottomNav activeTab={activeTab} onTabChange={(tab) => { setShowAbout(false); setShowMedications(false); setShowMedicationSetup(false); setActiveTab(tab); }} />
       </div>
 
       {/* Event Form Modal */}
