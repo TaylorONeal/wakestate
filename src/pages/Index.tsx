@@ -10,6 +10,7 @@ import { AboutScreen } from '@/components/AboutScreen';
 import { MedicationsScreen } from '@/components/MedicationsScreen';
 import { MedicationSetup } from '@/components/MedicationSetup';
 import { ExportScreen } from '@/components/ExportScreen';
+import { FeedbackScreen } from '@/components/FeedbackScreen';
 import { EventForm } from '@/components/EventForm';
 import { Onboarding } from '@/components/Onboarding';
 import { getCheckIns, getEvents, getMedicationConfig } from '@/lib/storage';
@@ -22,6 +23,7 @@ const Index = () => {
   const [showMedications, setShowMedications] = useState(false);
   const [showMedicationSetup, setShowMedicationSetup] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [checkInCount, setCheckInCount] = useState(0);
   const [eventCount, setEventCount] = useState(0);
@@ -48,6 +50,10 @@ const Index = () => {
   };
 
   const renderScreen = () => {
+    if (showFeedback) {
+      return <FeedbackScreen onBack={() => setShowFeedback(false)} />;
+    }
+
     if (showExport) {
       return <ExportScreen onBack={() => setShowExport(false)} />;
     }
@@ -69,7 +75,15 @@ const Index = () => {
     }
 
     if (showAbout) {
-      return <AboutScreen onBack={() => setShowAbout(false)} />;
+      return (
+        <AboutScreen 
+          onBack={() => setShowAbout(false)} 
+          onNavigateToFeedback={() => {
+            setShowAbout(false);
+            setShowFeedback(true);
+          }}
+        />
+      );
     }
 
     switch (activeTab) {
@@ -111,6 +125,7 @@ const Index = () => {
   };
 
   const getTitle = () => {
+    if (showFeedback) return 'Feedback';
     if (showExport) return 'Export & Reports';
     if (showMedicationSetup) return 'Set Up Medications';
     if (showMedications) return 'Medications';
@@ -177,7 +192,7 @@ const Index = () => {
         <main className="px-4 py-4 max-w-lg mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
-              key={showExport ? 'export' : showMedicationSetup ? 'med-setup' : showMedications ? 'medications' : showAbout ? 'about' : activeTab}
+              key={showFeedback ? 'feedback' : showExport ? 'export' : showMedicationSetup ? 'med-setup' : showMedications ? 'medications' : showAbout ? 'about' : activeTab}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -189,7 +204,7 @@ const Index = () => {
         </main>
 
         {/* Bottom Navigation */}
-        <BottomNav activeTab={activeTab} onTabChange={(tab) => { setShowAbout(false); setShowMedications(false); setShowMedicationSetup(false); setShowExport(false); setActiveTab(tab); }} />
+        <BottomNav activeTab={activeTab} onTabChange={(tab) => { setShowAbout(false); setShowMedications(false); setShowMedicationSetup(false); setShowExport(false); setShowFeedback(false); setActiveTab(tab); }} />
       </div>
 
       {/* Event Form Modal */}
