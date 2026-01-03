@@ -42,7 +42,7 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
         </motion.button>
       )}
 
-      {/* What WakeTrack Is */}
+      {/* What WakeState Is */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -52,18 +52,18 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
           <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
             <Info className="w-5 h-5 text-primary" />
           </div>
-          <h2 className="text-lg font-semibold text-foreground">What WakeTrack Is</h2>
+          <h2 className="text-lg font-semibold text-foreground">What WakeState Is</h2>
         </div>
         
         <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
           <p>
-            WakeTrack is a <strong className="text-foreground">personal tracking and pattern-recognition tool</strong> designed specifically for people living with narcolepsy.
+            WakeState is a <strong className="text-foreground">personal tracking and pattern-recognition tool</strong> designed specifically for people living with narcolepsy.
           </p>
           <p>
             It helps you log your daily experiences — from sleepiness and cognitive fog to cataplexy events and naps — so you can spot patterns over time.
           </p>
           <p className="text-xs border-l-2 border-primary/50 pl-3 italic">
-            WakeTrack is not a diagnostic tool and does not provide medical advice. Always consult with your healthcare team about your symptoms.
+            WakeState is not a diagnostic tool and does not provide medical advice. Always consult with your healthcare team about your symptoms.
           </p>
         </div>
       </motion.section>
@@ -147,7 +147,7 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
         </div>
 
         <p className="text-xs text-muted-foreground text-center mt-4 italic">
-          WakeTrack has no affiliation with any organization listed.
+          WakeState has no affiliation with any organization listed.
         </p>
       </motion.section>
 
@@ -184,7 +184,7 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
         </div>
         
         <p className="text-sm text-muted-foreground leading-relaxed">
-          I built WakeTrack because it could help me better understand my own narcolepsy and help others in the communities I'm part of. If it helps you notice patterns or explain your experience more clearly, that's the goal.
+          I built WakeState because it could help me better understand my own narcolepsy and help others in the communities I'm part of. If it helps you notice patterns or explain your experience more clearly, that's the goal.
         </p>
       </motion.section>
 
@@ -195,7 +195,7 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
         transition={{ delay: 0.5 }}
         className="text-center text-xs text-muted-foreground"
       >
-        WakeTrack v1.0 • Not a medical device
+        WakeState v1.0 • Not a medical device
       </motion.p>
     </div>
   );

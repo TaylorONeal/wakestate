@@ -63,7 +63,7 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications }: S
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `waketrack-export-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `wakestate-export-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
     
@@ -80,7 +80,7 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications }: S
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `waketrack-checkins-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `wakestate-checkins-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     
@@ -212,7 +212,7 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications }: S
           <div className="flex items-center gap-3">
             <Info className="w-5 h-5 text-primary" />
             <div className="text-left">
-              <h2 className="text-lg font-semibold">About WakeTrack</h2>
+              <h2 className="text-lg font-semibold">About WakeState</h2>
               <p className="text-sm text-muted-foreground">Resources, how to use, and more</p>
             </div>
           </div>
@@ -241,7 +241,7 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications }: S
             <AlertDialogTitle>Import data</AlertDialogTitle>
             <AlertDialogDescription>
               This will merge imported data with your existing data. 
-              Select a WakeTrack JSON export file.
+              Select a WakeState JSON export file.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
