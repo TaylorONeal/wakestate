@@ -27,7 +27,7 @@ export function useSaveConfirmation() {
     // Auto-hide after animation completes
     setTimeout(() => {
       setState(prev => ({ ...prev, isVisible: false }));
-    }, 1200);
+    }, 1800);
   }, []);
 
   const hide = useCallback(() => {
