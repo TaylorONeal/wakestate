@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { HumanChallenge } from './HumanChallenge';
 
 interface FeedbackScreenProps {
   onBack: () => void;
@@ -42,6 +43,12 @@ const ISSUE_TYPES = [
   { value: 'other', label: 'Other' },
 ];
 
+interface ChallengeData {
+  type: string;
+  answer: number;
+  expected: number;
+}
+
 export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
   const { toast } = useToast();
   const [userType, setUserType] = useState('');
@@ -49,8 +56,18 @@ export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
   const [issueType, setIssueType] = useState('');
   const [otherDetails, setOtherDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [challengeData, setChallengeData] = useState<ChallengeData | null>(null);
 
   const showOtherField = issueType === 'other' || appSection === 'other' || userType === 'other';
+  const isFormValid = userType && appSection && issueType && challengeData !== null;
+
+  const handleChallengeVerified = (data: ChallengeData) => {
+    setChallengeData(data);
+  };
+
+  const handleChallengeReset = () => {
+    setChallengeData(null);
+  };
 
   const handleSubmit = async () => {
     if (!userType || !appSection || !issueType) {
@@ -71,17 +88,35 @@ export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
       return;
     }
 
+    if (!challengeData) {
+      toast({
+        title: 'Please complete verification',
+        description: 'Solve the quick math question to submit.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from('feedback').insert({
-        user_type: userType,
-        app_section: appSection,
-        issue_type: issueType,
-        other_details: otherDetails.trim() || null,
+      const { data, error } = await supabase.functions.invoke('submit-feedback', {
+        body: {
+          user_type: userType,
+          app_section: appSection,
+          issue_type: issueType,
+          other_details: otherDetails.trim() || null,
+          challenge_type: challengeData.type,
+          challenge_answer: challengeData.answer,
+          expected_answer: challengeData.expected,
+        },
       });
 
       if (error) throw error;
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
       toast({
         title: 'Feedback submitted!',
@@ -93,14 +128,18 @@ export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
       setAppSection('');
       setIssueType('');
       setOtherDetails('');
+      setChallengeData(null);
       
       // Go back after short delay
       setTimeout(() => onBack(), 1500);
     } catch (error) {
       console.error('Feedback submission error:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Please try again later.';
+      
       toast({
         title: 'Submission failed',
-        description: 'Please try again later.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -210,10 +249,16 @@ export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
           </p>
         </div>
 
+        {/* Human Challenge */}
+        <HumanChallenge 
+          onVerified={handleChallengeVerified}
+          onReset={handleChallengeReset}
+        />
+
         {/* Submit Button */}
         <Button
           onClick={handleSubmit}
-          disabled={isSubmitting || !userType || !appSection || !issueType}
+          disabled={isSubmitting || !isFormValid}
           className="w-full"
           size="lg"
         >
