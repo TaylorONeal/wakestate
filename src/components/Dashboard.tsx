@@ -382,6 +382,19 @@ export function Dashboard({ refreshTrigger }: DashboardProps) {
           </p>
         </motion.section>
       )}
+
+      {/* Local Storage Notice */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="section-card border-border/30 bg-surface-2/50"
+      >
+        <p className="text-xs text-muted-foreground text-center leading-relaxed">
+          📱 Your data is stored locally on this device only.{' '}
+          <span className="text-foreground font-medium">Export regularly</span> in Settings → Export & Reports to keep a backup.
+        </p>
+      </motion.section>
     </div>
   );
 }

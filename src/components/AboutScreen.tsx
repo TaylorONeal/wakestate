@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ExternalLink, Info, Heart, BookOpen, Shield, ChevronLeft } from 'lucide-react';
+import { ExternalLink, Info, Heart, BookOpen, Shield, ChevronLeft, Coffee } from 'lucide-react';
 
 interface AboutScreenProps {
   onBack?: () => void;
@@ -183,9 +183,21 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
           <h2 className="text-lg font-semibold text-foreground">About the Creator</h2>
         </div>
         
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm text-muted-foreground leading-relaxed mb-4">
           I built WakeState because it could help me better understand my own narcolepsy and help others in the communities I'm part of. If it helps you notice patterns or explain your experience more clearly, that's the goal.
         </p>
+
+        <a
+          href="https://buymeacoffee.com/tayloroneal"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full p-3 rounded-xl bg-[#FFDD00]/10 hover:bg-[#FFDD00]/20 border border-[#FFDD00]/30 transition-colors group"
+        >
+          <Coffee className="w-5 h-5 text-[#FFDD00]" />
+          <span className="text-sm font-medium text-[#FFDD00] group-hover:text-[#FFDD00]">
+            Buy me a coffee ☕
+          </span>
+        </a>
       </motion.section>
 
       {/* Version */}
