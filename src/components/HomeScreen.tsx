@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Brain, Activity, TrendingUp, Info, X, Moon } from 'lucide-react';
 import { NARCOLEPSY_DOMAIN_CONFIG, OVERLAPPING_DOMAIN_CONFIG } from '@/types';
 import { MedicationsToday } from '@/components/MedicationsToday';
+import { InstallBanner } from '@/components/InstallBanner';
 
 interface HomeScreenProps {
   onLogWakeState: () => void;
@@ -47,6 +48,9 @@ export function HomeScreen({ onLogWakeState, onLogEvent, onMedicationSetup, chec
 
   return (
     <div className="space-y-6 pb-24">
+      {/* Install Banner */}
+      <InstallBanner />
+
       {/* App Intro */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

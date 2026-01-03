@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Info, ChevronRight, Pill, FileText } from 'lucide-react';
+import { Shield, Info, ChevronRight, Pill, FileText, Smartphone, Check, Coffee } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import {
@@ -8,6 +8,8 @@ import {
   saveSettings,
 } from '@/lib/storage';
 import { type AppSettings } from '@/types';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
+import { InstallInstructionsModal } from '@/components/InstallInstructionsModal';
 
 interface SettingsScreenProps {
   onNavigateToAbout?: () => void;
@@ -20,6 +22,8 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
     showContextByDefault: false,
     theme: 'midnight',
   });
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const { canInstall, isInstalled, promptInstall } = usePWAInstall();
 
   useEffect(() => {
     loadSettings();
@@ -37,6 +41,14 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
     const updated = { ...settings, [key]: value };
     setSettings(updated);
     await saveSettings(updated);
+  };
+
+  const handleInstallClick = async () => {
+    if (canInstall) {
+      await promptInstall();
+    } else {
+      setShowInstallModal(true);
+    }
   };
 
   return (
@@ -58,6 +70,30 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
           />
         </div>
       </section>
+
+      {/* Install WakeState */}
+      <motion.button
+        onClick={handleInstallClick}
+        className="section-card w-full flex items-center justify-between hover:bg-surface-3 transition-colors"
+        whileTap={{ scale: 0.98 }}
+      >
+        <div className="flex items-center gap-3">
+          {isInstalled ? (
+            <Check className="w-5 h-5 text-green-500" />
+          ) : (
+            <Smartphone className="w-5 h-5 text-primary" />
+          )}
+          <div className="text-left">
+            <h2 className="text-lg font-semibold">
+              {isInstalled ? 'WakeState Installed' : 'Install WakeState'}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {isInstalled ? 'Running as an app' : 'Add to home screen'}
+            </p>
+          </div>
+        </div>
+        {!isInstalled && <ChevronRight className="w-5 h-5 text-muted-foreground" />}
+      </motion.button>
 
       {/* Export & Reports Link */}
       {onNavigateToExport && (
@@ -126,10 +162,33 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
         </motion.button>
       )}
 
+      {/* Buy Me a Coffee */}
+      <a
+        href="https://buymeacoffee.com/tayloroneal"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="section-card flex items-center justify-between hover:bg-surface-3 transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <Coffee className="w-5 h-5 text-[#FFDD00]" />
+          <div className="text-left">
+            <h2 className="text-lg font-semibold group-hover:text-[#FFDD00] transition-colors">Support WakeState</h2>
+            <p className="text-sm text-muted-foreground">Buy me a coffee ☕</p>
+          </div>
+        </div>
+        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+      </a>
+
       {/* Version */}
       <p className="text-xs text-muted-foreground text-center">
         Version 1.0 • Not a medical device
       </p>
+
+      {/* Install Instructions Modal */}
+      <InstallInstructionsModal 
+        isOpen={showInstallModal} 
+        onClose={() => setShowInstallModal(false)} 
+      />
     </div>
   );
 }
