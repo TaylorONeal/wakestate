@@ -9,6 +9,7 @@ import { SettingsScreen } from '@/components/SettingsScreen';
 import { AboutScreen } from '@/components/AboutScreen';
 import { MedicationsScreen } from '@/components/MedicationsScreen';
 import { MedicationSetup } from '@/components/MedicationSetup';
+import { ExportScreen } from '@/components/ExportScreen';
 import { EventForm } from '@/components/EventForm';
 import { Onboarding } from '@/components/Onboarding';
 import { getCheckIns, getEvents, getMedicationConfig } from '@/lib/storage';
@@ -20,6 +21,7 @@ const Index = () => {
   const [showAbout, setShowAbout] = useState(false);
   const [showMedications, setShowMedications] = useState(false);
   const [showMedicationSetup, setShowMedicationSetup] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [checkInCount, setCheckInCount] = useState(0);
   const [eventCount, setEventCount] = useState(0);
@@ -46,6 +48,10 @@ const Index = () => {
   };
 
   const renderScreen = () => {
+    if (showExport) {
+      return <ExportScreen onBack={() => setShowExport(false)} />;
+    }
+
     if (showMedicationSetup) {
       return (
         <MedicationSetup
@@ -96,6 +102,7 @@ const Index = () => {
           <SettingsScreen
             onNavigateToAbout={() => setShowAbout(true)}
             onNavigateToMedications={() => setShowMedications(true)}
+            onNavigateToExport={() => setShowExport(true)}
           />
         );
       default:
@@ -104,6 +111,7 @@ const Index = () => {
   };
 
   const getTitle = () => {
+    if (showExport) return 'Export & Reports';
     if (showMedicationSetup) return 'Set Up Medications';
     if (showMedications) return 'Medications';
     if (showAbout) return 'About';
@@ -169,7 +177,7 @@ const Index = () => {
         <main className="px-4 py-4 max-w-lg mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
-              key={showMedicationSetup ? 'med-setup' : showMedications ? 'medications' : showAbout ? 'about' : activeTab}
+              key={showExport ? 'export' : showMedicationSetup ? 'med-setup' : showMedications ? 'medications' : showAbout ? 'about' : activeTab}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -181,7 +189,7 @@ const Index = () => {
         </main>
 
         {/* Bottom Navigation */}
-        <BottomNav activeTab={activeTab} onTabChange={(tab) => { setShowAbout(false); setShowMedications(false); setShowMedicationSetup(false); setActiveTab(tab); }} />
+        <BottomNav activeTab={activeTab} onTabChange={(tab) => { setShowAbout(false); setShowMedications(false); setShowMedicationSetup(false); setShowExport(false); setActiveTab(tab); }} />
       </div>
 
       {/* Event Form Modal */}
