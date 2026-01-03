@@ -7,7 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { TagGroup } from '@/components/TagChip';
 import { DateTimePicker } from '@/components/DateTimePicker';
+import { SaveConfirmation } from '@/components/SaveConfirmation';
 import { useToast } from '@/hooks/use-toast';
+import { useSaveConfirmation } from '@/hooks/useSaveConfirmation';
 import { saveEvent } from '@/lib/storage';
 import { EMOTION_TAGS, ACTIVITY_TAGS, type TrackingEvent, type SeverityTag } from '@/types';
 import {
@@ -29,6 +31,7 @@ interface CataplextyEventFormProps {
 
 export function CataplextyEventForm({ onClose, onBack, onSave }: CataplextyEventFormProps) {
   const { toast } = useToast();
+  const saveConfirmation = useSaveConfirmation();
   const [dateTime, setDateTime] = useState(new Date());
   const [severity, setSeverity] = useState<SeverityTag | undefined>();
   const [emotionTags, setEmotionTags] = useState<string[]>([]);
@@ -91,6 +94,9 @@ export function CataplextyEventForm({ onClose, onBack, onSave }: CataplextyEvent
 
     await saveEvent(event);
     
+    // Trigger save animation (wake-related event, always new)
+    saveConfirmation.trigger('new', 'wake');
+    
     toast({
       title: 'Cataplexy event logged',
       description: `${severity} episode recorded`,
@@ -98,7 +104,9 @@ export function CataplextyEventForm({ onClose, onBack, onSave }: CataplextyEvent
 
     setIsSaving(false);
     onSave();
-    onClose();
+    
+    // Small delay for animation
+    setTimeout(() => onClose(), 400);
   };
 
   return (
@@ -220,6 +228,13 @@ export function CataplextyEventForm({ onClose, onBack, onSave }: CataplextyEvent
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Save Confirmation Animation */}
+      <SaveConfirmation
+        isVisible={saveConfirmation.isVisible}
+        saveType={saveConfirmation.saveType}
+        logType={saveConfirmation.logType}
+      />
     </>
   );
 }

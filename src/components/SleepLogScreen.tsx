@@ -8,7 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SaveConfirmation } from '@/components/SaveConfirmation';
 import { toast } from 'sonner';
+import { useSaveConfirmation } from '@/hooks/useSaveConfirmation';
 import { v4 as uuidv4 } from 'uuid';
 import { getSleepEntryForDate, saveSleepEntry } from '@/lib/storage';
 import type { SleepEntry, WakeupCategory } from '@/types';
@@ -22,6 +24,7 @@ interface SleepLogScreenProps {
 export function SleepLogScreen({ onBack, onSave }: SleepLogScreenProps) {
   // Last night's date
   const lastNight = format(subDays(new Date(), 1), 'yyyy-MM-dd');
+  const saveConfirmation = useSaveConfirmation();
   
   const [isEditing, setIsEditing] = useState(false);
   const [existingEntry, setExistingEntry] = useState<SleepEntry | null>(null);
@@ -85,9 +88,17 @@ export function SleepLogScreen({ onBack, onSave }: SleepLogScreenProps) {
     };
 
     await saveSleepEntry(entry);
+    
+    // Trigger save animation (sleep-related, new or edit)
+    saveConfirmation.trigger(isEditing ? 'edit' : 'new', 'sleep');
+    
     toast.success("Last night's sleep logged.");
     onSave();
-    onBack();
+    
+    // Small delay to show animation before navigating
+    setTimeout(() => {
+      onBack();
+    }, 400);
   };
 
   const adjustTime = (field: 'hours' | 'minutes', delta: number) => {
@@ -304,6 +315,13 @@ export function SleepLogScreen({ onBack, onSave }: SleepLogScreenProps) {
           {isEditing ? 'Update Sleep Log' : 'Save Sleep Log'}
         </Button>
       </motion.div>
+
+      {/* Save Confirmation Animation */}
+      <SaveConfirmation
+        isVisible={saveConfirmation.isVisible}
+        saveType={saveConfirmation.saveType}
+        logType={saveConfirmation.logType}
+      />
     </div>
   );
 }
