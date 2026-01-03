@@ -1,1 +1,4 @@
 project_id = "<project-ref>"
+
+[functions.submit-feedback]
+verify_jwt = false
