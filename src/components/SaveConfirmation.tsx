@@ -47,10 +47,10 @@ export function SaveConfirmation({ isVisible, saveType, logType }: SaveConfirmat
   const displayText = isMedication ? '⚡' : (isNew ? 'ZZzzz' : 'zz');
   
   // Animation durations - satisfying timing with ASMR-like fade
-  const textDuration = isNew ? 1.1 : 0.8;
-  const cloudDuration = isNew ? 0.9 : 0.6;
+  const textDuration = isNew ? 1.6 : 1.0;
+  const cloudDuration = isNew ? 1.3 : 0.9;
   const textDelay = 0;
-  const cloudDelay = isNew ? 0.15 : 0.1;
+  const cloudDelay = isNew ? 0.1 : 0.05;
 
   if (reducedMotion) {
     // Simple fade + checkmark for reduced motion
