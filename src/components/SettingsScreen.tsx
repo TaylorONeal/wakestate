@@ -237,20 +237,33 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Clear all tracking data?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete all check-ins, events, sleep logs, and medication records. 
-              This cannot be undone.
+            <AlertDialogDescription className="space-y-2">
+              <span className="block">
+                This will permanently delete all check-ins, events, sleep logs, and medication records. 
+                This cannot be undone.
+              </span>
+              {onNavigateToExport && (
+                <button
+                  onClick={() => {
+                    setShowClearDataDialog(false);
+                    onNavigateToExport();
+                  }}
+                  className="text-primary hover:underline underline-offset-2"
+                >
+                  Export your data first →
+                </button>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           
-          <div className="py-2">
+          <div className="pt-2">
             <SlideToConfirm 
               onConfirm={handleClearAllData}
               label="Slide to confirm it's gonna go poof"
             />
           </div>
           
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-2">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
           </div>
         </AlertDialogContent>
