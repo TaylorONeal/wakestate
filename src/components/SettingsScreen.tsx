@@ -12,13 +12,12 @@ import {
 import { type AppSettings } from '@/types';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { InstallInstructionsModal } from '@/components/InstallInstructionsModal';
+import { SlideToConfirm } from '@/components/SlideToConfirm';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
@@ -240,18 +239,20 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
             <AlertDialogTitle>Clear all tracking data?</AlertDialogTitle>
             <AlertDialogDescription>
               This will permanently delete all check-ins, events, sleep logs, and medication records. 
-              This cannot be undone. Consider exporting your data first.
+              This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          
+          <div className="py-2">
+            <SlideToConfirm 
+              onConfirm={handleClearAllData}
+              label="Slide to confirm it's gonna go poof"
+            />
+          </div>
+          
+          <div className="flex justify-end">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleClearAllData}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Clear All Data
-            </AlertDialogAction>
-          </AlertDialogFooter>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>
