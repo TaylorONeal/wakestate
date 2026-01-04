@@ -65,6 +65,10 @@ const Index = () => {
       return <FeedbackScreen onBack={() => setShowFeedback(false)} />;
     }
 
+    if (showExport) {
+      return <ExportScreen onBack={() => setShowExport(false)} />;
+    }
+
     if (showMedicationSetup) {
       return (
         <MedicationSetup
