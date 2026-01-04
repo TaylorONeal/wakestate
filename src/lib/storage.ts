@@ -24,6 +24,17 @@ export const defaultSettings: AppSettings = {
   theme: 'midnight',
 };
 
+// Clear all data
+export async function clearAllData(): Promise<void> {
+  await del(CHECKINS_KEY);
+  await del(EVENTS_KEY);
+  await del(MEDICATIONS_KEY);
+  await del(MED_CONFIG_KEY);
+  await del(MED_ADMIN_KEY);
+  await del(SLEEP_ENTRIES_KEY);
+  // Keep settings - user preferences should remain
+}
+
 // Check-ins
 export async function getCheckIns(): Promise<CheckIn[]> {
   try {
