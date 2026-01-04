@@ -1,15 +1,28 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Info, ChevronRight, Pill, FileText, Smartphone, Check, Coffee } from 'lucide-react';
+import { Shield, Info, ChevronRight, Pill, FileText, Smartphone, Check, Coffee, Trash2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import {
   getSettings,
   saveSettings,
+  clearAllData,
 } from '@/lib/storage';
 import { type AppSettings } from '@/types';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { InstallInstructionsModal } from '@/components/InstallInstructionsModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 interface SettingsScreenProps {
   onNavigateToAbout?: () => void;
@@ -23,6 +36,7 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
     theme: 'midnight',
   });
   const [showInstallModal, setShowInstallModal] = useState(false);
+  const [showClearDataDialog, setShowClearDataDialog] = useState(false);
   const { canInstall, isInstalled, promptInstall } = usePWAInstall();
 
   useEffect(() => {
@@ -32,6 +46,14 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
   const loadSettings = async () => {
     const data = await getSettings();
     setSettings(data);
+  };
+
+  const handleClearAllData = async () => {
+    await clearAllData();
+    setShowClearDataDialog(false);
+    toast.success('All tracking data cleared');
+    // Reload the page to reset all state
+    window.location.reload();
   };
 
   const updateSetting = async <K extends keyof AppSettings>(
@@ -144,6 +166,27 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
         </p>
       </section>
 
+      {/* Clear Data */}
+      <section className="section-card space-y-4 border-destructive/30">
+        <div className="flex items-center gap-3">
+          <Trash2 className="w-5 h-5 text-destructive" />
+          <h2 className="text-lg font-semibold">Clear Data</h2>
+        </div>
+        
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Delete all check-ins, events, sleep logs, and medication records. Your preferences will be kept.
+        </p>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowClearDataDialog(true)}
+          className="text-destructive border-destructive/50 hover:bg-destructive/10"
+        >
+          Clear All Tracking Data
+        </Button>
+      </section>
+
       {/* About Link */}
       {onNavigateToAbout && (
         <motion.button
@@ -189,6 +232,28 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
         isOpen={showInstallModal} 
         onClose={() => setShowInstallModal(false)} 
       />
+
+      {/* Clear Data Confirmation */}
+      <AlertDialog open={showClearDataDialog} onOpenChange={setShowClearDataDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear all tracking data?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all check-ins, events, sleep logs, and medication records. 
+              This cannot be undone. Consider exporting your data first.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleClearAllData}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Clear All Data
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
