@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format, parseISO, subDays, subMonths, subYears, eachDayOfInterval, startOfDay, endOfDay, isWithinInterval, startOfWeek, endOfWeek, eachHourOfInterval, getHours } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 'recharts';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { getEvents, getCheckIns, getSleepEntries } from '@/lib/storage';
 import { Moon, Zap, TrendingUp, Clock, BedDouble, FileText } from 'lucide-react';
 import { NARCOLEPSY_DOMAIN_CONFIG, type TrackingEvent, type CheckIn, type NarcolepsyDomainKey, type SleepEntry } from '@/types';
@@ -20,12 +21,14 @@ export function Dashboard({ refreshTrigger, onNavigateToExport }: DashboardProps
   const [sleepEntries, setSleepEntries] = useState<SleepEntry[]>([]);
   const [napPeriod, setNapPeriod] = useState<ViewPeriod>('week');
   const [cataplextyPeriod, setCataplextyPeriod] = useState<ViewPeriod>('week');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadData();
   }, [refreshTrigger]);
 
   const loadData = async () => {
+    setIsLoading(true);
     const [eventsData, checkInsData, sleepData] = await Promise.all([
       getEvents(),
       getCheckIns(),
@@ -34,6 +37,7 @@ export function Dashboard({ refreshTrigger, onNavigateToExport }: DashboardProps
     setEvents(eventsData);
     setCheckIns(checkInsData);
     setSleepEntries(sleepData);
+    setIsLoading(false);
   };
 
   const getDateRange = (period: ViewPeriod) => {
@@ -183,6 +187,52 @@ export function Dashboard({ refreshTrigger, onNavigateToExport }: DashboardProps
   };
 
   const hasAnyData = events.length > 0 || checkIns.length > 0;
+
+  // Loading state with skeleton
+  if (isLoading) {
+    return (
+      <div className="space-y-6 pb-24">
+        {/* Naps Card Skeleton */}
+        <div className="section-card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-10 h-10 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            </div>
+            <Skeleton className="h-8 w-24 rounded-lg" />
+          </div>
+          <Skeleton className="h-32 w-full rounded-lg" />
+        </div>
+
+        {/* Cataplexy Card Skeleton */}
+        <div className="section-card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-10 h-10 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            </div>
+            <Skeleton className="h-8 w-24 rounded-lg" />
+          </div>
+          <Skeleton className="h-32 w-full rounded-lg" />
+        </div>
+
+        {/* Summary Skeleton */}
+        <div className="section-card">
+          <Skeleton className="h-4 w-32 mb-4" />
+          <div className="grid grid-cols-2 gap-3">
+            <Skeleton className="h-20 rounded-xl" />
+            <Skeleton className="h-20 rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!hasAnyData) {
     return (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Brain, Activity, TrendingUp, Info, X, Moon, BedDouble } from 'lucide-react';
+import { Zap, Brain, Activity, TrendingUp, Info, X, Moon, BedDouble, Shield } from 'lucide-react';
 import { NARCOLEPSY_DOMAIN_CONFIG, OVERLAPPING_DOMAIN_CONFIG } from '@/types';
 import { MedicationsToday } from '@/components/MedicationsToday';
 import { InstallBanner } from '@/components/InstallBanner';
@@ -280,6 +280,20 @@ export function HomeScreen({ onLogWakeState, onLogEvent, onLogSleep, onMedicatio
         Quick 30-second check-ins throughout the day build the best patterns
       </motion.p>
 
+      {/* Privacy Badge */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+        className="flex items-center justify-center gap-2 py-2"
+      >
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
+          <Shield className="w-3 h-3 text-green-500" />
+          <span className="text-xs text-green-500/90 font-medium">Local-only</span>
+        </div>
+        <span className="text-xs text-muted-foreground">Your data never leaves this device</span>
+      </motion.div>
+
       {/* Legend Modal */}
       <AnimatePresence>
         {showLegend && (
@@ -313,22 +327,22 @@ export function HomeScreen({ onLogWakeState, onLogEvent, onLogSleep, onMedicatio
                   <Zap className="w-4 h-4" />
                   Narcolepsy-Related
                 </h4>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {Object.entries(NARCOLEPSY_DOMAIN_CONFIG).map(([key, config]) => (
-                    <div 
-                      key={key} 
-                      className="group relative flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-surface-3/50 transition-colors cursor-default"
+                    <div
+                      key={key}
+                      className="flex flex-col gap-1 p-2 -mx-2 rounded-lg"
                     >
-                      <div
-                        className={`w-3 h-3 rounded-full flex-shrink-0 bg-${config.color}`}
-                      />
-                      <span className="text-sm text-foreground">{config.label}</span>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-3 h-3 rounded-full flex-shrink-0 bg-${config.color}`}
+                        />
+                        <span className="text-sm font-medium text-foreground">{config.label}</span>
+                      </div>
                       {config.description && (
-                        <div className="absolute left-0 right-0 top-full z-10 hidden group-hover:block pt-1">
-                          <div className="bg-surface-2 border border-border/50 rounded-lg p-2 text-xs text-muted-foreground shadow-lg">
-                            {config.description}
-                          </div>
-                        </div>
+                        <p className="text-xs text-muted-foreground ml-6 leading-relaxed">
+                          {config.description}
+                        </p>
                       )}
                     </div>
                   ))}
@@ -341,22 +355,22 @@ export function HomeScreen({ onLogWakeState, onLogEvent, onLogSleep, onMedicatio
                   <Activity className="w-4 h-4" />
                   Other / Overlapping
                 </h4>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {Object.entries(OVERLAPPING_DOMAIN_CONFIG).map(([key, config]) => (
-                    <div 
-                      key={key} 
-                      className="group relative flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-surface-3/50 transition-colors cursor-default"
+                    <div
+                      key={key}
+                      className="flex flex-col gap-1 p-2 -mx-2 rounded-lg"
                     >
-                      <div
-                        className={`w-3 h-3 rounded-full flex-shrink-0 bg-${config.color}`}
-                      />
-                      <span className="text-sm text-foreground">{config.label}</span>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-3 h-3 rounded-full flex-shrink-0 bg-${config.color}`}
+                        />
+                        <span className="text-sm font-medium text-foreground">{config.label}</span>
+                      </div>
                       {config.description && (
-                        <div className="absolute left-0 right-0 top-full z-10 hidden group-hover:block pt-1">
-                          <div className="bg-surface-2 border border-border/50 rounded-lg p-2 text-xs text-muted-foreground shadow-lg">
-                            {config.description}
-                          </div>
-                        </div>
+                        <p className="text-xs text-muted-foreground ml-6 leading-relaxed">
+                          {config.description}
+                        </p>
                       )}
                     </div>
                   ))}
