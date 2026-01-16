@@ -19,8 +19,8 @@ const tabs: { id: TabId; label: string; icon: typeof Brain }[] = [
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50 safe-area-bottom">
-      <div className="flex items-center justify-around h-16 px-2 max-w-lg mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50">
+      <div className="flex items-center justify-around h-16 px-2 max-w-lg mx-auto" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
