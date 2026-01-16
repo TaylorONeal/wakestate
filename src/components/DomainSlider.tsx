@@ -149,6 +149,10 @@ export function DomainSlider({ domainKey, config, value, onChange }: DomainSlide
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer touch-pan-y"
           style={{ touchAction: 'pan-y' }}
           aria-label={config.label}
+          aria-valuemin={1}
+          aria-valuemax={5}
+          aria-valuenow={value}
+          aria-valuetext={`Level ${value}: ${getAnchorText(value)}`}
         />
       </div>
     </div>

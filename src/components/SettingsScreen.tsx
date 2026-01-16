@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Info, ChevronRight, Pill, FileText, Smartphone, Check, Coffee, Trash2 } from 'lucide-react';
+import { Shield, Info, ChevronRight, Pill, FileText, Smartphone, Check, Coffee, Trash2, Download, AlertTriangle } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -152,17 +152,47 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
         </motion.button>
       )}
 
-      {/* Privacy */}
+      {/* Privacy & Data */}
       <section className="section-card space-y-4">
         <div className="flex items-center gap-3">
-          <Shield className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold">Privacy</h2>
+          <Shield className="w-5 h-5 text-green-500" />
+          <h2 className="text-lg font-semibold">Privacy & Data</h2>
         </div>
-        
+
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20">
+          <Shield className="w-4 h-4 text-green-500 flex-shrink-0" />
+          <p className="text-sm text-green-500/90">
+            100% local storage - your data never leaves this device
+          </p>
+        </div>
+
         <p className="text-sm text-muted-foreground leading-relaxed">
-          All your data is stored locally on this device. Nothing is sent to any server. 
-          Your tracking data never leaves your phone unless you export it.
+          All your check-ins, events, and medication records are stored only on this device.
+          Nothing is sent to any server. Your health data is completely private.
         </p>
+
+        {/* Backup Reminder */}
+        <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-2">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+            <p className="text-sm font-medium text-amber-500/90">Back up your data</p>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Since data is stored only on this device, it will be lost if you clear browser data,
+            reinstall the app, or switch devices. Export regularly to keep a backup.
+          </p>
+          {onNavigateToExport && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onNavigateToExport}
+              className="mt-2 text-amber-600 border-amber-500/30 hover:bg-amber-500/10"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export Data Now
+            </Button>
+          )}
+        </div>
       </section>
 
       {/* Clear Data */}
