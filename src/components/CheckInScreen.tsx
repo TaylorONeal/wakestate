@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
@@ -9,9 +9,9 @@ import { DomainSlider } from '@/components/DomainSlider';
 import { TagGroup } from '@/components/TagChip';
 import { DateTimePicker } from '@/components/DateTimePicker';
 import { SaveConfirmation } from '@/components/SaveConfirmation';
-import { useToast } from '@/hooks/use-toast';
 import { useSaveConfirmation } from '@/hooks/useSaveConfirmation';
-import { saveCheckIn, getSettings } from '@/lib/storage';
+import { saveCheckIn, deleteCheckIn, getSettings } from '@/lib/storage';
+import { toast } from 'sonner';
 import {
   NARCOLEPSY_DOMAIN_CONFIG,
   OVERLAPPING_DOMAIN_CONFIG,
@@ -90,8 +90,9 @@ interface CheckInScreenProps {
 }
 
 export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack }: CheckInScreenProps) {
-  const { toast } = useToast();
   const saveConfirmation = useSaveConfirmation();
+  const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSavedIdRef = useRef<string | null>(null);
   const [dateTime, setDateTime] = useState(new Date());
   const [narcolepsyDomains, setNarcolepsyDomains] = useState<NarcolepsyDomains>(defaultNarcolepsyDomains);
   const [overlappingDomains, setOverlappingDomains] = useState<OverlappingDomains>(defaultOverlappingDomains);
@@ -118,8 +119,7 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
         setShowNote(draft.note.length > 0);
         setOverlappingExpanded(draft.overlappingExpanded);
         setDraftRestored(true);
-        toast({
-          title: 'Draft restored',
+        toast.info('Draft restored', {
           description: 'Your previous check-in was recovered',
         });
       } catch (e) {
@@ -182,9 +182,10 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
 
   const handleSave = async () => {
     setIsSaving(true);
-    
+
+    const checkInId = uuidv4();
     const checkIn: CheckIn = {
-      id: uuidv4(),
+      id: checkInId,
       createdAt: new Date().toISOString(),
       localDate: format(dateTime, 'yyyy-MM-dd'),
       localTime: format(dateTime, 'HH:mm'),
@@ -198,21 +199,40 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     };
 
     await saveCheckIn(checkIn);
-    
+    lastSavedIdRef.current = checkInId;
+
     // Trigger save animation (wake-related, always new for check-ins)
     saveConfirmation.trigger('new', 'wake');
-    
-    toast({
-      title: 'Check-in saved',
+
+    // Show toast with undo action
+    toast.success('Check-in saved', {
       description: `Recorded at ${format(dateTime, 'h:mm a')}`,
+      action: {
+        label: 'Undo',
+        onClick: async () => {
+          // Cancel navigation if still pending
+          if (navigationTimeoutRef.current) {
+            clearTimeout(navigationTimeoutRef.current);
+            navigationTimeoutRef.current = null;
+          }
+          // Delete the saved check-in
+          if (lastSavedIdRef.current) {
+            await deleteCheckIn(lastSavedIdRef.current);
+            lastSavedIdRef.current = null;
+            toast.info('Check-in removed');
+            onSave(); // Refresh data
+          }
+        },
+      },
+      duration: 5000, // 5 seconds to undo
     });
 
     handleReset();
     setIsSaving(false);
     onSave();
-    
+
     // Delay navigation to let animation complete
-    setTimeout(() => {
+    navigationTimeoutRef.current = setTimeout(() => {
       onNavigateToTrends();
     }, 1600);
   };
