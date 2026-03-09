@@ -1,4 +1,7 @@
 project_id = "<project-ref>"
 
+[functions.get-challenge]
+verify_jwt = false
+
 [functions.submit-feedback]
 verify_jwt = false

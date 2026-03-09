@@ -174,7 +174,7 @@ export function HumanChallenge({ onVerified, onReset }: HumanChallengeProps) {
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-center text-sm text-green-400"
+          className="text-center text-sm text-accent-foreground"
         >
           ✓ Ready to submit!
         </motion.p>
