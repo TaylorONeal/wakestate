@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -45,10 +46,28 @@ const borderColorMap: Record<string, string> = {
   'domain-digestive': 'border-domain-digestive/50',
 };
 
+const glowColorMap: Record<string, string> = {
+  'domain-cataplexy': 'shadow-domain-cataplexy/20',
+  'domain-microsleeps': 'shadow-domain-microsleeps/20',
+  'domain-cognitive': 'shadow-domain-cognitive/20',
+  'domain-effort': 'shadow-domain-effort/20',
+  'domain-sleep-pressure': 'shadow-domain-sleep-pressure/20',
+  'domain-motor': 'shadow-domain-motor/20',
+  'domain-sensory': 'shadow-domain-sensory/20',
+  'domain-thermo': 'shadow-domain-thermo/20',
+  'domain-emotional': 'shadow-domain-emotional/20',
+  'domain-anxiety': 'shadow-domain-anxiety/20',
+  'domain-mood': 'shadow-domain-mood/20',
+  'domain-digestive': 'shadow-domain-digestive/20',
+};
+
 export function DomainSlider({ domainKey, config, value, onChange }: DomainSliderProps) {
+  const [isInteracting, setIsInteracting] = useState(false);
+  const [pulseKey, setPulseKey] = useState(0);
   const percentage = ((value - 1) / 4) * 100;
   const bgColor = colorMap[config.color] || 'bg-primary';
   const borderColor = borderColorMap[config.color] || 'border-primary/50';
+  const glowColor = glowColorMap[config.color] || 'shadow-primary/20';
 
   const getAnchorText = (val: number): string => {
     if (val <= 1.5) return config.anchors[1];
@@ -56,15 +75,16 @@ export function DomainSlider({ domainKey, config, value, onChange }: DomainSlide
     return config.anchors[5];
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseInt(e.target.value, 10);
-    onChange(newValue);
-    
-    // Trigger haptic feedback if available
-    if (navigator.vibrate) {
-      navigator.vibrate(10);
+    if (newValue !== value) {
+      onChange(newValue);
+      setPulseKey(prev => prev + 1);
+      if (navigator.vibrate) {
+        navigator.vibrate(10);
+      }
     }
-  };
+  }, [value, onChange]);
 
   return (
     <div className="space-y-2">
@@ -97,9 +117,10 @@ export function DomainSlider({ domainKey, config, value, onChange }: DomainSlide
         <AnimatePresence mode="wait">
           <motion.span
             key={value}
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4 }}
+            initial={{ opacity: 0, y: -4, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
             className="text-xs text-muted-foreground min-w-[100px] text-right"
           >
             {getAnchorText(value)}
@@ -107,7 +128,15 @@ export function DomainSlider({ domainKey, config, value, onChange }: DomainSlide
         </AnimatePresence>
       </div>
 
-      <div className={cn('relative h-14 rounded-xl overflow-hidden bg-surface-2 border', borderColor)}>
+      <motion.div
+        className={cn(
+          'relative h-14 rounded-xl overflow-hidden bg-surface-2 border transition-shadow duration-200',
+          borderColor,
+          isInteracting && `shadow-md ${glowColor}`
+        )}
+        animate={{ scale: isInteracting ? 1.01 : 1 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      >
         {/* Filled Track */}
         <motion.div
           className={cn('absolute inset-y-0 left-0 rounded-xl', bgColor)}
@@ -121,17 +150,17 @@ export function DomainSlider({ domainKey, config, value, onChange }: DomainSlide
         <div className="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
           {[1, 2, 3, 4, 5].map((num) => (
             <motion.div
-              key={num}
+              key={`${num}-${pulseKey}`}
               className={cn(
-                'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200',
+                'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors duration-150',
                 num <= value
                   ? cn('text-background', bgColor)
                   : 'bg-surface-3/50 text-muted-foreground'
               )}
               animate={{
-                scale: num === value ? 1.15 : 1,
+                scale: num === value ? 1.2 : num <= value ? 1.05 : 1,
               }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 25 }}
             >
               {num}
             </motion.div>
@@ -146,6 +175,9 @@ export function DomainSlider({ domainKey, config, value, onChange }: DomainSlide
           step={1}
           value={value}
           onChange={handleChange}
+          onPointerDown={() => setIsInteracting(true)}
+          onPointerUp={() => setIsInteracting(false)}
+          onPointerCancel={() => setIsInteracting(false)}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer touch-pan-y"
           style={{ touchAction: 'pan-y' }}
           aria-label={config.label}
@@ -154,7 +186,7 @@ export function DomainSlider({ domainKey, config, value, onChange }: DomainSlide
           aria-valuenow={value}
           aria-valuetext={`Level ${value}: ${getAnchorText(value)}`}
         />
-      </div>
+      </motion.div>
     </div>
   );
 }
