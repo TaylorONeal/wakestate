@@ -6,14 +6,13 @@ const corsHeaders = {
 };
 
 // Simple in-memory rate limiting (resets on function cold start)
-// For production, consider using a Redis cache or database table
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const MAX_REQUESTS_PER_WINDOW = 5; // 5 submissions per hour per IP
+const MAX_REQUESTS_PER_WINDOW = 5;
+const CHALLENGE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
 
 function getClientIP(req: Request): string {
-  // Try various headers for the real IP
   const forwardedFor = req.headers.get('x-forwarded-for');
   if (forwardedFor) {
     return forwardedFor.split(',')[0].trim();
@@ -22,7 +21,6 @@ function getClientIP(req: Request): string {
   if (realIP) {
     return realIP;
   }
-  // Fallback
   return 'unknown';
 }
 
@@ -31,36 +29,68 @@ function checkRateLimit(ip: string): { allowed: boolean; remaining: number; rese
   const record = rateLimitMap.get(ip);
 
   if (!record || now > record.resetTime) {
-    // First request or window expired - allow and start new window
     rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
     return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - 1, resetIn: RATE_LIMIT_WINDOW_MS };
   }
 
   if (record.count >= MAX_REQUESTS_PER_WINDOW) {
-    // Rate limit exceeded
     const resetIn = record.resetTime - now;
     return { allowed: false, remaining: 0, resetIn };
   }
 
-  // Increment count and allow
   record.count++;
   return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - record.count, resetIn: record.resetTime - now };
 }
 
-// Validate the human challenge answer
-function validateChallenge(challengeType: string, answer: number, expectedAnswer: number): boolean {
-  if (challengeType !== 'math') {
-    console.log('Invalid challenge type:', challengeType);
-    return false;
+// Verify signed challenge token
+async function verifyChallenge(token: string, userAnswer: number, secret: string): Promise<{ valid: boolean; reason?: string }> {
+  try {
+    const tokenData = atob(token);
+    const [expectedAnswerStr, timestampStr, signature] = tokenData.split(':');
+    
+    const expectedAnswer = parseInt(expectedAnswerStr, 10);
+    const timestamp = parseInt(timestampStr, 10);
+    
+    if (isNaN(expectedAnswer) || isNaN(timestamp)) {
+      return { valid: false, reason: 'Invalid token format' };
+    }
+    
+    // Check expiry
+    if (Date.now() - timestamp > CHALLENGE_EXPIRY_MS) {
+      return { valid: false, reason: 'Challenge expired' };
+    }
+    
+    // Verify signature
+    const encoder = new TextEncoder();
+    const data = `${expectedAnswer}:${timestamp}`;
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const expectedSig = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
+    const hashArray = Array.from(new Uint8Array(expectedSig));
+    const expectedSignature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    if (signature !== expectedSignature) {
+      return { valid: false, reason: 'Invalid signature' };
+    }
+    
+    // Verify answer
+    if (userAnswer !== expectedAnswer) {
+      return { valid: false, reason: 'Incorrect answer' };
+    }
+    
+    return { valid: true };
+  } catch (error) {
+    console.error('Challenge verification error:', error);
+    return { valid: false, reason: 'Verification failed' };
   }
-  
-  const isValid = answer === expectedAnswer;
-  console.log('Challenge validation:', { challengeType, answer, expectedAnswer, isValid });
-  return isValid;
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -76,7 +106,6 @@ Deno.serve(async (req) => {
     const clientIP = getClientIP(req);
     console.log('Feedback submission attempt from IP:', clientIP);
 
-    // Check rate limit
     const rateLimit = checkRateLimit(clientIP);
     if (!rateLimit.allowed) {
       const resetMinutes = Math.ceil(rateLimit.resetIn / 60000);
@@ -98,16 +127,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Parse request body
     const body = await req.json();
     const { 
       user_type, 
       app_section, 
       issue_type, 
       other_details,
-      challenge_type,
-      challenge_answer,
-      expected_answer
+      challenge_token,
+      challenge_answer
     } = body;
 
     // Validate required fields
@@ -136,8 +163,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate human challenge
-    if (!challenge_type || challenge_answer === undefined || expected_answer === undefined) {
+    // Validate challenge token and answer
+    if (!challenge_token || challenge_answer === undefined) {
       console.log('Missing challenge data');
       return new Response(
         JSON.stringify({ error: 'Please complete the human verification' }),
@@ -145,10 +172,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (!validateChallenge(challenge_type, challenge_answer, expected_answer)) {
-      console.log('Challenge failed');
+    const signingSecret = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const verification = await verifyChallenge(challenge_token, challenge_answer, signingSecret);
+    
+    if (!verification.valid) {
+      console.log('Challenge failed:', verification.reason);
       return new Response(
-        JSON.stringify({ error: 'Human verification failed. Please try again.' }),
+        JSON.stringify({ error: verification.reason === 'Challenge expired' 
+          ? 'Challenge expired. Please get a new question.' 
+          : 'Human verification failed. Please try again.' 
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -158,7 +191,6 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Insert feedback
     const { error: insertError } = await supabase.from('feedback').insert({
       user_type,
       app_section,
