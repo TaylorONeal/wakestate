@@ -44,9 +44,8 @@ const ISSUE_TYPES = [
 ];
 
 interface ChallengeData {
-  type: string;
+  token: string;
   answer: number;
-  expected: number;
 }
 
 export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
@@ -106,9 +105,8 @@ export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
           app_section: appSection,
           issue_type: issueType,
           other_details: otherDetails.trim() || null,
-          challenge_type: challengeData.type,
+          challenge_token: challengeData.token,
           challenge_answer: challengeData.answer,
-          expected_answer: challengeData.expected,
         },
       });
 
