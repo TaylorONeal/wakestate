@@ -400,32 +400,62 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        {!showNote ? (
-          <Button
-            variant="ghost"
-            onClick={() => setShowNote(true)}
-            className="w-full justify-start text-muted-foreground gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Add note
-          </Button>
-        ) : (
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">
-              Note (optional, max 140 chars)
-            </label>
-            <Textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value.slice(0, 140))}
-              placeholder="Quick note about this moment..."
-              className="input-field resize-none h-20"
-              maxLength={140}
-            />
-            <span className="text-xs text-muted-foreground text-right block">
-              {note.length}/140
-            </span>
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {!showNote ? (
+            <motion.div
+              key="add-note-btn"
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.1 }}
+            >
+              <Button
+                variant="ghost"
+                onClick={() => setShowNote(true)}
+                className="w-full justify-start text-muted-foreground gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add note
+              </Button>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="note-field"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="space-y-2 overflow-hidden"
+            >
+              <label className="text-sm font-medium text-muted-foreground">
+                Note (optional, max 140 chars)
+              </label>
+              <Textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value.slice(0, 140))}
+                placeholder="Quick note about this moment..."
+                className="input-field resize-none h-20"
+                maxLength={140}
+                autoFocus
+              />
+              <div className="flex items-center justify-between">
+                <motion.span 
+                  className="text-xs text-muted-foreground"
+                  animate={{ 
+                    color: note.length > 120 ? 'hsl(var(--destructive))' : undefined 
+                  }}
+                >
+                  {note.length}/140
+                </motion.span>
+                {note.length === 0 && (
+                  <button
+                    onClick={() => setShowNote(false)}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.section>
 
       {/* Action Buttons */}
@@ -435,33 +465,63 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.35 }}
       >
-        <Button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="w-full h-14 text-lg font-semibold glow-primary"
+        <motion.div
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         >
-          <Save className="w-5 h-5 mr-2" />
-          {isSaving ? 'Saving...' : 'Save Check-In'}
-        </Button>
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="w-full h-14 text-lg font-semibold glow-primary relative overflow-hidden"
+          >
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={isSaving ? 'saving' : 'save'}
+                className="inline-flex items-center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+              >
+                {isSaving ? (
+                  <motion.span
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                    className="inline-flex mr-2"
+                  >
+                    <Save className="w-5 h-5" />
+                  </motion.span>
+                ) : (
+                  <Save className="w-5 h-5 mr-2" />
+                )}
+                {isSaving ? 'Saving...' : 'Save Check-In'}
+              </motion.span>
+            </AnimatePresence>
+          </Button>
+        </motion.div>
 
         <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={onEventClick}
-            className="flex-1 h-12 gap-2 border-domain-cataplexy/50 text-domain-cataplexy hover:bg-domain-cataplexy/10"
-          >
-            <Zap className="w-4 h-4" />
-            Log Event
-          </Button>
+          <motion.div className="flex-1" whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="outline"
+              onClick={onEventClick}
+              className="w-full h-12 gap-2 border-domain-cataplexy/50 text-domain-cataplexy hover:bg-domain-cataplexy/10"
+            >
+              <Zap className="w-4 h-4" />
+              Log Event
+            </Button>
+          </motion.div>
           
-          <Button
-            variant="ghost"
-            onClick={() => setShowResetDialog(true)}
-            className="flex-1 h-12 gap-2 text-muted-foreground"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Clear
-          </Button>
+          <motion.div className="flex-1" whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="ghost"
+              onClick={() => setShowResetDialog(true)}
+              className="w-full h-12 gap-2 text-muted-foreground"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Clear
+            </Button>
+          </motion.div>
         </div>
       </motion.div>
 
