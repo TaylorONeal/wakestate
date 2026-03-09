@@ -149,7 +149,7 @@ export function HumanChallenge({ onVerified, onReset }: HumanChallengeProps) {
               className={`
                 py-3 px-2 rounded-lg font-medium text-base transition-all
                 ${isSelected && isVerified
-                  ? 'bg-green-500/20 border-2 border-green-500 text-green-400' 
+                  ? 'bg-accent/20 border-2 border-accent text-accent-foreground' 
                   : isSelected
                     ? 'bg-primary/20 border-2 border-primary text-primary'
                     : 'bg-surface border border-border text-foreground hover:border-primary/50'
