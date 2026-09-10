@@ -136,9 +136,20 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     }
   }, []);
 
+  // Check if form has unsaved changes
+  const hasChanges = (() => {
+    const narcoChanged = Object.keys(narcolepsyDomains).some(
+      (key) => narcolepsyDomains[key as keyof NarcolepsyDomains] !== 1
+    );
+    const overlappingChanged = overlappingExpanded && Object.keys(overlappingDomains).some(
+      (key) => overlappingDomains[key as keyof OverlappingDomains] !== 1
+    );
+    return narcoChanged || overlappingChanged || activeTags.length > 0 || note.trim().length > 0;
+  })();
+
   // Auto-save draft when values change
   useEffect(() => {
-    if (draftRestored || hasChanges()) {
+    if (draftRestored || hasChanges) {
       const draft: CheckInDraft = {
         dateTime: dateTime.toISOString(),
         narcolepsyDomains,
@@ -156,21 +167,11 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
         }
       }
     }
-  }, [dateTime, narcolepsyDomains, overlappingDomains, activeTags, note, overlappingExpanded]);
+  }, [dateTime, narcolepsyDomains, overlappingDomains, activeTags, note, overlappingExpanded, draftRestored, hasChanges]);
 
-  // Check if form has unsaved changes
-  const hasChanges = () => {
-    const narcoChanged = Object.keys(narcolepsyDomains).some(
-      (key) => narcolepsyDomains[key as keyof NarcolepsyDomains] !== 1
-    );
-    const overlappingChanged = overlappingExpanded && Object.keys(overlappingDomains).some(
-      (key) => overlappingDomains[key as keyof OverlappingDomains] !== 1
-    );
-    return narcoChanged || overlappingChanged || activeTags.length > 0 || note.trim().length > 0;
-  };
 
   const handleBackClick = () => {
-    if (hasChanges()) {
+    if (hasChanges) {
       setShowBackDialog(true);
     } else {
       onBack();

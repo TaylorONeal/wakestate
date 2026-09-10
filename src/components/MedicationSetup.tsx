@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Check, Pill } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,28 @@ const ALL_MEDICATIONS = MEDICATION_SECTIONS.flatMap(section =>
 export function MedicationSetup({ onComplete, onBack }: MedicationSetupProps) {
   const { toast } = useToast();
   const [selectedMeds, setSelectedMeds] = useState<Set<string>>(new Set());
+
+  const savingRef = useRef(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const persistConfig = async (regimen: MedicationRegimen[]) => {
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setIsSaving(true);
+    try {
+      const userConfig: UserMedicationConfig = {
+        isConfigured: true, regimen, lastUpdated: new Date().toISOString(),
+      };
+      await saveMedicationConfig(userConfig);
+      toast({ title: regimen.length ? "Medications saved" : "Setup skipped" });
+      onComplete();
+    } catch {
+      toast({ title: "Setup was not saved", description: "Your selection is still here. Please try again.", variant: "destructive" });
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
+  };
 
   const toggleMedication = (medId: string) => {
     setSelectedMeds(prev => {
@@ -51,32 +73,10 @@ export function MedicationSetup({ onComplete, onBack }: MedicationSetupProps) {
       };
     });
 
-    const userConfig: UserMedicationConfig = {
-      isConfigured: true,
-      regimen,
-      lastUpdated: new Date().toISOString(),
-    };
-
-    await saveMedicationConfig(userConfig);
-    
-    toast({
-      title: 'Medications saved',
-      description: 'Tap "Taken" on your home screen to log doses.',
-    });
-    
-    onComplete();
+    await persistConfig(regimen);
   };
 
-  const handleSkip = async () => {
-    // Mark as configured but with empty regimen
-    const userConfig: UserMedicationConfig = {
-      isConfigured: true,
-      regimen: [],
-      lastUpdated: new Date().toISOString(),
-    };
-    await saveMedicationConfig(userConfig);
-    onComplete();
-  };
+  const handleSkip = () => persistConfig([]);
 
   return (
     <motion.div
@@ -88,7 +88,7 @@ export function MedicationSetup({ onComplete, onBack }: MedicationSetupProps) {
       {/* Header */}
       <div className="flex items-center gap-3">
         {onBack && (
-          <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">
+          <Button variant="ghost" size="icon" aria-label="Back" onClick={onBack} disabled={isSaving} className="shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </Button>
         )}
@@ -115,6 +115,8 @@ export function MedicationSetup({ onComplete, onBack }: MedicationSetupProps) {
               {section.medications.map((med) => (
                 <motion.button
                   key={med.id}
+                  aria-pressed={selectedMeds.has(med.id)}
+                  disabled={isSaving}
                   onClick={() => toggleMedication(med.id)}
                   className={`group relative overflow-visible p-3 rounded-xl border-2 transition-all text-left ${
                     selectedMeds.has(med.id)
@@ -160,15 +162,16 @@ export function MedicationSetup({ onComplete, onBack }: MedicationSetupProps) {
           onClick={handleSave}
           className="w-full"
           size="lg"
-          disabled={selectedMeds.size === 0}
+          disabled={isSaving || selectedMeds.size === 0}
         >
           <Check className="w-4 h-4 mr-2" />
-          Done ({selectedMeds.size} selected)
+          {isSaving ? "Saving…" : `Done (${selectedMeds.size} selected)`}
         </Button>
         
         <Button
           variant="ghost"
           onClick={handleSkip}
+          disabled={isSaving}
           className="w-full text-muted-foreground"
         >
           Skip for now
