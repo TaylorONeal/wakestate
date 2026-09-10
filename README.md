@@ -134,3 +134,23 @@ This project is built with:
 - Local-first storage (no required backend)
 
 --
+
+## Development and mobile preparation
+
+Use Node 22+ and npm (`package-lock.json` is the reproducible dependency source).
+
+```sh
+npm ci
+npm run dev
+npm run typecheck
+npm test
+npm run lint
+npm run build
+npm run native:sync
+```
+
+The redesigned home screen emphasizes quick logging with a calm teal palette, bundled fonts, accessible navigation, and factual privacy guidance. Version 2 JSON backups include all saved health-record categories; import replaces included categories after validation. Reports/CSV remain focused on check-ins and events. Clear Data removes the journal, draft, legacy copies, and native export cache while keeping preferences.
+
+Capacitor projects in `ios/` and `android/` bundle the app for native testing. Native exports open the system share sheet; the web build keeps browser downloads and PWA support. Signing, store artwork, privacy policy operations, device QA, and store submission are still required. See [documentation index](docs/INDEX.md), [launch checklist](docs/LAUNCH.md), and [security review](docs/SECURITY.md).
+
+The continued UX pass adds quiet save confirmations, deferred loading of larger views, failed-save recovery, bounded sleep-time controls, draft validation, atomic concurrent inserts, and streamed feedback request-size enforcement. The regression suite currently contains 19 tests; see the launch notes for verified behavior and remaining release gates.

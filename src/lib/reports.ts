@@ -1,3 +1,4 @@
+import { downloadFile } from './download';
 import { format, subDays, parseISO, differenceInMinutes } from 'date-fns';
 import type { CheckIn, TrackingEvent, NarcolepsyDomains, OverlappingDomains } from '@/types';
 import { NARCOLEPSY_DOMAIN_CONFIG, OVERLAPPING_DOMAIN_CONFIG } from '@/types';
@@ -566,12 +567,6 @@ Please discuss any concerns with a healthcare provider.
   return report;
 }
 
-export function downloadReport(content: string, filename: string): void {
-  const blob = new Blob([content], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
+export async function downloadReport(content: string, filename: string): Promise<void> {
+  await downloadFile(content, filename, 'text/plain');
 }

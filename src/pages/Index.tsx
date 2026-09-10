@@ -1,20 +1,23 @@
-import { useState, useEffect } from 'react';
+import { ScreenErrorBoundary } from '@/components/ScreenErrorBoundary';
+import { Capacitor } from '@capacitor/core';
+import { App as NativeApp } from '@capacitor/app';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BottomNav, type TabId } from '@/components/BottomNav';
 import { HomeScreen } from '@/components/HomeScreen';
 import { CheckInScreen } from '@/components/CheckInScreen';
-import { TimelineScreen } from '@/components/TimelineScreen';
-import { Dashboard } from '@/components/Dashboard';
+const TimelineScreen = lazy(() => import('@/components/TimelineScreen').then(module => ({ default: module.TimelineScreen })));
+const Dashboard = lazy(() => import('@/components/Dashboard').then(module => ({ default: module.Dashboard })));
 import { SettingsScreen } from '@/components/SettingsScreen';
-import { AboutScreen } from '@/components/AboutScreen';
-import { MedicationsScreen } from '@/components/MedicationsScreen';
-import { MedicationSetup } from '@/components/MedicationSetup';
-import { ExportScreen } from '@/components/ExportScreen';
-import { FeedbackScreen } from '@/components/FeedbackScreen';
+const AboutScreen = lazy(() => import('@/components/AboutScreen').then(module => ({ default: module.AboutScreen })));
+const MedicationsScreen = lazy(() => import('@/components/MedicationsScreen').then(module => ({ default: module.MedicationsScreen })));
+const MedicationSetup = lazy(() => import('@/components/MedicationSetup').then(module => ({ default: module.MedicationSetup })));
+const ExportScreen = lazy(() => import('@/components/ExportScreen').then(module => ({ default: module.ExportScreen })));
+const FeedbackScreen = lazy(() => import('@/components/FeedbackScreen').then(module => ({ default: module.FeedbackScreen })));
 import { SleepLogScreen } from '@/components/SleepLogScreen';
 import { EventForm } from '@/components/EventForm';
 import { Onboarding } from '@/components/Onboarding';
-import { getCheckIns, getEvents, getMedicationConfig } from '@/lib/storage';
+import { getCheckIns, getEvents } from '@/lib/storage';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -29,6 +32,24 @@ const Index = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [checkInCount, setCheckInCount] = useState(0);
   const [eventCount, setEventCount] = useState(0);
+
+  useEffect(() => {
+    if (Capacitor.getPlatform() !== 'android') return;
+    const listener = NativeApp.addListener('backButton', () => {
+      if (showEventForm) { setShowEventForm(false); return; }
+      const dialog = document.querySelector('[role="dialog"], [role="alertdialog"]');
+      if (dialog) { dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); return; }
+      if (showSleepLog) setShowSleepLog(false);
+      else if (showFeedback) setShowFeedback(false);
+      else if (showExport) setShowExport(false);
+      else if (showMedicationSetup) setShowMedicationSetup(false);
+      else if (showMedications) setShowMedications(false);
+      else if (showAbout) setShowAbout(false);
+      else if (activeTab !== 'home') setActiveTab('home');
+      else void NativeApp.minimizeApp();
+    });
+    return () => { void listener.then(handle => handle.remove()); };
+  }, [activeTab, showEventForm, showSleepLog, showFeedback, showExport, showMedicationSetup, showMedications, showAbout]);
 
   useEffect(() => {
     const onboarded = localStorage.getItem('wakestate_onboarded');
@@ -66,7 +87,7 @@ const Index = () => {
     }
 
     if (showExport) {
-      return <ExportScreen onBack={() => setShowExport(false)} />;
+      return <ExportScreen onBack={() => setShowExport(false)} onDataChange={handleDataChange} />;
     }
 
     if (showMedicationSetup) {
@@ -101,6 +122,7 @@ const Index = () => {
       case 'home':
         return (
           <HomeScreen
+            onPrivacy={() => setActiveTab('settings')}
             onLogWakeState={() => setActiveTab('log')}
             onLogEvent={() => setShowEventForm(true)}
             onLogSleep={() => setShowSleepLog(true)}
@@ -151,7 +173,7 @@ const Index = () => {
       case 'timeline':
         return 'Timeline';
       case 'dashboard':
-        return 'Dashboard';
+        return 'Patterns';
       case 'settings':
         return 'Settings';
       default:
@@ -169,30 +191,11 @@ const Index = () => {
       </AnimatePresence>
 
       {/* Main App */}
-      <div className="min-h-screen bg-background">
+      <div hidden={showOnboarding} className="min-h-[100dvh] bg-background">
         {/* Header */}
         <header className="sticky top-0 z-40 glass border-b border-border/50 safe-area-top overflow-hidden">
-          {/* Animated Zzz Line */}
-          <div className="absolute top-0 left-0 right-0 h-1 flex items-center overflow-hidden opacity-30">
-            {[...Array(6)].map((_, i) => (
-              <motion.span
-                key={i}
-                className="text-[8px] text-primary font-bold whitespace-nowrap"
-                initial={{ x: -30 }}
-                animate={{ x: '100vw' }}
-                transition={{
-                  duration: 10,
-                  delay: i * 1.6,
-                  repeat: Infinity,
-                  ease: 'linear',
-                }}
-              >
-                Zzz
-              </motion.span>
-            ))}
-          </div>
           <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
-            <h1 className="text-xl font-bold text-foreground">{getTitle()}</h1>
+            <h1 className="text-lg font-semibold tracking-tight text-foreground">{getTitle()}</h1>
             {activeTab !== 'home' && !showAbout && !showMedications && !showMedicationSetup && (
               <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
                 WakeState
@@ -205,13 +208,15 @@ const Index = () => {
         <main className="px-4 py-4 max-w-lg mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
-              key={showFeedback ? 'feedback' : showExport ? 'export' : showMedicationSetup ? 'med-setup' : showMedications ? 'medications' : showAbout ? 'about' : activeTab}
+              key={showSleepLog ? 'sleep' : showFeedback ? 'feedback' : showExport ? 'export' : showMedicationSetup ? 'med-setup' : showMedications ? 'medications' : showAbout ? 'about' : activeTab}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              {renderScreen()}
+              <ScreenErrorBoundary><Suspense fallback={<p role="status" className="py-12 text-center text-sm text-muted-foreground">Loading your view…</p>}>
+                {renderScreen()}
+              </Suspense></ScreenErrorBoundary>
             </motion.div>
           </AnimatePresence>
         </main>

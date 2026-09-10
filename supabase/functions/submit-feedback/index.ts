@@ -1,3 +1,4 @@
+import { readJsonObject, RequestBodyError } from '../_shared/request-body.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -104,12 +105,10 @@ Deno.serve(async (req) => {
 
   try {
     const clientIP = getClientIP(req);
-    console.log('Feedback submission attempt from IP:', clientIP);
 
     const rateLimit = checkRateLimit(clientIP);
     if (!rateLimit.allowed) {
       const resetMinutes = Math.ceil(rateLimit.resetIn / 60000);
-      console.log('Rate limit exceeded for IP:', clientIP);
       return new Response(
         JSON.stringify({ 
           error: 'Too many feedback submissions. Please try again later.',
@@ -127,7 +126,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const body = await req.json();
+    const body = await readJsonObject(req);
     const { 
       user_type, 
       app_section, 
@@ -136,6 +135,14 @@ Deno.serve(async (req) => {
       challenge_token,
       challenge_answer
     } = body;
+
+    if (!body || typeof body !== 'object' ||
+      typeof user_type !== 'string' || typeof app_section !== 'string' || typeof issue_type !== 'string' ||
+      (other_details != null && typeof other_details !== 'string') ||
+      typeof challenge_token !== 'string' || challenge_token.length > 512 ||
+      (typeof challenge_answer !== 'number' || !Number.isInteger(challenge_answer))) {
+      return new Response(JSON.stringify({ error: 'Invalid feedback fields' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     // Validate required fields
     if (!user_type || !app_section || !issue_type) {
@@ -206,7 +213,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Feedback submitted successfully from IP:', clientIP);
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -224,6 +230,9 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
+    if (error instanceof RequestBodyError) {
+      return new Response(JSON.stringify({ error: error.message }), { status: error.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
     console.error('Unexpected error:', error);
     return new Response(
       JSON.stringify({ error: 'An unexpected error occurred' }),

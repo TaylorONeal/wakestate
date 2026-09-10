@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Credentials and native build outputs
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+*.mobileprovision
