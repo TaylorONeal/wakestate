@@ -4,6 +4,23 @@
 
 Native Capacitor projects are provided in `ios/` and `android/`. This is launch preparation, not a signed release or store submission. Bundle identifier `com.wakestate.app` is provisional: confirm publisher ownership before uploading either app. Existing web users must export/import to transfer records; native storage is separate.
 
+## Launch tracker — 2026-09-10
+
+Evidence checked at 13:43 UTC (21:43 WITA), with verification completed during this session. This table is the current project status; earlier verification notes below are historical. Shared tracking points here from the canonical improvement backlog.
+
+| ID | Work | Status / evidence | Owner and closure condition |
+|---|---|---|---|
+| WS-01 | Simple medical visual style and mobile layout | Complete locally; dark teal palette, bundled font, safe areas and accessible navigation | Engineering; merged preparation pass |
+| WS-02 | Local record integrity and recovery | Complete locally; atomic storage, validated backups, retryable journal and medication setup saves | Engineering; regression suite and browser checks |
+| WS-03 | Feedback lifecycle | Complete locally; response validation, expiry reset after selection, recoverable failed refresh, accurate pending-verification wording | Engineering; does not resolve SEC-01 server abuse protection |
+| WS-04 | Reproducible validation | Complete locally; `npm run validate`, 22 tests, typecheck, web build and native sync; lint 0 errors / 8 fast-refresh warnings | Engineering; rerun after code changes |
+| WS-05 | Feedback abuse protection and production security | Open; deployed headers/RLS and durable rate limits remain unverified | Engineering + backend operator; implement durable prevention, deploy and exercise failure/replay cases |
+| WS-06 | Native builds and device QA | Blocked by local toolchain; prior iOS platform missing and Android Java runtime absent | Release environment; unsigned compilation, physical-device QA and TestFlight/Play internal track |
+| WS-07 | Publisher, policy and signing | Awaiting release-owner facts | Publisher; confirm app ID/accounts, support contact, retention/deletion policy, signing and store disclosures |
+| WS-08 | Native/store artwork and content review | Open; generated native artwork remains, store copy drafted below | Release/design; final icons/screenshots and health-content review |
+
+No push, deployment, production data change or store submission is included. Resume release work when backend access/authorization, toolchains or publisher facts are available; no repeated reminder is needed while those conditions are unchanged.
+
 ## Build workflow
 
 Use Node 22+, `npm ci`, then:
@@ -91,3 +108,11 @@ Follow-up verification: 17/17 tests, TypeScript, production build and native syn
 Nap and cataplexy forms now recover from failed saves, prevent duplicate submissions while saving, and cancel delayed close callbacks when unmounted. Nap input rejects invalid/zero-length time ranges. Check-in edits/deletes, event deletes, medication-log undo, and sleep upserts/deletes now use atomic IndexedDB transactions; regression tests cover concurrent deletion/insertion and one sleep entry per date. The existing store-release gates above remain open; integration into main is not a store release.
 
 Final integration verification: 19/19 tests, TypeScript, production web build, native web build and Capacitor sync for both platforms passed. ESLint reports 0 errors and 13 existing warnings; generated native artifacts are excluded from source linting. A fresh 390×844 browser session confirmed failed nap saves show an error and re-enable Save, with no browser console errors. Native compilation/device testing and the release gates above remain outstanding.
+
+## Autonomous reliability follow-up
+
+Medication setup keeps selections and re-enables Save/Skip after a failed write, guards duplicate submissions, and exposes selection state to assistive technology. Patterns now exits its loading state with a retry action when reads fail. Report counts fetch in parallel, ignore older requests, and avoid duplicate mount reads; a successful import is not mislabeled as failed merely because count refresh fails. Check-in draft effects now declare their dependencies.
+
+Feedback clears stale challenge data before refresh, rejects malformed/expired responses, refreshes even after selection, ignores superseded requests and permits answer corrections. Its UI says the answer is checked when sent. This is lifecycle reliability, not a replacement for the outstanding server-side abuse controls.
+
+Verification: 22/22 tests, TypeScript, production build and native asset sync passed. ESLint: 0 errors / 8 existing fast-refresh warnings (all five hook warnings resolved). Browser storage-failure injection confirmed medication selection retention, visible error and enabled retry. Feedback expiry after selection plus failed refresh cleared the old question/answer and displayed retry; no browser runtime errors were recorded. Native device checks remain open.

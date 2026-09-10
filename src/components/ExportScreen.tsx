@@ -1,5 +1,5 @@
 import { downloadFile } from '@/lib/download';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import {
@@ -80,22 +80,23 @@ export function ExportScreen({ onBack, onDataChange }: ExportScreenProps) {
   const [includeProviderQuestions, setIncludeProviderQuestions] = useState(true);
   const [clinicianMode, setClinicianMode] = useState(false);
 
-  useEffect(() => {
-    loadCounts();
-  }, []);
-
-  const loadCounts = async () => {
-    const checkIns = await getCheckIns();
-    const events = await getEvents();
+  const countsRequest = useRef(0);
+  const loadCounts = useCallback(async () => {
+    const request = ++countsRequest.current;
+    const [checkIns, events] = await Promise.all([getCheckIns(), getEvents()]);
+    if (request !== countsRequest.current) return;
     const { start, end } = getDateRange(dateRange);
     const filtered = filterDataByDateRange(checkIns, events, start, end);
     setCheckInCount(filtered.checkIns.length);
     setEventCount(filtered.events.length);
-  };
+  }, [dateRange]);
 
   useEffect(() => {
-    loadCounts();
-  }, [dateRange]);
+    void loadCounts().catch(() => {
+      toast({ title: "Could not load report counts", description: "Please reopen Reports to try again.", variant: "destructive" });
+    });
+    return () => { countsRequest.current += 1; };
+  }, [loadCounts, toast]);
 
   const getReportOptions = (): ReportOptions => ({
     dateRange,
@@ -185,7 +186,9 @@ export function ExportScreen({ onBack, onDataChange }: ExportScreenProps) {
       });
 
       setShowImportDialog(false);
-      loadCounts();
+      void loadCounts().catch(() => {
+        toast({ title: "Import saved", description: "Reopen Reports to refresh the counts." });
+      });
     } catch (error) {
       toast({
         title: 'Import failed',
