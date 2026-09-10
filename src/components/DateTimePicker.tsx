@@ -80,6 +80,7 @@ export function DateTimePicker({ date, onChange }: DateTimePickerProps) {
             </Popover>
             
             <Input
+              aria-label="Entry time"
               type="time"
               value={timeValue}
               onChange={handleTimeChange}
@@ -112,6 +113,7 @@ export function DateTimePicker({ date, onChange }: DateTimePickerProps) {
         <Button
           variant="ghost"
           size="icon"
+          aria-label={isEditing ? "Finish editing date and time" : "Edit date and time"}
           onClick={() => setIsEditing(!isEditing)}
           className={cn(isEditing && 'text-primary')}
         >

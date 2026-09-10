@@ -56,7 +56,7 @@ export function AboutScreen({ onBack, onNavigateToFeedback }: AboutScreenProps) 
           </div>
           <h2 className="text-lg font-semibold text-foreground">What WakeState Is</h2>
         </div>
-        
+
         <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
           <p>
             WakeState is a <strong className="text-foreground">personal tracking and pattern-recognition tool</strong> designed specifically for people living with narcolepsy.
@@ -83,7 +83,7 @@ export function AboutScreen({ onBack, onNavigateToFeedback }: AboutScreenProps) 
           </div>
           <h2 className="text-lg font-semibold text-foreground">How to Use It</h2>
         </div>
-        
+
         <ul className="space-y-3 text-sm text-muted-foreground">
           <li className="flex items-start gap-3">
             <span className="text-primary font-bold">1</span>
@@ -125,7 +125,7 @@ export function AboutScreen({ onBack, onNavigateToFeedback }: AboutScreenProps) 
           </div>
           <h2 className="text-lg font-semibold text-foreground">Definitions & Resources</h2>
         </div>
-        
+
         <div className="space-y-3">
           {resources.map((resource) => (
             <a
@@ -164,10 +164,10 @@ export function AboutScreen({ onBack, onNavigateToFeedback }: AboutScreenProps) 
           <Shield className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">Privacy</h2>
         </div>
-        
+
         <p className="text-sm text-muted-foreground leading-relaxed">
-          All your data is stored locally on this device. Nothing is sent to any server. 
-          Your tracking data never leaves your phone unless you export it.
+          Your health journal is stored locally. Optional feedback is sent online.
+          You control exports. Device backups and feedback have separate privacy considerations.
         </p>
       </motion.section>
 
@@ -184,7 +184,7 @@ export function AboutScreen({ onBack, onNavigateToFeedback }: AboutScreenProps) 
           </div>
           <h2 className="text-lg font-semibold text-foreground">About the Creator</h2>
         </div>
-        
+
         <p className="text-sm text-muted-foreground leading-relaxed mb-4">
           I built WakeState because it could help me better understand my own narcolepsy and help others in the communities I'm part of. If it helps you notice patterns or explain your experience more clearly, that's the goal.
         </p>

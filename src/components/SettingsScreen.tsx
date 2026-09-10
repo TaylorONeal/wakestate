@@ -12,7 +12,6 @@ import {
 import { type AppSettings } from '@/types';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { InstallInstructionsModal } from '@/components/InstallInstructionsModal';
-import { SlideToConfirm } from '@/components/SlideToConfirm';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -35,6 +34,7 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
     theme: 'midnight',
   });
   const [showInstallModal, setShowInstallModal] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const [showClearDataDialog, setShowClearDataDialog] = useState(false);
   const { canInstall, isInstalled, promptInstall } = usePWAInstall();
 
@@ -48,11 +48,19 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
   };
 
   const handleClearAllData = async () => {
-    await clearAllData();
+    if (isClearing) return;
+    setIsClearing(true);
+    try {
+      await clearAllData();
     setShowClearDataDialog(false);
     toast.success('All tracking data cleared');
     // Reload the page to reset all state
-    window.location.reload();
+      window.location.reload();
+    } catch {
+      toast.error("Could not clear all data. Please try again.");
+    } finally {
+      setIsClearing(false);
+    }
   };
 
   const updateSetting = async <K extends keyof AppSettings>(
@@ -86,6 +94,7 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
             </p>
           </div>
           <Switch
+            aria-label="Show overlapping symptoms by default"
             checked={settings.showContextByDefault}
             onCheckedChange={(checked) => updateSetting('showContextByDefault', checked)}
           />
@@ -100,7 +109,7 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
       >
         <div className="flex items-center gap-3">
           {isInstalled ? (
-            <Check className="w-5 h-5 text-green-500" />
+            <Check className="w-5 h-5 text-primary" />
           ) : (
             <Smartphone className="w-5 h-5 text-primary" />
           )}
@@ -155,22 +164,24 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
       {/* Privacy & Data */}
       <section className="section-card space-y-4">
         <div className="flex items-center gap-3">
-          <Shield className="w-5 h-5 text-green-500" />
+          <Shield className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold">Privacy & Data</h2>
         </div>
 
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20">
-          <Shield className="w-4 h-4 text-green-500 flex-shrink-0" />
-          <p className="text-sm text-green-500/90">
-            100% local storage - your data never leaves this device
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
+          <Shield className="w-4 h-4 text-primary flex-shrink-0" />
+          <p className="text-sm text-primary">
+            Local journal · no automatic health-data upload
           </p>
         </div>
 
         <p className="text-sm text-muted-foreground leading-relaxed">
           All your check-ins, events, and medication records are stored only on this device.
-          Nothing is sent to any server. Your health data is completely private.
+          Health records are not automatically uploaded. Optional feedback is sent to our feedback service.
         </p>
 
+        <p className="text-sm text-muted-foreground leading-relaxed">No advertising or analytics SDK is included. Local records are not encrypted by WakeState or protected by an app PIN. Use a device passcode, and take care on shared devices.</p>
+        <a href="/privacy.html" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4">Read the privacy notice</a>
         {/* Backup Reminder */}
         <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-2">
           <div className="flex items-center gap-2">
@@ -287,10 +298,9 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
           </AlertDialogHeader>
           
           <div className="pt-2">
-            <SlideToConfirm 
-              onConfirm={handleClearAllData}
-              label="Slide to confirm it's gonna go poof"
-            />
+            <Button variant="destructive" className="w-full min-h-11" disabled={isClearing} onClick={handleClearAllData}>
+              {isClearing ? 'Deleting…' : 'Delete all tracking data'}
+            </Button>
           </div>
           
           <div className="flex justify-end pt-2">

@@ -14,7 +14,10 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 bg-background flex items-center justify-center p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="welcome-title"
+      className="fixed inset-0 z-[60] overflow-y-auto bg-background flex items-center justify-center p-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -36,7 +39,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <Moon className="w-10 h-10 text-primary" />
           </motion.div>
           
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 id="welcome-title" className="text-3xl font-bold text-foreground">
             WakeState
           </h1>
           
@@ -54,13 +57,15 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         >
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <Zap className="w-4 h-4 text-primary shrink-0" />
-            <span>30-second check-ins, many times per day</span>
+            <span>Quick check-ins, whenever it suits you</span>
           </div>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <Shield className="w-4 h-4 text-primary shrink-0" />
-            <span>Your data stays on your device, always</span>
+            <span>Your health journal is stored on this device</span>
           </div>
         </motion.div>
+
+        <p className="text-xs text-muted-foreground leading-relaxed">No account needed. Export backups to keep a copy. Optional feedback is sent online. WakeState is a personal journal, not a diagnostic or treatment tool.</p>
 
         {/* Single CTA */}
         <motion.div
@@ -69,8 +74,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           transition={{ delay: 0.4 }}
         >
           <Button
+            autoFocus
             onClick={handleStart}
-            className="w-full h-14 text-lg font-semibold glow-primary"
+            className="w-full h-14 text-lg font-semibold "
           >
             Start Tracking
             <ArrowRight className="w-5 h-5 ml-2" />

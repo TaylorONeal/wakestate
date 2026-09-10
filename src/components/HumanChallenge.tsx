@@ -30,7 +30,7 @@ export function HumanChallenge({ onVerified, onReset }: HumanChallengeProps) {
     onReset();
 
     try {
-      const { data, error } = await supabase.functions.invoke('get-challenge');
+      const { data, error } = await supabase.functions.invoke('get-challenge', { method: 'GET' });
       
       if (error) throw error;
       if (data?.error) throw new Error(data.error);

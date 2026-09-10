@@ -1,4 +1,6 @@
-import { get, set, del, keys } from 'idb-keyval';
+import { clearExportCache } from './download';
+import { get, set, delMany, setMany, update } from 'idb-keyval';
+import { format } from 'date-fns';
 import type { 
   CheckIn, 
   TrackingEvent, 
@@ -26,12 +28,12 @@ export const defaultSettings: AppSettings = {
 
 // Clear all data
 export async function clearAllData(): Promise<void> {
-  await del(CHECKINS_KEY);
-  await del(EVENTS_KEY);
-  await del(MEDICATIONS_KEY);
-  await del(MED_CONFIG_KEY);
-  await del(MED_ADMIN_KEY);
-  await del(SLEEP_ENTRIES_KEY);
+  const trackingKeys = [CHECKINS_KEY, EVENTS_KEY, MEDICATIONS_KEY, MED_CONFIG_KEY, MED_ADMIN_KEY, SLEEP_ENTRIES_KEY];
+  // Remove legacy copies as well so fallback reads cannot resurrect deleted records.
+  localStorage.removeItem('wakestate_checkin_draft_v2');
+  for (const key of trackingKeys) localStorage.removeItem(key);
+  await delMany(trackingKeys);
+  await clearExportCache();
   // Keep settings - user preferences should remain
 }
 
@@ -47,24 +49,18 @@ export async function getCheckIns(): Promise<CheckIn[]> {
 }
 
 export async function saveCheckIn(checkIn: CheckIn): Promise<void> {
-  const checkIns = await getCheckIns();
-  checkIns.unshift(checkIn);
-  await set(CHECKINS_KEY, checkIns);
+  // A single read/write transaction preserves entries saved concurrently.
+  await update<CheckIn[]>(CHECKINS_KEY, current => [checkIn, ...(current ?? [])]);
 }
 
 export async function updateCheckIn(id: string, updates: Partial<CheckIn>): Promise<void> {
-  const checkIns = await getCheckIns();
-  const index = checkIns.findIndex(c => c.id === id);
-  if (index !== -1) {
-    checkIns[index] = { ...checkIns[index], ...updates };
-    await set(CHECKINS_KEY, checkIns);
-  }
+  await update<CheckIn[]>(CHECKINS_KEY, current => (current ?? []).map(entry =>
+    entry.id === id ? { ...entry, ...updates, id } : entry
+  ));
 }
 
 export async function deleteCheckIn(id: string): Promise<void> {
-  const checkIns = await getCheckIns();
-  const filtered = checkIns.filter(c => c.id !== id);
-  await set(CHECKINS_KEY, filtered);
+  await update<CheckIn[]>(CHECKINS_KEY, current => (current ?? []).filter(entry => entry.id !== id));
 }
 
 // Events
@@ -79,15 +75,12 @@ export async function getEvents(): Promise<TrackingEvent[]> {
 }
 
 export async function saveEvent(event: TrackingEvent): Promise<void> {
-  const events = await getEvents();
-  events.unshift(event);
-  await set(EVENTS_KEY, events);
+  // A single read/write transaction preserves entries saved concurrently.
+  await update<TrackingEvent[]>(EVENTS_KEY, current => [event, ...(current ?? [])]);
 }
 
 export async function deleteEvent(id: string): Promise<void> {
-  const events = await getEvents();
-  const filtered = events.filter(e => e.id !== id);
-  await set(EVENTS_KEY, filtered);
+  await update<TrackingEvent[]>(EVENTS_KEY, current => (current ?? []).filter(entry => entry.id !== id));
 }
 
 // Settings
@@ -155,20 +148,17 @@ export async function getMedicationAdministrations(): Promise<MedicationAdminist
 }
 
 export async function saveMedicationAdministration(admin: MedicationAdministration): Promise<void> {
-  const administrations = await getMedicationAdministrations();
-  administrations.unshift(admin);
-  await set(MED_ADMIN_KEY, administrations);
+  // A single read/write transaction preserves entries saved concurrently.
+  await update<MedicationAdministration[]>(MED_ADMIN_KEY, current => [admin, ...(current ?? [])]);
 }
 
 export async function removeMedicationAdministration(id: string): Promise<void> {
-  const administrations = await getMedicationAdministrations();
-  const filtered = administrations.filter(a => a.id !== id);
-  await set(MED_ADMIN_KEY, filtered);
+  await update<MedicationAdministration[]>(MED_ADMIN_KEY, current => (current ?? []).filter(entry => entry.id !== id));
 }
 
 export async function getTodayAdministrations(medicationId: string): Promise<MedicationAdministration[]> {
   const administrations = await getMedicationAdministrations();
-  const today = new Date().toISOString().split('T')[0];
+  const today = format(new Date(), 'yyyy-MM-dd');
   return administrations.filter(a => a.medicationId === medicationId && a.localDate === today);
 }
 
@@ -189,22 +179,16 @@ export async function getSleepEntryForDate(date: string): Promise<SleepEntry | n
 }
 
 export async function saveSleepEntry(entry: SleepEntry): Promise<void> {
-  const entries = await getSleepEntries();
-  const existingIndex = entries.findIndex(e => e.date === entry.date);
-  
-  if (existingIndex !== -1) {
-    entries[existingIndex] = entry;
-  } else {
-    entries.unshift(entry);
-  }
-  
-  await set(SLEEP_ENTRIES_KEY, entries);
+  await update<SleepEntry[]>(SLEEP_ENTRIES_KEY, current => {
+    const entries = current ?? [];
+    return entries.some(existing => existing.date === entry.date)
+      ? entries.map(existing => existing.date === entry.date ? entry : existing)
+      : [entry, ...entries];
+  });
 }
 
 export async function deleteSleepEntry(id: string): Promise<void> {
-  const entries = await getSleepEntries();
-  const filtered = entries.filter(e => e.id !== id);
-  await set(SLEEP_ENTRIES_KEY, filtered);
+  await update<SleepEntry[]>(SLEEP_ENTRIES_KEY, current => (current ?? []).filter(entry => entry.id !== id));
 }
 
 // Export/Import
@@ -214,7 +198,11 @@ export async function exportAllData(): Promise<string> {
   const settings = await getSettings();
   
   return JSON.stringify({
-    version: 1,
+    version: 2,
+    medications: await getUserMedications(),
+    medicationConfig: await getMedicationConfig(),
+    medicationAdministrations: await getMedicationAdministrations(),
+    sleepEntries: await getSleepEntries(),
     exportedAt: new Date().toISOString(),
     checkIns,
     events,
@@ -223,21 +211,20 @@ export async function exportAllData(): Promise<string> {
 }
 
 export async function importData(jsonString: string): Promise<{ checkIns: number; events: number }> {
-  const parsed = JSON.parse(jsonString);
-  
-  // Validate import data with zod schema
-  const validated = ImportDataSchema.parse(parsed);
-  
-  if (validated.checkIns) {
-    await set(CHECKINS_KEY, validated.checkIns);
-  }
-  if (validated.events) {
-    await set(EVENTS_KEY, validated.events);
-  }
-  if (validated.settings) {
-    await set(SETTINGS_KEY, validated.settings);
-  }
-  
+  if (new Blob([jsonString]).size > 10 * 1024 * 1024) throw new Error('Backup exceeds 10 MB');
+  const validated = ImportDataSchema.parse(JSON.parse(jsonString));
+  // Validate everything before making a single atomic IndexedDB write.
+  const entries: [string, unknown][] = [];
+  if (validated.checkIns) entries.push([CHECKINS_KEY, validated.checkIns]);
+  if (validated.events) entries.push([EVENTS_KEY, validated.events]);
+  if (validated.settings) entries.push([SETTINGS_KEY, validated.settings]);
+  if (validated.medications) entries.push([MEDICATIONS_KEY, validated.medications]);
+  if (validated.medicationConfig !== undefined) entries.push([MED_CONFIG_KEY, validated.medicationConfig]);
+  if (validated.medicationAdministrations) entries.push([MED_ADMIN_KEY, validated.medicationAdministrations]);
+  if (validated.sleepEntries) entries.push([SLEEP_ENTRIES_KEY, validated.sleepEntries]);
+  if (!entries.length) throw new Error('No WakeState data found');
+  await setMany(entries);
+
   return {
     checkIns: validated.checkIns?.length || 0,
     events: validated.events?.length || 0,
@@ -287,5 +274,12 @@ export function exportToCSV(checkIns: CheckIn[]): string {
     c.note || '',
   ]);
   
-  return [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))].join('\n');
+  return [headers.join(','), ...rows.map(r => r.map(escapeCSVCell).join(','))].join('\n');
+}
+
+// Spreadsheet programs interpret leading formula characters even inside quotes.
+export function escapeCSVCell(value: unknown): string {
+  let text = String(value ?? '');
+  if (/^[\s]*[=+@-]/.test(text) || /^[\t\r\n]/.test(text)) text = "'" + text;
+  return '"' + text.replace(/"/g, '""') + '"';
 }

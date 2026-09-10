@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 export type SaveType = 'new' | 'edit';
 export type LogType = 'wake' | 'sleep' | 'medication';
@@ -16,7 +16,11 @@ export function useSaveConfirmation() {
     logType: 'wake',
   });
 
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+
   const trigger = useCallback((saveType: SaveType, logType: LogType) => {
+    if (timer.current) clearTimeout(timer.current);
     setState({ isVisible: true, saveType, logType });
     
     // Haptic feedback
@@ -25,12 +29,13 @@ export function useSaveConfirmation() {
     }
     
     // Auto-hide after animation completes
-    setTimeout(() => {
+    timer.current = setTimeout(() => {
       setState(prev => ({ ...prev, isVisible: false }));
     }, 1800);
   }, []);
 
   const hide = useCallback(() => {
+    if (timer.current) clearTimeout(timer.current);
     setState(prev => ({ ...prev, isVisible: false }));
   }, []);
 
