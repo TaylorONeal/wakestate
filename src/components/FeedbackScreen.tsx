@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, Send, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -64,9 +64,9 @@ export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
     setChallengeData(data);
   };
 
-  const handleChallengeReset = () => {
+  const handleChallengeReset = useCallback(() => {
     setChallengeData(null);
-  };
+  }, []);
 
   const handleSubmit = async () => {
     if (!userType || !appSection || !issueType) {
@@ -172,6 +172,7 @@ export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
         </p>
       </motion.div>
 
+<p className="section-card text-sm text-muted-foreground">Feedback is optional and sent online. Please do not include personal health information. <a className="text-primary underline" href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy notice</a></p>
       {/* Form */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -278,7 +279,7 @@ export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
         transition={{ delay: 0.3 }}
         className="text-center text-xs text-muted-foreground px-4"
       >
-        Feedback is anonymous. No personal data or tracking info is collected.
+        Sending feedback shares your selected role and message with WakeState through Supabase. The service receives your IP address for request handling and abuse prevention. Your journal is not attached. Please leave out names, medications, and other health details.
       </motion.p>
     </div>
   );

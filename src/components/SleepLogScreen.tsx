@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { adjustSleepDuration } from '@/lib/sleep';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ChevronDown, ChevronUp, Minus, Plus, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,10 @@ export function SleepLogScreen({ onBack, onSave }: SleepLogScreenProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [existingEntry, setExistingEntry] = useState<SleepEntry | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (navigationTimer.current) clearTimeout(navigationTimer.current); }, []);
+  const [isSaving, setIsSaving] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   
   // Form state
   const [hours, setHours] = useState(7);
@@ -63,17 +68,22 @@ export function SleepLogScreen({ onBack, onSave }: SleepLogScreenProps) {
       }
       setIsLoading(false);
     };
-    loadExisting();
+    loadExisting().catch(() => { setLoadError(true); setIsLoading(false); });
   }, [lastNight]);
 
   const handleSave = async () => {
+    if (isSaving) return;
     const totalMinutes = hours * 60 + minutes;
     
-    if (totalMinutes === 0) {
-      toast.error('Please enter your sleep time');
+    if (totalMinutes <= 0 || totalMinutes > 1440) {
+      toast.error('Enter a sleep duration between 15 minutes and 24 hours');
       return;
     }
 
+    if (ahi && (!Number.isFinite(Number(ahi)) || Number(ahi) < 0 || Number(ahi) > 200)) {
+      toast.error('Enter an AHI between 0 and 200, or leave it blank');
+      return;
+    }
     const entry: SleepEntry = {
       id: existingEntry?.id || uuidv4(),
       date: lastNight,
@@ -87,7 +97,14 @@ export function SleepLogScreen({ onBack, onSave }: SleepLogScreenProps) {
       ahi: ahi ? parseFloat(ahi) : undefined,
     };
 
-    await saveSleepEntry(entry);
+    setIsSaving(true);
+    try {
+      await saveSleepEntry(entry);
+    } catch {
+      toast.error('Could not save sleep. Your entries are still here; please try again.');
+      setIsSaving(false);
+      return;
+    }
     
     // Trigger save animation (sleep-related, new or edit)
     saveConfirmation.trigger(isEditing ? 'edit' : 'new', 'sleep');
@@ -96,23 +113,18 @@ export function SleepLogScreen({ onBack, onSave }: SleepLogScreenProps) {
     onSave();
     
     // Small delay to show animation before navigating
-    setTimeout(() => {
+    navigationTimer.current = setTimeout(() => {
       onBack();
     }, 400);
   };
 
   const adjustTime = (field: 'hours' | 'minutes', delta: number) => {
-    if (field === 'hours') {
-      setHours(prev => Math.max(0, Math.min(24, prev + delta)));
-    } else {
-      setMinutes(prev => {
-        const newVal = prev + delta;
-        if (newVal < 0) return 45;
-        if (newVal > 45) return 0;
-        return newVal;
-      });
-    }
+    const total = adjustSleepDuration(hours, minutes, field === 'hours' ? delta * 60 : delta);
+    setHours(Math.floor(total / 60));
+    setMinutes(total % 60);
   };
+
+  if (loadError) return <div role="alert" className="section-card space-y-4"><p>Could not read your sleep journal. Please try opening it again.</p><Button onClick={onBack}>Back</Button></div>;
 
   if (isLoading) {
     return (
@@ -164,6 +176,7 @@ export function SleepLogScreen({ onBack, onSave }: SleepLogScreenProps) {
           {/* Hours */}
           <div className="flex flex-col items-center gap-2">
             <button
+              aria-label="Increase hours"
               onClick={() => adjustTime('hours', 1)}
               className="p-3 rounded-full bg-primary/20 hover:bg-primary/30 text-primary transition-colors"
             >
@@ -174,6 +187,7 @@ export function SleepLogScreen({ onBack, onSave }: SleepLogScreenProps) {
               <div className="text-sm text-muted-foreground">hours</div>
             </div>
             <button
+              aria-label="Decrease hours"
               onClick={() => adjustTime('hours', -1)}
               className="p-3 rounded-full bg-primary/20 hover:bg-primary/30 text-primary transition-colors"
             >
@@ -186,6 +200,7 @@ export function SleepLogScreen({ onBack, onSave }: SleepLogScreenProps) {
           {/* Minutes */}
           <div className="flex flex-col items-center gap-2">
             <button
+              aria-label="Increase minutes"
               onClick={() => adjustTime('minutes', 15)}
               className="p-3 rounded-full bg-primary/20 hover:bg-primary/30 text-primary transition-colors"
             >
@@ -196,6 +211,7 @@ export function SleepLogScreen({ onBack, onSave }: SleepLogScreenProps) {
               <div className="text-sm text-muted-foreground">minutes</div>
             </div>
             <button
+              aria-label="Decrease minutes"
               onClick={() => adjustTime('minutes', -15)}
               className="p-3 rounded-full bg-primary/20 hover:bg-primary/30 text-primary transition-colors"
             >
@@ -310,9 +326,10 @@ export function SleepLogScreen({ onBack, onSave }: SleepLogScreenProps) {
       >
         <Button
           onClick={handleSave}
+          disabled={isSaving}
           className="w-full h-14 text-lg font-semibold rounded-2xl"
         >
-          {isEditing ? 'Update Sleep Log' : 'Save Sleep Log'}
+          {isSaving ? 'Saving…' : isEditing ? 'Update Sleep Log' : 'Save Sleep Log'}
         </Button>
       </motion.div>
 

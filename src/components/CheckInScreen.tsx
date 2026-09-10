@@ -1,3 +1,4 @@
+import { CheckInDraftSchema } from '@/lib/validation';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
@@ -92,7 +93,9 @@ interface CheckInScreenProps {
 export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack }: CheckInScreenProps) {
   const saveConfirmation = useSaveConfirmation();
   const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastSavedIdRef = useRef<string | null>(null);
+  const savingRef = useRef(false);
+  const draftWarningShown = useRef(false);
+  useEffect(() => () => { if (navigationTimeoutRef.current) clearTimeout(navigationTimeoutRef.current); }, []);
   const [dateTime, setDateTime] = useState(new Date());
   const [narcolepsyDomains, setNarcolepsyDomains] = useState<NarcolepsyDomains>(defaultNarcolepsyDomains);
   const [overlappingDomains, setOverlappingDomains] = useState<OverlappingDomains>(defaultOverlappingDomains);
@@ -107,10 +110,11 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
 
   // Load draft on mount
   useEffect(() => {
-    const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+    let savedDraft: string | null = null;
+    try { savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY); } catch { /* Tracking can still be used if draft storage is unavailable. */ }
     if (savedDraft) {
       try {
-        const draft: CheckInDraft = JSON.parse(savedDraft);
+        const draft = CheckInDraftSchema.parse(JSON.parse(savedDraft)) as CheckInDraft;
         setDateTime(new Date(draft.dateTime));
         setNarcolepsyDomains(draft.narcolepsyDomains);
         setOverlappingDomains(draft.overlappingDomains);
@@ -123,12 +127,12 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
           description: 'Your previous check-in was recovered',
         });
       } catch (e) {
-        localStorage.removeItem(DRAFT_STORAGE_KEY);
+        try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* Storage may be disabled. */ }
       }
     } else {
       getSettings().then((settings: AppSettings) => {
         setOverlappingExpanded(settings.showContextByDefault);
-      });
+      }).catch(() => { /* Keep the default preferences when storage is unavailable. */ });
     }
   }, []);
 
@@ -143,7 +147,14 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
         note,
         overlappingExpanded,
       };
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      try {
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      } catch {
+        if (!draftWarningShown.current) {
+          toast.warning('Draft could not be backed up', { description: 'Keep this screen open until you save your check-in.' });
+          draftWarningShown.current = true;
+        }
+      }
     }
   }, [dateTime, narcolepsyDomains, overlappingDomains, activeTags, note, overlappingExpanded]);
 
@@ -181,6 +192,8 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
   };
 
   const handleSave = async () => {
+    if (savingRef.current) return;
+    savingRef.current = true;
     setIsSaving(true);
 
     const checkInId = uuidv4();
@@ -198,8 +211,15 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
       note: note.trim() || undefined,
     };
 
-    await saveCheckIn(checkIn);
-    lastSavedIdRef.current = checkInId;
+    try {
+      await saveCheckIn(checkIn);
+    } catch {
+      toast.error('Could not save your check-in', { description: 'Your entries are still here. Check device storage and try again.' });
+      return;
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
 
     // Trigger save animation (wake-related, always new for check-ins)
     saveConfirmation.trigger('new', 'wake');
@@ -216,11 +236,12 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
             navigationTimeoutRef.current = null;
           }
           // Delete the saved check-in
-          if (lastSavedIdRef.current) {
-            await deleteCheckIn(lastSavedIdRef.current);
-            lastSavedIdRef.current = null;
+          try {
+            await deleteCheckIn(checkInId);
             toast.info('Check-in removed');
-            onSave(); // Refresh data
+            onSave();
+          } catch {
+            toast.error('Could not undo. Your saved check-in is still in the journal.');
           }
         },
       },
@@ -232,6 +253,7 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     onSave();
 
     // Delay navigation to let animation complete
+    if (navigationTimeoutRef.current) clearTimeout(navigationTimeoutRef.current);
     navigationTimeoutRef.current = setTimeout(() => {
       onNavigateToTrends();
     }, 1600);
@@ -246,7 +268,7 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     setShowNote(false);
     setShowResetDialog(false);
     setDraftRestored(false);
-    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* Do not interrupt a completed save. */ }
   };
 
   // Order for overlapping domains (sensory last)
@@ -541,7 +563,7 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
             <AlertDialogCancel>Keep editing</AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => { 
-                localStorage.removeItem(DRAFT_STORAGE_KEY);
+                try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* Storage may be disabled. */ }
                 setShowBackDialog(false);
                 setTimeout(() => onBack(), 0);
               }}

@@ -10,17 +10,17 @@ interface BottomNavProps {
 }
 
 const tabs: { id: TabId; label: string; icon: typeof Brain }[] = [
-  { id: 'home', label: 'Home', icon: Home },
+  { id: 'home', label: 'Today', icon: Home },
   { id: 'log', label: 'Log', icon: Brain },
   { id: 'timeline', label: 'Timeline', icon: Calendar },
-  { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+  { id: 'dashboard', label: 'Patterns', icon: BarChart3 },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50">
-      <div className="flex items-center justify-around h-16 px-2 max-w-lg mx-auto" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+    <nav aria-label="Main navigation" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }} className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50">
+      <div className="flex items-center justify-around h-16 px-2 max-w-lg mx-auto">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -28,9 +28,10 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
           return (
             <motion.button
               key={tab.id}
+              aria-current={isActive ? 'page' : undefined}
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                'tab-item relative flex-1 touch-target',
+                'tab-item relative flex-1 touch-target min-w-0 px-1',
                 isActive && 'tab-item-active'
               )}
               whileTap={{ scale: 0.9 }}
