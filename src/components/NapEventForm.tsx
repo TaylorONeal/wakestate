@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { format, differenceInMinutes } from 'date-fns';
@@ -36,6 +36,9 @@ export function NapEventForm({ onClose, onBack, onSave }: NapEventFormProps) {
   const [refreshed, setRefreshed] = useState<RefreshedLevel | undefined>();
   const [sleepInertia, setSleepInertia] = useState<SleepInertiaDuration | undefined>();
   const [note, setNote] = useState('');
+  const savingRef = useRef(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
   const [isSaving, setIsSaving] = useState(false);
   const [showBackDialog, setShowBackDialog] = useState(false);
 
@@ -60,6 +63,7 @@ export function NapEventForm({ onClose, onBack, onSave }: NapEventFormProps) {
     : 'Set end time';
 
   const handleSave = async () => {
+    if (savingRef.current) return;
     if (planned === undefined) {
       toast({
         title: 'Please select nap type',
@@ -69,6 +73,11 @@ export function NapEventForm({ onClose, onBack, onSave }: NapEventFormProps) {
       return;
     }
 
+    if (!Number.isFinite(duration) || duration <= 0 || duration > 1440) {
+      toast({ title: 'Check the nap times', description: 'End time must be after start time, within 24 hours.', variant: 'destructive' });
+      return;
+    }
+    savingRef.current = true;
     setIsSaving(true);
 
     const event: TrackingEvent = {
@@ -86,7 +95,14 @@ export function NapEventForm({ onClose, onBack, onSave }: NapEventFormProps) {
       note: note.trim() || undefined,
     };
 
-    await saveEvent(event);
+    try {
+      await saveEvent(event);
+    } catch {
+      savingRef.current = false;
+      setIsSaving(false);
+      toast({ title: 'Event was not saved', description: 'Your entries are still here. Check device storage and try again.', variant: 'destructive' });
+      return;
+    }
     
     // Trigger save animation (nap is sleep-related, always new)
     saveConfirmation.trigger('new', 'sleep');
@@ -96,16 +112,16 @@ export function NapEventForm({ onClose, onBack, onSave }: NapEventFormProps) {
       description: `${planned ? 'Planned' : 'Unplanned'} nap recorded`,
     });
 
-    setIsSaving(false);
     onSave();
     
     // Small delay for animation
-    setTimeout(() => onClose(), 400);
+    closeTimer.current = setTimeout(() => onClose(), 400);
   };
 
   const formatTimeInput = (date: Date) => format(date, 'HH:mm');
 
   const handleTimeChange = (type: 'start' | 'end', value: string) => {
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) return;
     const [hours, minutes] = value.split(':').map(Number);
     const newDate = new Date();
     newDate.setHours(hours, minutes, 0, 0);
@@ -129,6 +145,7 @@ export function NapEventForm({ onClose, onBack, onSave }: NapEventFormProps) {
         {/* Header */}
         <div className="flex items-center gap-3">
           <motion.button
+            aria-label="Back to event types"
             onClick={handleBackClick}
             className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors -ml-1"
             whileTap={{ scale: 0.95 }}

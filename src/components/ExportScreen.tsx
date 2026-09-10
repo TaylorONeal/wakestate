@@ -1,13 +1,14 @@
+import { downloadFile } from '@/lib/download';
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { 
-  ChevronLeft, 
-  FileText, 
-  Download, 
-  Upload, 
-  Star, 
-  Stethoscope, 
+import {
+  ChevronLeft,
+  FileText,
+  Download,
+  Upload,
+  Star,
+  Stethoscope,
   Heart,
   Database,
   Table,
@@ -56,6 +57,7 @@ import {
 
 interface ExportScreenProps {
   onBack: () => void;
+  onDataChange?: () => void;
 }
 
 const DATE_RANGE_OPTIONS: { value: DateRangeOption; label: string }[] = [
@@ -64,7 +66,7 @@ const DATE_RANGE_OPTIONS: { value: DateRangeOption; label: string }[] = [
   { value: '90days', label: 'Last 90 days' },
 ];
 
-export function ExportScreen({ onBack }: ExportScreenProps) {
+export function ExportScreen({ onBack, onDataChange }: ExportScreenProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -104,7 +106,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
 
   const handleGenerateReport = async (type: 'quick' | 'detailed' | 'personal') => {
     setIsGenerating(true);
-    
+
     try {
       const checkIns = await getCheckIns();
       const events = await getEvents();
@@ -130,11 +132,11 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
           break;
       }
 
-      downloadReport(report, filename);
+      await downloadReport(report, filename);
 
       toast({
         title: 'Report generated',
-        description: 'Your report has been downloaded',
+        description: 'Download or sharing finished. Keep exported files private.',
       });
     } catch (error) {
       toast({
@@ -148,36 +150,23 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
   };
 
   const handleExportJSON = async () => {
-    const data = await exportAllData();
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `wakestate-export-${format(new Date(), 'yyyy-MM-dd')}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: 'Export complete',
-      description: 'Your data has been downloaded',
-    });
+    try {
+      const data = await exportAllData();
+      await downloadFile(data, `wakestate-export-${format(new Date(), 'yyyy-MM-dd')}.json`, 'application/json');
+      toast({ title: 'Export ready', description: 'Keep your backup in a private location.' });
+    } catch {
+      toast({ title: 'Export not completed', description: 'Please try again.', variant: 'destructive' });
+    }
   };
 
   const handleExportCSV = async () => {
-    const checkIns = await getCheckIns();
-    const csv = exportToCSV(checkIns);
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `wakestate-checkins-${format(new Date(), 'yyyy-MM-dd')}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: 'CSV Export complete',
-      description: 'Check-ins exported to CSV',
-    });
+    try {
+      const csv = exportToCSV(await getCheckIns());
+      await downloadFile(csv, `wakestate-checkins-${format(new Date(), 'yyyy-MM-dd')}.csv`, 'text/csv');
+      toast({ title: 'CSV export ready', description: 'This file contains check-ins only.' });
+    } catch {
+      toast({ title: 'Export not completed', description: 'Please try again.', variant: 'destructive' });
+    }
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,14 +174,16 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
     if (!file) return;
 
     try {
+      if (file.size > 10 * 1024 * 1024) throw new Error('Backup exceeds 10 MB');
       const text = await file.text();
       const result = await importData(text);
-      
+      onDataChange?.();
+
       toast({
         title: 'Import complete',
         description: `Imported ${result.checkIns} check-ins and ${result.events} events`,
       });
-      
+
       setShowImportDialog(false);
       loadCounts();
     } catch (error) {
@@ -202,7 +193,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
         variant: 'destructive',
       });
     }
-    
+
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -243,7 +234,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
           <Calendar className="w-4 h-4 text-primary" />
           <Label className="font-medium">Date Range</Label>
         </div>
-        
+
         <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRangeOption)}>
           <SelectTrigger className="w-full">
             <SelectValue />
@@ -278,7 +269,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
         </div>
 
         {/* Quick Summary Card */}
-        <motion.div 
+        <motion.div
           className="section-card border-primary/30 space-y-3"
           whileTap={{ scale: 0.995 }}
         >
@@ -306,7 +297,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
             <span>Clinician appointments • Workplace accommodations • Personal reflection</span>
           </div>
 
-          <Button 
+          <Button
             onClick={() => handleGenerateReport('quick')}
             disabled={isGenerating || checkInCount === 0}
             className="w-full"
@@ -317,7 +308,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
         </motion.div>
 
         {/* Detailed Report Card */}
-        <motion.div 
+        <motion.div
           className="section-card space-y-3"
           whileTap={{ scale: 0.995 }}
         >
@@ -338,7 +329,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
             <span>Sleep specialists • Neurologists • Long-term treatment discussions</span>
           </div>
 
-          <Button 
+          <Button
             variant="outline"
             onClick={() => handleGenerateReport('detailed')}
             disabled={isGenerating || checkInCount === 0}
@@ -350,7 +341,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
         </motion.div>
 
         {/* Personal Insight Card */}
-        <motion.div 
+        <motion.div
           className="section-card space-y-3"
           whileTap={{ scale: 0.995 }}
         >
@@ -371,7 +362,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
             <span>Personal journaling • Understanding changes • Preparing questions</span>
           </div>
 
-          <Button 
+          <Button
             variant="outline"
             onClick={() => handleGenerateReport('personal')}
             disabled={isGenerating || checkInCount === 0}
@@ -385,7 +376,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
         {/* Report Options */}
         <div className="section-card space-y-4">
           <h4 className="text-sm font-medium text-muted-foreground">Report Options</h4>
-          
+
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label className="text-sm">Include provider questions</Label>
@@ -439,7 +430,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
               </p>
             </div>
           </div>
-          <Button 
+          <Button
             variant="ghost"
             size="sm"
             onClick={handleExportJSON}
@@ -461,7 +452,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
               </p>
             </div>
           </div>
-          <Button 
+          <Button
             variant="ghost"
             size="sm"
             onClick={handleExportCSV}
@@ -483,7 +474,7 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
               </p>
             </div>
           </div>
-          <Button 
+          <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowImportDialog(true)}
@@ -504,13 +495,14 @@ export function ExportScreen({ onBack }: ExportScreenProps) {
         className="hidden"
       />
 
+      <p className="text-xs text-muted-foreground">Exports contain sensitive health information and are not encrypted. Only share with people you choose. Native exports also leave a temporary app cache copy, removed by your next export or Clear Data.</p>
       {/* Import Confirmation Dialog */}
       <AlertDialog open={showImportDialog} onOpenChange={setShowImportDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Import data</AlertDialogTitle>
             <AlertDialogDescription>
-              This will merge imported data with your existing data. 
+              This replaces the categories included in your backup. Export your current data first.
               Select a WakeState JSON export file.
             </AlertDialogDescription>
           </AlertDialogHeader>
