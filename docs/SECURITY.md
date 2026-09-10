@@ -44,3 +44,5 @@ No production Supabase data, credentials, auth settings, or policies were modifi
 Concurrent check-in, event and medication inserts now use single IndexedDB read/write transactions. A ten-way concurrent check-in test verifies records are retained. Corrupt check-in drafts are validated before restoration; unavailable draft storage warns without crashing the form. Check-in, sleep and medication save failures preserve form contents and offer a retry; no successful save is claimed before the write completes. These changes do not encrypt records or establish regulatory compliance.
 
 The integration pass also makes edits/deletes and sleep upserts atomic, so an undo or deletion cannot overwrite a concurrently inserted journal record. Event-form save errors preserve entered values and permit retry. No server deployment, authentication-policy change, or store submission is included.
+
+Feedback response validation and challenge expiry/retry handling are now covered locally. The interface no longer implies a selected answer has been verified; SEC-01 remains open because client lifecycle fixes do not prevent automated submissions or token replay.
