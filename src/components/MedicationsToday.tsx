@@ -1,14 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { format } from 'date-fns';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Pill, Plus, Undo2, Clock, Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SaveConfirmation } from '@/components/SaveConfirmation';
-import { 
-  getMedicationConfig, 
-  getMedicationAdministrations, 
+import {
+  getMedicationConfig,
+  getMedicationAdministrations,
   saveMedicationAdministration,
   removeMedicationAdministration,
-  getTodayAdministrations 
+  getTodayAdministrations
 } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 import { useSaveConfirmation } from '@/hooks/useSaveConfirmation';
@@ -32,29 +33,38 @@ export function MedicationsToday({ onSetupClick, refreshTrigger }: MedicationsTo
   const saveConfirmation = useSaveConfirmation();
   const [config, setConfig] = useState<UserMedicationConfig | null>(null);
   const [medStatuses, setMedStatuses] = useState<MedStatus[]>([]);
+  const [loadError, setLoadError] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
   const [loading, setLoading] = useState(true);
   const [undoItem, setUndoItem] = useState<{ id: string; medId: string; timeout: NodeJS.Timeout } | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    const medConfig = await getMedicationConfig();
-    setConfig(medConfig);
+    setLoadError(false);
+    try {
+      const medConfig = await getMedicationConfig();
+      setConfig(medConfig);
 
-    if (medConfig?.isConfigured && medConfig.regimen.length > 0) {
-      const statuses: MedStatus[] = await Promise.all(
-        medConfig.regimen.map(async (med) => {
-          const todayAdmins = await getTodayAdministrations(med.medicationId);
-          return {
-            med,
-            todayCount: todayAdmins.length,
-            targetCount: med.frequencyCount,
-            lastAdmin: todayAdmins[0],
-          };
-        })
-      );
-      setMedStatuses(statuses);
+      if (medConfig?.isConfigured && medConfig.regimen.length > 0) {
+        const statuses: MedStatus[] = await Promise.all(
+          medConfig.regimen.map(async (med) => {
+            const todayAdmins = await getTodayAdministrations(med.medicationId);
+            return {
+              med,
+              todayCount: todayAdmins.length,
+              targetCount: med.frequencyCount,
+              lastAdmin: todayAdmins[0],
+            };
+          })
+        );
+        setMedStatuses(statuses);
+      }
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -62,61 +72,82 @@ export function MedicationsToday({ onSetupClick, refreshTrigger }: MedicationsTo
   }, [loadData, refreshTrigger]);
 
   const handleTaken = async (med: MedicationRegimen) => {
-    const now = new Date();
-    const admin: MedicationAdministration = {
-      id: uuidv4(),
-      medicationId: med.medicationId,
-      brandName: med.brandName,
-      timestamp: now.toISOString(),
-      localDate: now.toISOString().split('T')[0],
-      localTime: now.toTimeString().slice(0, 5),
-      doseSelected: med.defaultDose,
-      adminNumberForDay: (medStatuses.find(s => s.med.medicationId === med.medicationId)?.todayCount || 0) + 1,
-    };
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
+    try {
+      const now = new Date();
+      const admin: MedicationAdministration = {
+        id: uuidv4(),
+        medicationId: med.medicationId,
+        brandName: med.brandName,
+        timestamp: now.toISOString(),
+        localDate: format(now, 'yyyy-MM-dd'),
+        localTime: now.toTimeString().slice(0, 5),
+        doseSelected: med.defaultDose,
+        adminNumberForDay: (medStatuses.find(s => s.med.medicationId === med.medicationId)?.todayCount || 0) + 1,
+      };
 
-    await saveMedicationAdministration(admin);
-    
-    // Trigger save animation (medication type for lightning bolts)
-    saveConfirmation.trigger('new', 'medication');
-    
-    // Haptic feedback
-    if ('vibrate' in navigator) {
-      navigator.vibrate(30);
+      await saveMedicationAdministration(admin);
+
+      // Trigger save animation (medication type for lightning bolts)
+      saveConfirmation.trigger('new', 'medication');
+
+      // Haptic feedback
+      if ('vibrate' in navigator) {
+        navigator.vibrate(30);
+      }
+
+      toast({
+        title: `${med.brandName} logged`,
+        description: `${med.defaultDose} at ${admin.localTime}`,
+      });
+
+      // Set up undo
+      if (undoItem) {
+        clearTimeout(undoItem.timeout);
+      }
+
+      const timeout = setTimeout(() => {
+        setUndoItem(null);
+      }, 30000);
+
+      setUndoItem({ id: admin.id, medId: med.medicationId, timeout });
+
+      await loadData();
+    } catch {
+      toast({ title: 'Medication was not saved', description: 'Check device storage and try again.', variant: 'destructive' });
+    } finally {
+      busyRef.current = false;
+      setBusy(false);
     }
-
-    toast({
-      title: `${med.brandName} logged`,
-      description: `${med.defaultDose} at ${admin.localTime}`,
-    });
-
-    // Set up undo
-    if (undoItem) {
-      clearTimeout(undoItem.timeout);
-    }
-
-    const timeout = setTimeout(() => {
-      setUndoItem(null);
-    }, 30000);
-
-    setUndoItem({ id: admin.id, medId: med.medicationId, timeout });
-
-    await loadData();
   };
 
   const handleUndo = async () => {
-    if (!undoItem) return;
+    if (!undoItem || busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
+    try {
 
-    clearTimeout(undoItem.timeout);
-    await removeMedicationAdministration(undoItem.id);
-    
-    toast({
-      title: 'Undone',
-      description: 'Medication log removed.',
-    });
+      clearTimeout(undoItem.timeout);
+      await removeMedicationAdministration(undoItem.id);
 
-    setUndoItem(null);
-    await loadData();
+      toast({
+        title: 'Undone',
+        description: 'Medication log removed.',
+      });
+
+      setUndoItem(null);
+      await loadData();
+    } catch {
+      toast({ title: 'Could not undo medication log', description: 'The saved record remains. Please try again.', variant: 'destructive' });
+    } finally {
+      busyRef.current = false;
+      setBusy(false);
+    }
   };
+
+  if (loadError) return <section role="alert" className="section-card space-y-3"><p className="text-sm">Could not load your medication journal.</p><Button variant="outline" onClick={loadData}>Try again</Button></section>;
 
   if (loading) {
     return (
@@ -162,6 +193,7 @@ export function MedicationsToday({ onSetupClick, refreshTrigger }: MedicationsTo
           <Button
             variant="ghost"
             size="sm"
+            disabled={busy}
             onClick={handleUndo}
             className="text-primary hover:text-primary/80"
           >
@@ -176,7 +208,7 @@ export function MedicationsToday({ onSetupClick, refreshTrigger }: MedicationsTo
         {medStatuses.map(({ med, todayCount, targetCount, lastAdmin }) => {
           const isComplete = targetCount > 0 && todayCount >= targetCount;
           const isPRN = targetCount === 0;
-          
+
           return (
             <motion.div
               key={med.medicationId}
@@ -218,6 +250,7 @@ export function MedicationsToday({ onSetupClick, refreshTrigger }: MedicationsTo
               </div>
 
               <Button
+                disabled={busy}
                 onClick={() => handleTaken(med)}
                 size="sm"
                 variant={isComplete ? 'outline' : 'default'}
