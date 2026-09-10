@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
@@ -37,6 +37,9 @@ export function CataplextyEventForm({ onClose, onBack, onSave }: CataplextyEvent
   const [emotionTags, setEmotionTags] = useState<string[]>([]);
   const [activityTags, setActivityTags] = useState<string[]>([]);
   const [note, setNote] = useState('');
+  const savingRef = useRef(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
   const [isSaving, setIsSaving] = useState(false);
   const [showBackDialog, setShowBackDialog] = useState(false);
 
@@ -68,6 +71,7 @@ export function CataplextyEventForm({ onClose, onBack, onSave }: CataplextyEvent
   };
 
   const handleSave = async () => {
+    if (savingRef.current) return;
     if (!severity) {
       toast({
         title: 'Please select severity',
@@ -77,6 +81,7 @@ export function CataplextyEventForm({ onClose, onBack, onSave }: CataplextyEvent
       return;
     }
 
+    savingRef.current = true;
     setIsSaving(true);
 
     const event: TrackingEvent = {
@@ -92,7 +97,14 @@ export function CataplextyEventForm({ onClose, onBack, onSave }: CataplextyEvent
       note: note.trim() || undefined,
     };
 
-    await saveEvent(event);
+    try {
+      await saveEvent(event);
+    } catch {
+      savingRef.current = false;
+      setIsSaving(false);
+      toast({ title: 'Event was not saved', description: 'Your entries are still here. Check device storage and try again.', variant: 'destructive' });
+      return;
+    }
     
     // Trigger save animation (wake-related event, always new)
     saveConfirmation.trigger('new', 'wake');
@@ -102,11 +114,10 @@ export function CataplextyEventForm({ onClose, onBack, onSave }: CataplextyEvent
       description: `${severity} episode recorded`,
     });
 
-    setIsSaving(false);
     onSave();
     
     // Small delay for animation
-    setTimeout(() => onClose(), 400);
+    closeTimer.current = setTimeout(() => onClose(), 400);
   };
 
   return (
@@ -115,6 +126,7 @@ export function CataplextyEventForm({ onClose, onBack, onSave }: CataplextyEvent
         {/* Header */}
         <div className="flex items-center gap-3">
           <motion.button
+            aria-label="Back to event types"
             onClick={handleBackClick}
             className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors -ml-1"
             whileTap={{ scale: 0.95 }}
