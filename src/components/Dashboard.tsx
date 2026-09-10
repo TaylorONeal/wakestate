@@ -15,31 +15,6 @@ interface DashboardProps {
   onNavigateToExport?: () => void;
 }
 
-export function Dashboard({ refreshTrigger, onNavigateToExport }: DashboardProps) {
-  const [events, setEvents] = useState<TrackingEvent[]>([]);
-  const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
-  const [sleepEntries, setSleepEntries] = useState<SleepEntry[]>([]);
-  const [napPeriod, setNapPeriod] = useState<ViewPeriod>('week');
-  const [cataplextyPeriod, setCataplextyPeriod] = useState<ViewPeriod>('week');
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    loadData();
-  }, [refreshTrigger]);
-
-  const loadData = async () => {
-    setIsLoading(true);
-    const [eventsData, checkInsData, sleepData] = await Promise.all([
-      getEvents(),
-      getCheckIns(),
-      getSleepEntries(),
-    ]);
-    setEvents(eventsData);
-    setCheckIns(checkInsData);
-    setSleepEntries(sleepData);
-    setIsLoading(false);
-  };
-
   const getDateRange = (period: ViewPeriod) => {
     const now = new Date();
     switch (period) {
@@ -55,7 +30,7 @@ export function Dashboard({ refreshTrigger, onNavigateToExport }: DashboardProps
   };
 
   // Filter events by type and period
-  const getFilteredEvents = (type: 'nap' | 'cataplexy', period: ViewPeriod) => {
+  const getFilteredEvents = (events: TrackingEvent[], type: 'nap' | 'cataplexy', period: ViewPeriod) => {
     const { start, end } = getDateRange(period);
     return events.filter(e => {
       // Check for legacy event types too
@@ -69,13 +44,41 @@ export function Dashboard({ refreshTrigger, onNavigateToExport }: DashboardProps
     });
   };
 
+
+export function Dashboard({ refreshTrigger, onNavigateToExport }: DashboardProps) {
+  const [events, setEvents] = useState<TrackingEvent[]>([]);
+  const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
+  const [sleepEntries, setSleepEntries] = useState<SleepEntry[]>([]);
+  const [napPeriod, setNapPeriod] = useState<ViewPeriod>('week');
+  const [cataplextyPeriod, setCataplextyPeriod] = useState<ViewPeriod>('week');
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [loadError, setLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    setIsLoading(true);
+    setLoadError(false);
+    Promise.all([getEvents(), getCheckIns(), getSleepEntries()])
+      .then(([eventsData, checkInsData, sleepData]) => {
+        if (!active) return;
+        setEvents(eventsData);
+        setCheckIns(checkInsData);
+        setSleepEntries(sleepData);
+      })
+      .catch(() => { if (active) setLoadError(true); })
+      .finally(() => { if (active) setIsLoading(false); });
+    return () => { active = false; };
+  }, [refreshTrigger, retryCount]);
+
   // Generate chart data for naps
   const napChartData = useMemo(() => {
     const { start, end } = getDateRange(napPeriod);
     const days = eachDayOfInterval({ start, end });
     
     return days.map(day => {
-      const dayEvents = getFilteredEvents('nap', napPeriod).filter(e => 
+      const dayEvents = getFilteredEvents(events, 'nap', napPeriod).filter(e =>
         format(parseISO(e.localDate), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
       );
       
@@ -94,7 +97,7 @@ export function Dashboard({ refreshTrigger, onNavigateToExport }: DashboardProps
     const days = eachDayOfInterval({ start, end });
     
     return days.map(day => {
-      const dayEvents = getFilteredEvents('cataplexy', cataplextyPeriod).filter(e => 
+      const dayEvents = getFilteredEvents(events, 'cataplexy', cataplextyPeriod).filter(e =>
         format(parseISO(e.localDate), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
       );
       
@@ -131,8 +134,8 @@ export function Dashboard({ refreshTrigger, onNavigateToExport }: DashboardProps
     return { napsByHour, cataplextyByHour };
   }, [events]);
 
-  const napEvents = getFilteredEvents('nap', napPeriod);
-  const cataplextyEvents = getFilteredEvents('cataplexy', cataplextyPeriod);
+  const napEvents = getFilteredEvents(events, 'nap', napPeriod);
+  const cataplextyEvents = getFilteredEvents(events, 'cataplexy', cataplextyPeriod);
 
   const PeriodToggle = ({ value, onChange, color }: { value: ViewPeriod; onChange: (p: ViewPeriod) => void; color: string }) => (
     <div className="flex gap-1 bg-surface-2 rounded-lg p-1">
@@ -187,6 +190,16 @@ export function Dashboard({ refreshTrigger, onNavigateToExport }: DashboardProps
   };
 
   const hasAnyData = events.length > 0 || checkIns.length > 0;
+
+  if (loadError) {
+    return (
+      <div className="section-card space-y-3" role="alert">
+        <h2 className="font-semibold">Patterns could not be loaded</h2>
+        <p className="text-sm text-muted-foreground">Your records have not been changed. Try loading them again.</p>
+        <Button onClick={() => setRetryCount(count => count + 1)}>Try again</Button>
+      </div>
+    );
+  }
 
   // Loading state with skeleton
   if (isLoading) {
