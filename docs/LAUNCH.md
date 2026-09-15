@@ -1,5 +1,11 @@
 # iOS and Android launch preparation
 
+## Android execution update — 2026-09-15
+
+Native Android compilation now passes with installed Java 21 / SDK 36. Installable debug APK and unsigned release AAB are available with checksums in `artifacts/android/2026-09-15/`. The old missing-Java blocker below is superseded. Native lint: 0 errors / 15 warnings; all 22 regression tests and typecheck pass. No Android device is attached. Publisher account is closed per coordinating Admin verification; owned app ID/signing remain unverified. No push or store submission.
+
+See [the Android release packet](release/ANDROID-2026-09-15.md) for artifact paths, signing evidence, prepared store fields, backend acceptance tests and exact remaining blockers. WS-06 is now compilation complete / device QA open; WS-08 Android launcher and splash vectors implemented / device visuals and store images open. WS-05 and WS-07 remain open.
+
 ## Status
 
 Native Capacitor projects are provided in `ios/` and `android/`. This is launch preparation, not a signed release or store submission. Bundle identifier `com.wakestate.app` is provisional: confirm publisher ownership before uploading either app. Existing web users must export/import to transfer records; native storage is separate.
