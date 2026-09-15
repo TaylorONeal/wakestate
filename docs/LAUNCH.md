@@ -124,3 +124,7 @@ Feedback clears stale challenge data before refresh, rejects malformed/expired r
 Verification: 22/22 tests, TypeScript, production build and native asset sync passed. ESLint: 0 errors / 8 existing fast-refresh warnings (all five hook warnings resolved). Browser storage-failure injection confirmed medication selection retention, visible error and enabled retry. Feedback expiry after selection plus failed refresh cleared the old question/answer and displayed retry; no browser runtime errors were recorded. Native device checks remain open.
 
 Repository publication correction: committing `2f9afa0` triggered the existing `.git/hooks/post-commit` auto-push to origin/main. The hook reported success, so this pass and the prior local commits reached GitHub despite the intended local-only workflow above. No store submission was performed. This correction is committed locally with hooks bypassed; it does not assert deployment status.
+
+## Clean candidate update
+
+The platform-clean candidate at `artifacts/android/2026-09-15-independent/` supersedes the initial September 15 artifacts; `artifacts/android/current.json` records hashes and status. See [removal evidence and independent hosting](INDEPENDENT-HOSTING.md). Cleanup stays on a local branch with no merge/push/deploy. Signing, device, publisher and backend gates remain open.
