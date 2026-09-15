@@ -30,3 +30,6 @@ dist-ssr
 *.keystore
 *.jks
 *.mobileprovision
+
+# Local unsigned/debug release artifacts
+/artifacts/

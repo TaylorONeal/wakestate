@@ -15,7 +15,8 @@
     "native:sync": "npm run build:native && cap sync",
     "native:ios": "cap open ios",
     "native:android": "cap open android",
-    "validate": "npm run typecheck && npm test && npm run lint && npm run build"
+    "validate": "npm run typecheck && npm test && npm run lint && npm run build",
+    "android:build": "sh scripts/build-android.sh"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",

@@ -46,3 +46,5 @@ Concurrent check-in, event and medication inserts now use single IndexedDB read/
 The integration pass also makes edits/deletes and sleep upserts atomic, so an undo or deletion cannot overwrite a concurrently inserted journal record. Event-form save errors preserve entered values and permit retry. No server deployment, authentication-policy change, or store submission is included.
 
 Feedback response validation and challenge expiry/retry handling are now covered locally. The interface no longer implies a selected answer has been verified; SEC-01 remains open because client lifecycle fixes do not prevent automated submissions or token replay.
+
+Android execution September 15: actual debug APK and unsigned AAB compile; manifest/package inspection confirms target 36 and no health sensor permissions. Production RLS/header/abuse protection remain unverified; exact read-only inspection and rollout acceptance checks are staged in `docs/release/ANDROID-2026-09-15.md`. No auth configuration or licenses changed.
