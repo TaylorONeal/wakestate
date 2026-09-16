@@ -1,5 +1,5 @@
 import { clearExportCache } from './download';
-import { get, set, delMany, setMany, update } from 'idb-keyval';
+import { get, getMany, set, delMany, setMany, update } from 'idb-keyval';
 import { format } from 'date-fns';
 import type { 
   CheckIn, 
@@ -193,21 +193,21 @@ export async function deleteSleepEntry(id: string): Promise<void> {
 
 // Export/Import
 export async function exportAllData(): Promise<string> {
-  const checkIns = await getCheckIns();
-  const events = await getEvents();
-  const settings = await getSettings();
-  
-  return JSON.stringify({
+  // One transaction provides a coherent snapshot and propagates read failures.
+  // Display helpers may fall back to empty data; backups must never do so.
+  const [checkIns, events, settings, medications, medicationConfig, medicationAdministrations, sleepEntries] =
+    await getMany([CHECKINS_KEY, EVENTS_KEY, SETTINGS_KEY, MEDICATIONS_KEY, MED_CONFIG_KEY, MED_ADMIN_KEY, SLEEP_ENTRIES_KEY]);
+  const backup = {
     version: 2,
-    medications: await getUserMedications(),
-    medicationConfig: await getMedicationConfig(),
-    medicationAdministrations: await getMedicationAdministrations(),
-    sleepEntries: await getSleepEntries(),
     exportedAt: new Date().toISOString(),
-    checkIns,
-    events,
-    settings,
-  }, null, 2);
+    checkIns: checkIns === undefined ? [] : checkIns, events: events === undefined ? [] : events, settings: settings === undefined ? defaultSettings : settings,
+    medications: medications === undefined ? {} : medications, medicationConfig: medicationConfig === undefined ? null : medicationConfig,
+    medicationAdministrations: medicationAdministrations === undefined ? [] : medicationAdministrations, sleepEntries: sleepEntries === undefined ? [] : sleepEntries,
+  };
+  ImportDataSchema.parse(backup);
+  const json = JSON.stringify(backup, null, 2);
+  if (new Blob([json]).size > 10 * 1024 * 1024) throw new Error('Backup exceeds 10 MB');
+  return json;
 }
 
 export async function importData(jsonString: string): Promise<{ checkIns: number; events: number }> {
