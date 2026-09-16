@@ -156,3 +156,9 @@ Capacitor projects in `ios/` and `android/` bundle the app for native testing. N
 The continued UX pass adds quiet save confirmations, deferred loading of larger views, failed-save recovery, bounded sleep-time controls, draft validation, atomic concurrent inserts, and streamed feedback request-size enforcement. The regression suite currently contains 22 tests; see the launch notes for verified behavior and remaining release gates.
 
 Run `npm run validate` for typecheck, regression tests, lint and production web build. Run `npm run native:sync` afterward to prepare bundled assets for both native projects. Current ownership and release blockers are in [the launch tracker](docs/LAUNCH.md#launch-tracker--2026-09-10).
+
+## Independent builds
+
+Use npm and package-lock.json. `npm run branding:generate` creates local web/native assets; `npm run build` produces the portable PWA. See [independent hosting](docs/INDEPENDENT-HOSTING.md) for nginx/container configuration, build inputs and data migration.
+
+`npm run migration:rehearse` runs isolated synthetic cross-origin backup recovery; install Chromium with `npx playwright install chromium` first. See [migration/recovery checklist](docs/MIGRATION-REHEARSAL.md).

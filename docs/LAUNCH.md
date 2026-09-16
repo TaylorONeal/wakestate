@@ -124,3 +124,11 @@ Feedback clears stale challenge data before refresh, rejects malformed/expired r
 Verification: 22/22 tests, TypeScript, production build and native asset sync passed. ESLint: 0 errors / 8 existing fast-refresh warnings (all five hook warnings resolved). Browser storage-failure injection confirmed medication selection retention, visible error and enabled retry. Feedback expiry after selection plus failed refresh cleared the old question/answer and displayed retry; no browser runtime errors were recorded. Native device checks remain open.
 
 Repository publication correction: committing `2f9afa0` triggered the existing `.git/hooks/post-commit` auto-push to origin/main. The hook reported success, so this pass and the prior local commits reached GitHub despite the intended local-only workflow above. No store submission was performed. This correction is committed locally with hooks bypassed; it does not assert deployment status.
+
+## Clean candidate update
+
+The platform-clean candidate at `artifacts/android/2026-09-15-independent/` supersedes the initial September 15 artifacts; `artifacts/android/current.json` records hashes and status. See [removal evidence and independent hosting](INDEPENDENT-HOSTING.md). Cleanup stays on a local branch with no merge/push/deploy. Signing, device, publisher and backend gates remain open.
+
+## Migration follow-up — 2026-09-16
+
+The current independent candidate is `artifacts/android/2026-09-16-migration/` (web PWA, debug APK, unsigned AAB, hashes and native lint evidence). `artifacts/android/current.json` supersedes the prior candidate. Passed: 26 unit tests, typecheck, eleven-check synthetic cross-origin/legacy-recovery browser rehearsal, web build, Android assembleDebug/bundleRelease/lintDebug/testDebugUnitTest and iOS asset sync. No physical-device QA or production migration. [Rehearsal/checklist](MIGRATION-REHEARSAL.md) includes the old-origin read-only backup helper. Local branch only; no push/merge/deploy/auth changes.
