@@ -88,3 +88,31 @@ it('keeps one sleep entry per date during simultaneous updates', async () => {
   await Promise.all([420, 450].map(totalSleepMinutes => saveSleepEntry({ id: String(totalSleepMinutes), date: '2026-09-09', createdAt: '2026-09-10', updatedAt: '2026-09-10', totalSleepMinutes })));
   expect(await getSleepEntries()).toHaveLength(1);
 });
+
+it('fails export on an IndexedDB read error instead of offering an empty backup', async () => {
+  const read = vi.spyOn(IDBObjectStore.prototype, 'get').mockImplementation(() => { throw new DOMException('Unavailable', 'UnknownError'); });
+  try { await expect(exportAllData()).rejects.toThrow(); } finally { read.mockRestore(); }
+});
+
+it('rejects corrupt stored records before offering a backup that cannot be restored', async () => {
+  await set('wakestate_sleep_entries', [{ id: 'broken', totalSleepMinutes: -1 }]);
+  await expect(exportAllData()).rejects.toThrow();
+  expect(await get('wakestate_sleep_entries')).toEqual([{ id: 'broken', totalSleepMinutes: -1 }]);
+});
+
+it('rolls back all imported categories when a later write fails', async () => {
+  await set('wakestate_events', [{ id: 'original' }]);
+  const original = IDBObjectStore.prototype.put;
+  const write = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(function(value, key) {
+    if (key === 'wakestate_sleep_entries') { this.transaction.abort(); throw new DOMException('Test quota', 'QuotaExceededError'); }
+    return original.call(this, value, key);
+  });
+  try { await expect(importData(JSON.stringify({ version: 2, events: [], sleepEntries: [] }))).rejects.toThrow(); }
+  finally { write.mockRestore(); }
+  expect(await get('wakestate_events')).toEqual([{ id: 'original' }]);
+});
+
+it('does not silently turn a null stored category into an empty backup', async () => {
+  await set('wakestate_events', null);
+  await expect(exportAllData()).rejects.toThrow();
+});

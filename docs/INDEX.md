@@ -9,3 +9,5 @@
 - [Read-only feedback security inspection](release/verify-feedback-security.sql): deployed policy/grant inspection for an authorized operator.
 
 - [Independent hosting/removal audit](INDEPENDENT-HOSTING.md): local assets, clean candidates and external migration gates.
+
+- [Migration rehearsal and recovery checklist](MIGRATION-REHEARSAL.md): synthetic cross-origin UI recovery, legacy helper, fail-closed exports and evidence.
