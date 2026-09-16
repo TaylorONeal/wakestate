@@ -27,3 +27,7 @@ The live `https://wakestate.lovable.app/` host and GitHub homepage remain extern
 Platform names in this audit are intentional historical evidence; old git history/ignored superseded artifacts are preserved. No tracked runtime reference remains. The existing post-commit auto-push hook is preserved; cleanup commits bypass it with per-command `core.hooksPath=/dev/null`. No push, merge or deployment is included.
 
 Final native verification after deleting unused template bitmap variants: build/tasks passed, Android lint 0 errors / 8 warnings. Final APK was extracted separately and scanned again; no platform string matches. Screenshot capture of the standalone SVG stalled and was stopped; image decode checks and direct local image inspection succeeded.
+
+## Portability verification
+
+See [the migration rehearsal](MIGRATION-REHEARSAL.md) and run `npm run migration:rehearse` before a domain move. It verifies complete synthetic recovery across origins and includes a local read-only helper for the older origin if its exporter omits categories. Do not retire old hosting based on counts alone.

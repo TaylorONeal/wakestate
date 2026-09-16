@@ -17,7 +17,8 @@
     "native:android": "cap open android",
     "validate": "npm run typecheck && npm test && npm run lint && npm run build",
     "android:build": "sh scripts/build-android.sh",
-    "branding:generate": "node scripts/generate-branding.mjs"
+    "branding:generate": "node scripts/generate-branding.mjs",
+    "migration:rehearse": "node scripts/rehearse-migration.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",
@@ -85,6 +86,7 @@
   "devDependencies": {
     "@capacitor/cli": "^8.4.3",
     "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^22.16.5",
     "@types/react": "^18.3.23",
