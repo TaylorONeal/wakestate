@@ -128,3 +128,7 @@ Repository publication correction: committing `2f9afa0` triggered the existing `
 ## Clean candidate update
 
 The platform-clean candidate at `artifacts/android/2026-09-15-independent/` supersedes the initial September 15 artifacts; `artifacts/android/current.json` records hashes and status. See [removal evidence and independent hosting](INDEPENDENT-HOSTING.md). Cleanup stays on a local branch with no merge/push/deploy. Signing, device, publisher and backend gates remain open.
+
+## Migration follow-up — 2026-09-16
+
+The current independent candidate is `artifacts/android/2026-09-16-migration/` (web PWA, debug APK, unsigned AAB, hashes and native lint evidence). `artifacts/android/current.json` supersedes the prior candidate. Passed: 26 unit tests, typecheck, eleven-check synthetic cross-origin/legacy-recovery browser rehearsal, web build, Android assembleDebug/bundleRelease/lintDebug/testDebugUnitTest and iOS asset sync. No physical-device QA or production migration. [Rehearsal/checklist](MIGRATION-REHEARSAL.md) includes the old-origin read-only backup helper. Local branch only; no push/merge/deploy/auth changes.

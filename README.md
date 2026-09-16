@@ -160,3 +160,5 @@ Run `npm run validate` for typecheck, regression tests, lint and production web 
 ## Independent builds
 
 Use npm and package-lock.json. `npm run branding:generate` creates local web/native assets; `npm run build` produces the portable PWA. See [independent hosting](docs/INDEPENDENT-HOSTING.md) for nginx/container configuration, build inputs and data migration.
+
+`npm run migration:rehearse` runs isolated synthetic cross-origin backup recovery; install Chromium with `npx playwright install chromium` first. See [migration/recovery checklist](docs/MIGRATION-REHEARSAL.md).
