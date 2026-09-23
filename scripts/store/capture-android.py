@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--serial', required=True, help='Disposable device serial from adb devices')
-    parser.add_argument('--shot', required=True, choices=['01-today', '02-check-in', '03-sleep', '04-patterns', '05-export'])
+    parser.add_argument('--shot', required=True, choices=['00-onboarding', '01-today', '02-check-in', '03-sleep', '04-patterns', '05-export'])
     parser.add_argument('--output', type=Path, default=Path('artifacts/store/android'))
     args = parser.parse_args()
     adb = ['adb', '-s', args.serial]
