@@ -2,6 +2,24 @@ name: Android readiness (unsigned)
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/android-readiness.yml'
+      - 'android/**'
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'supabase/functions/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'capacitor.config.*'
+      - 'vite.config.*'
+      - 'vitest.config.*'
+      - 'tsconfig*.json'
+      - 'eslint.config.*'
+      - 'postcss.config.*'
+      - 'tailwind.config.*'
+      - 'index.html'
 
 permissions:
   contents: read
