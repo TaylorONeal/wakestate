@@ -1,0 +1,41 @@
+name: Android readiness (unsigned)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Verify runner Android prerequisites
+        shell: bash
+        run: |
+          test -n "${ANDROID_HOME:-}" || { echo 'Android SDK is required'; exit 1; }
+          test -d "$ANDROID_HOME/platforms/android-36" || { echo 'Install approved Android SDK 36 on this runner'; exit 1; }
+      - run: npm ci
+      - run: npm run validate
+      - name: Compile debug APK and unsigned release bundle
+        run: npm run android:build
+      - name: Preserve unsigned build and reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: wakestate-unsigned-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/bundle/release/*.aab
+            android/app/build/reports/
