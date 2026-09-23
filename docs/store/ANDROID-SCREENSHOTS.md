@@ -2,6 +2,12 @@
 
 This packet prepares reproducible captures; it does not contain completed Android screenshots. Use only a disposable test device or emulator with synthetic records. Do not import this fixture over a real journal: import replaces stored categories.
 
+The unsigned Android workflow also launches the built APK on a fresh API 36 emulator and captures `00-onboarding` as an artifact for visual inspection. A successful job proves a captured native launch, not completion of the five seeded listing screenshots below. Review the image before using it; the job does not import sample records or certify device behavior.
+
+## Existing asset review
+
+September 23 inventory found PWA icons and native launcher/splash resources, but no completed store screenshots or feature graphic. Visual inspection of `public/pwa-512.png` shows an orange wave on a navy rounded square. The retained raster `drawable/splash.png` and `mipmap-xxxhdpi/ic_launcher.png` show Capacitor template artwork. Active native launcher/splash XML instead references the teal crescent vectors `wakestate_mark` / `wakestate_launcher`. Resolve this PWA/native brand mismatch before making a final store icon; do not assume unused template PNGs depict the active launcher. Actual native rendering still requires capture.
+
 ## Prepare
 
 1. Build the reviewed version with `npm run android:build`, or download its successful CI artifact. Record the source commit and APK hash with the capture set. The APK is debug-signed, not a store release.
