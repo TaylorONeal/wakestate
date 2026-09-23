@@ -1,0 +1,16 @@
+{
+  "source": "adb exec-out screencap -p",
+  "platform": "Android",
+  "apiLevel": 36,
+  "package": "com.wakestate.app",
+  "shot": "00-onboarding",
+  "width": 1080,
+  "height": 1920,
+  "sha256": "5becf9278824d512e82fe5c52a14c5eac561ebc59baa4752764be964e198a627",
+  "capturedAt": "2026-09-23T02:37:01.004627+00:00",
+  "workflowRun": "https://github.com/TaylorONeal/wakestate/actions/runs/35810672365",
+  "prHead": "db79bc4b646d2c116ebe9405006e4b1c8eacd8a7",
+  "testedMerge": "eb687f414c8c7c664d3fe497d2a78d792d3620c7",
+  "reviewStatus": "Reviewed: readable native onboarding, complete button and disclaimer, no personal records. Emulator status icons remain.",
+  "scope": "Fresh installation launch only; no seeded journal or interaction/device regression proof."
+}
