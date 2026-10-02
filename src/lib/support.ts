@@ -1,3 +1,6 @@
-// Single place for the public support address. Replace if the mailbox changes.
-export const SUPPORT_EMAIL = 'support@sidecraftmedia.com';
-export const FEEDBACK_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('WakeState feedback')}`;
+// Public support contact. Intentionally empty until the publisher's real support
+// address is set at store setup. While empty, the About screen hides the feedback section.
+export const SUPPORT_EMAIL = '';
+export const FEEDBACK_MAILTO = SUPPORT_EMAIL
+  ? `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('WakeState feedback')}`
+  : null;
