@@ -1,5 +1,7 @@
 # Security and privacy review
 
+> **Update 2026-10-02:** the feedback feature, Supabase client and edge functions were removed, so SEC-01 and the feedback-related findings below no longer apply (closed by removal). The app has no backend. Findings about local storage, exports and deployment headers still apply; `vercel.json` now sets baseline headers for the web host. A tested CSP is still not configured.
+
 ## Summary
 
 This is a source and dependency review, not a penetration test, regulatory certification, or verification of deployed services. Health records use IndexedDB plus a localStorage check-in draft; optional feedback uses Supabase. There is no app-level encryption or login gate. The UI now communicates those limits. Do not advertise HIPAA compliance, end-to-end encryption, complete anonymity, or guaranteed privacy.

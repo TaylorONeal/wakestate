@@ -1,13 +1,13 @@
 import { motion } from 'framer-motion';
 import { ExternalLink, Info, Heart, BookOpen, Shield, ChevronLeft, Coffee, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { FEEDBACK_MAILTO } from '@/lib/support';
 
 interface AboutScreenProps {
   onBack?: () => void;
-  onNavigateToFeedback?: () => void;
 }
 
-export function AboutScreen({ onBack, onNavigateToFeedback }: AboutScreenProps) {
+export function AboutScreen({ onBack }: AboutScreenProps) {
   const resources = [
     {
       name: 'American Academy of Sleep Medicine (AASM)',
@@ -166,8 +166,8 @@ export function AboutScreen({ onBack, onNavigateToFeedback }: AboutScreenProps) 
         </div>
 
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Your health journal is stored locally. Optional feedback is sent online.
-          You control exports. Device backups and feedback have separate privacy considerations.
+          Your health journal is stored locally and is never uploaded by WakeState.
+          You control exports. Device backups and any email you send have separate privacy considerations.
         </p>
       </motion.section>
 
@@ -220,14 +220,15 @@ export function AboutScreen({ onBack, onNavigateToFeedback }: AboutScreenProps) 
           Have a suggestion, found a bug, or want to share what's working well? Your feedback helps shape WakeState for the narcolepsy community.
         </p>
 
-        <Button
-          onClick={onNavigateToFeedback}
-          variant="outline"
-          className="w-full"
-        >
-          <MessageSquare className="w-4 h-4 mr-2" />
-          Give Feedback
+        <Button asChild variant="outline" className="w-full">
+          <a href={FEEDBACK_MAILTO}>
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Email Feedback
+          </a>
         </Button>
+        <p className="text-xs text-muted-foreground leading-relaxed mt-3">
+          This opens your email app. Please leave out private health details.
+        </p>
       </motion.section>
 
       {/* Version */}

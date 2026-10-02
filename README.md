@@ -151,10 +151,10 @@ npm run native:sync
 
 The redesigned home screen emphasizes quick logging with a calm teal palette, bundled fonts, accessible navigation, and factual privacy guidance. Version 2 JSON backups include all saved health-record categories; import replaces included categories after validation. Reports/CSV remain focused on check-ins and events. Clear Data removes the journal, draft, legacy copies, and native export cache while keeping preferences.
 
-Hosting notes are in [docs/HOSTING.md](docs/HOSTING.md).
+Feedback is an email link and the app has no backend. Hosting notes are in [docs/HOSTING.md](docs/HOSTING.md).
 
 Capacitor projects in `ios/` and `android/` bundle the app for native testing. Native exports open the system share sheet; the web build keeps browser downloads and PWA support. Signing, store artwork, privacy policy operations, device QA, and store submission are still required. See [documentation index](docs/INDEX.md), [launch checklist](docs/LAUNCH.md), and [security review](docs/SECURITY.md).
 
-The continued UX pass adds quiet save confirmations, deferred loading of larger views, failed-save recovery, bounded sleep-time controls, draft validation, atomic concurrent inserts, and streamed feedback request-size enforcement. The regression suite currently contains 22 tests; see the launch notes for verified behavior and remaining release gates.
+The continued UX pass adds quiet save confirmations, deferred loading of larger views, failed-save recovery, bounded sleep-time controls, draft validation, atomic concurrent inserts. The regression suite currently contains 22 tests; see the launch notes for verified behavior and remaining release gates.
 
 Run `npm run validate` for typecheck, regression tests, lint and production web build. Run `npm run native:sync` afterward to prepare bundled assets for both native projects. Current ownership and release blockers are in [the launch tracker](docs/LAUNCH.md#launch-tracker--2026-09-10).

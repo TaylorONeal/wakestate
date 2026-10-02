@@ -177,7 +177,7 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
 
         <p className="text-sm text-muted-foreground leading-relaxed">
           All your check-ins, events, and medication records are stored only on this device.
-          Health records are not automatically uploaded. Optional feedback is sent to our feedback service.
+          Health records are never uploaded by WakeState.
         </p>
 
         <p className="text-sm text-muted-foreground leading-relaxed">No advertising or analytics SDK is included. Local records are not encrypted by WakeState or protected by an app PIN. Use a device passcode, and take care on shared devices.</p>
