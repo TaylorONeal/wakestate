@@ -13,7 +13,6 @@ const AboutScreen = lazy(() => import('@/components/AboutScreen').then(module =>
 const MedicationsScreen = lazy(() => import('@/components/MedicationsScreen').then(module => ({ default: module.MedicationsScreen })));
 const MedicationSetup = lazy(() => import('@/components/MedicationSetup').then(module => ({ default: module.MedicationSetup })));
 const ExportScreen = lazy(() => import('@/components/ExportScreen').then(module => ({ default: module.ExportScreen })));
-const FeedbackScreen = lazy(() => import('@/components/FeedbackScreen').then(module => ({ default: module.FeedbackScreen })));
 import { SleepLogScreen } from '@/components/SleepLogScreen';
 import { EventForm } from '@/components/EventForm';
 import { Onboarding } from '@/components/Onboarding';
@@ -27,7 +26,6 @@ const Index = () => {
   const [showMedications, setShowMedications] = useState(false);
   const [showMedicationSetup, setShowMedicationSetup] = useState(false);
   const [showExport, setShowExport] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
   const [showSleepLog, setShowSleepLog] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [checkInCount, setCheckInCount] = useState(0);
@@ -40,7 +38,6 @@ const Index = () => {
       const dialog = document.querySelector('[role="dialog"], [role="alertdialog"]');
       if (dialog) { dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); return; }
       if (showSleepLog) setShowSleepLog(false);
-      else if (showFeedback) setShowFeedback(false);
       else if (showExport) setShowExport(false);
       else if (showMedicationSetup) setShowMedicationSetup(false);
       else if (showMedications) setShowMedications(false);
@@ -49,7 +46,7 @@ const Index = () => {
       else void NativeApp.minimizeApp();
     });
     return () => { void listener.then(handle => handle.remove()); };
-  }, [activeTab, showEventForm, showSleepLog, showFeedback, showExport, showMedicationSetup, showMedications, showAbout]);
+  }, [activeTab, showEventForm, showSleepLog, showExport, showMedicationSetup, showMedications, showAbout]);
 
   useEffect(() => {
     const onboarded = localStorage.getItem('wakestate_onboarded');
@@ -82,10 +79,6 @@ const Index = () => {
       );
     }
 
-    if (showFeedback) {
-      return <FeedbackScreen onBack={() => setShowFeedback(false)} />;
-    }
-
     if (showExport) {
       return <ExportScreen onBack={() => setShowExport(false)} onDataChange={handleDataChange} />;
     }
@@ -108,13 +101,7 @@ const Index = () => {
 
     if (showAbout) {
       return (
-        <AboutScreen 
-          onBack={() => setShowAbout(false)} 
-          onNavigateToFeedback={() => {
-            setShowAbout(false);
-            setShowFeedback(true);
-          }}
-        />
+        <AboutScreen onBack={() => setShowAbout(false)} />
       );
     }
 
@@ -160,7 +147,6 @@ const Index = () => {
 
   const getTitle = () => {
     if (showSleepLog) return "Last Night's Sleep";
-    if (showFeedback) return 'Feedback';
     if (showExport) return 'Export & Reports';
     if (showMedicationSetup) return 'Set Up Medications';
     if (showMedications) return 'Medications';
@@ -208,7 +194,7 @@ const Index = () => {
         <main className="px-4 py-4 max-w-lg mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
-              key={showSleepLog ? 'sleep' : showFeedback ? 'feedback' : showExport ? 'export' : showMedicationSetup ? 'med-setup' : showMedications ? 'medications' : showAbout ? 'about' : activeTab}
+              key={showSleepLog ? 'sleep' : showExport ? 'export' : showMedicationSetup ? 'med-setup' : showMedications ? 'medications' : showAbout ? 'about' : activeTab}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -222,7 +208,7 @@ const Index = () => {
         </main>
 
         {/* Bottom Navigation */}
-        <BottomNav activeTab={activeTab} onTabChange={(tab) => { setShowAbout(false); setShowMedications(false); setShowMedicationSetup(false); setShowExport(false); setShowFeedback(false); setShowSleepLog(false); setActiveTab(tab); }} />
+        <BottomNav activeTab={activeTab} onTabChange={(tab) => { setShowAbout(false); setShowMedications(false); setShowMedicationSetup(false); setShowExport(false); setShowSleepLog(false); setActiveTab(tab); }} />
       </div>
 
       {/* Event Form Modal */}

@@ -1,5 +1,11 @@
 # iOS and Android launch preparation
 
+## Update 2026-10-02: feedback backend removed, web hosting
+
+The in-app feedback screen, abuse challenge, Supabase client, edge functions and migrations were removed. About has an email feedback link that stays hidden until a support contact is set in `src/lib/support.ts` (currently empty on purpose). The app makes no network requests of its own, so WS-03 and WS-05 (feedback lifecycle and abuse protection) and SEC-01 no longer apply; they are closed by removal, not by a fix. Entries below that mention feedback, challenges, Supabase or backend acceptance tests are historical.
+
+Consequences for release gates: the privacy page and in-app copy now say WakeState uploads nothing. Once a release build's network traffic is inspected and confirms no requests, the Apple App Privacy and Google Data safety forms can likely be answered as no data collected. Do not declare that until the final build is checked. Set the real publisher support contact in `src/lib/support.ts` and on the privacy page at store setup; the stores require a support contact and public privacy policy URL. Do not publish placeholder names or addresses. The web PWA is hosted on Vercel (see HOSTING.md). The Lovable tooling dependency was removed.
+
 ## Android execution update — 2026-09-15
 
 Native Android compilation now passes with installed Java 21 / SDK 36. Installable debug APK and unsigned release AAB are available with checksums in `artifacts/android/2026-09-15/`. The old missing-Java blocker below is superseded. Native lint: 0 errors / 15 warnings; all 22 regression tests and typecheck pass. No Android device is attached. Publisher account is closed per coordinating Admin verification; owned app ID/signing remain unverified. No push or store submission.
