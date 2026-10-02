@@ -167,7 +167,7 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
 
         <p className="text-sm text-muted-foreground leading-relaxed">
           Your health journal is stored locally and is never uploaded by WakeState.
-          You control exports. Device backups and any email you send have separate privacy considerations.
+          You control exports. Device backups have separate privacy considerations.
         </p>
       </motion.section>
 
@@ -202,34 +202,36 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
         </a>
       </motion.section>
 
-      {/* Feedback Box */}
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.45 }}
-        className="section-card border-primary/20"
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <MessageSquare className="w-5 h-5 text-primary" />
+      {/* Feedback Box: shown only once a support contact is configured */}
+      {FEEDBACK_MAILTO && (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="section-card border-primary/20"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+              <MessageSquare className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-lg font-semibold text-foreground">Share Feedback</h2>
           </div>
-          <h2 className="text-lg font-semibold text-foreground">Share Feedback</h2>
-        </div>
 
-        <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-          Have a suggestion, found a bug, or want to share what's working well? Your feedback helps shape WakeState for the narcolepsy community.
-        </p>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+            Have a suggestion, found a bug, or want to share what's working well? Your feedback helps shape WakeState for the narcolepsy community.
+          </p>
 
-        <Button asChild variant="outline" className="w-full">
-          <a href={FEEDBACK_MAILTO}>
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Email Feedback
-          </a>
-        </Button>
-        <p className="text-xs text-muted-foreground leading-relaxed mt-3">
-          This opens your email app. Please leave out private health details.
-        </p>
-      </motion.section>
+          <Button asChild variant="outline" className="w-full">
+            <a href={FEEDBACK_MAILTO}>
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Email Feedback
+            </a>
+          </Button>
+          <p className="text-xs text-muted-foreground leading-relaxed mt-3">
+            This opens your email app. Please leave out private health details.
+          </p>
+        </motion.section>
+      )}
 
       {/* Version */}
       <motion.p
