@@ -65,7 +65,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           </div>
         </motion.div>
 
-        <p className="text-xs text-muted-foreground leading-relaxed">No account needed. Export backups to keep a copy. Optional feedback is sent online. WakeState is a personal journal, not a diagnostic or treatment tool.</p>
+        <p className="text-xs text-muted-foreground leading-relaxed">No account needed. Export backups to keep a copy. WakeState is a personal journal, not a diagnostic or treatment tool.</p>
 
         {/* Single CTA */}
         <motion.div

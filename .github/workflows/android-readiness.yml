@@ -9,7 +9,6 @@ on:
       - 'src/**'
       - 'public/**'
       - 'scripts/**'
-      - 'supabase/functions/**'
       - 'package.json'
       - 'package-lock.json'
       - 'capacitor.config.*'
