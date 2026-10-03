@@ -1,5 +1,5 @@
-// Single place for the support contact. Update before store submission if the mailbox changes.
-export const SUPPORT_EMAIL = 'support@sidecraftmedia.com';
+// Single place for the feedback contact. feedback@purafieldstudio.com forwards to the Purafield Gmail.
+export const SUPPORT_EMAIL = 'feedback@purafieldstudio.com';
 
 export interface FeedbackDraft {
   role: string;
