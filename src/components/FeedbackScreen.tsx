@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, Send, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,8 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { HumanChallenge } from './HumanChallenge';
+import { buildFeedbackMailto } from '@/lib/support';
 
 interface FeedbackScreenProps {
   onBack: () => void;
@@ -43,32 +42,17 @@ const ISSUE_TYPES = [
   { value: 'other', label: 'Other' },
 ];
 
-interface ChallengeData {
-  token: string;
-  answer: number;
-}
-
 export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
   const { toast } = useToast();
   const [userType, setUserType] = useState('');
   const [appSection, setAppSection] = useState('');
   const [issueType, setIssueType] = useState('');
   const [otherDetails, setOtherDetails] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [challengeData, setChallengeData] = useState<ChallengeData | null>(null);
 
   const showOtherField = issueType === 'other' || appSection === 'other' || userType === 'other';
-  const isFormValid = userType && appSection && issueType && challengeData !== null;
+  const isFormValid = userType && appSection && issueType;
 
-  const handleChallengeVerified = (data: ChallengeData) => {
-    setChallengeData(data);
-  };
-
-  const handleChallengeReset = useCallback(() => {
-    setChallengeData(null);
-  }, []);
-
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!userType || !appSection || !issueType) {
       toast({
         title: 'Please fill out all fields',
@@ -87,62 +71,16 @@ export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
       return;
     }
 
-    if (!challengeData) {
-      toast({
-        title: 'Please complete verification',
-        description: 'Solve the quick math question to submit.',
-        variant: 'destructive',
-      });
-      return;
-    }
+    const labelOf = (list: { value: string; label: string }[], value: string) =>
+      list.find((item) => item.value === value)?.label ?? value;
 
-    setIsSubmitting(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('submit-feedback', {
-        body: {
-          user_type: userType,
-          app_section: appSection,
-          issue_type: issueType,
-          other_details: otherDetails.trim() || null,
-          challenge_token: challengeData.token,
-          challenge_answer: challengeData.answer,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      toast({
-        title: 'Feedback submitted!',
-        description: 'Thank you for helping improve WakeState.',
-      });
-
-      // Reset form
-      setUserType('');
-      setAppSection('');
-      setIssueType('');
-      setOtherDetails('');
-      setChallengeData(null);
-      
-      // Go back after short delay
-      setTimeout(() => onBack(), 1500);
-    } catch (error) {
-      console.error('Feedback submission error:', error);
-      
-      const errorMessage = error instanceof Error ? error.message : 'Please try again later.';
-      
-      toast({
-        title: 'Submission failed',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Opens the device email app with a prefilled draft. Nothing is sent until the user sends it.
+    window.location.href = buildFeedbackMailto({
+      role: labelOf(USER_TYPES, userType),
+      section: labelOf(APP_SECTIONS, appSection),
+      kind: labelOf(ISSUE_TYPES, issueType),
+      details: otherDetails.trim(),
+    });
   };
 
   return (
@@ -172,7 +110,7 @@ export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
         </p>
       </motion.div>
 
-<p className="section-card text-sm text-muted-foreground">Feedback is optional and sent online. Please do not include personal health information. <a className="text-primary underline" href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy notice</a></p>
+<p className="section-card text-sm text-muted-foreground">Feedback is optional. This opens a draft in your email app and nothing is sent until you send it. WakeState itself makes no network requests. Please do not include personal health information. <a className="text-primary underline" href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy notice</a></p>
       {/* Form */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -248,27 +186,17 @@ export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
           </p>
         </div>
 
-        {/* Human Challenge */}
-        <HumanChallenge 
-          onVerified={handleChallengeVerified}
-          onReset={handleChallengeReset}
-        />
-
         {/* Submit Button */}
         <Button
           onClick={handleSubmit}
-          disabled={isSubmitting || !isFormValid}
+          disabled={!isFormValid}
           className="w-full"
           size="lg"
         >
-          {isSubmitting ? (
-            'Submitting...'
-          ) : (
-            <>
+                      <>
               <Send className="w-4 h-4 mr-2" />
-              Submit Feedback
+              Draft Feedback Email
             </>
-          )}
         </Button>
       </motion.div>
 
@@ -279,7 +207,7 @@ export function FeedbackScreen({ onBack }: FeedbackScreenProps) {
         transition={{ delay: 0.3 }}
         className="text-center text-xs text-muted-foreground px-4"
       >
-        Sending feedback shares your selected role and message with WakeState through Supabase. The service receives your IP address for request handling and abuse prevention. Your journal is not attached. Please leave out names, medications, and other health details.
+        Your journal is never attached. If you send the email, it goes through your own email provider. Please leave out names, medications, and other health details.
       </motion.p>
     </div>
   );
