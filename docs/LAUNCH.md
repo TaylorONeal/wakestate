@@ -1,12 +1,23 @@
 # iOS and Android launch preparation
 
+## Update 2026-10-04: Play release hardening
+
+- The app has no INTERNET permission (PR #10) and makes no network requests of its own. The merged manifest keeps only AndroidX's app-scoped signature receiver permission.
+- Release bundles are signed with a local upload key read from the gitignored `android/keystore.properties` (PR #11). Steps live in [ANDROID-RELEASE.md](ANDROID-RELEASE.md).
+- "Buy me a coffee" links now show only on the web PWA. Native builds (Android and iOS) hide them, so the store apps offer no tips or donations outside store billing.
+- Feedback is an email draft (mailto) to the publisher support address in `src/lib/support.ts`. Nothing is sent by the app.
+- Android versionCode 1, versionName "1.0.0".
+- Current checks: 19 tests (`npx vitest run`), typecheck, lint 0 errors, production build.
+
+Sections dated before 2026-10-02 are historical. Where they mention feedback submission, challenges, Supabase, backend tests or the INTERNET permission, the current state above wins.
+
 ## Update 2026-10-02: feedback backend removed, web hosting
 
-The in-app feedback screen, abuse challenge, Supabase client, edge functions and migrations were removed. About has an email feedback link that stays hidden until a support contact is set in `src/lib/support.ts` (currently empty on purpose). The app makes no network requests of its own, so WS-03 and WS-05 (feedback lifecycle and abuse protection) and SEC-01 no longer apply; they are closed by removal, not by a fix. Entries below that mention feedback, challenges, Supabase or backend acceptance tests are historical.
+The in-app feedback screen, abuse challenge, Supabase client, edge functions and migrations were removed. About has an email feedback link that stays hidden until a support contact is set in `src/lib/support.ts` (at the time empty; it is now set to the Purafield Studio support address). The app makes no network requests of its own, so WS-03 and WS-05 (feedback lifecycle and abuse protection) and SEC-01 no longer apply; they are closed by removal, not by a fix. Entries below that mention feedback, challenges, Supabase or backend acceptance tests are historical.
 
 Consequences for release gates: the privacy page and in-app copy now say WakeState uploads nothing. Once a release build's network traffic is inspected and confirms no requests, the Apple App Privacy and Google Data safety forms can likely be answered as no data collected. Do not declare that until the final build is checked. Set the real publisher support contact in `src/lib/support.ts` and on the privacy page at store setup; the stores require a support contact and public privacy policy URL. Do not publish placeholder names or addresses. The web PWA is hosted on Vercel (see HOSTING.md). The Lovable tooling dependency was removed.
 
-## Android execution update — 2026-09-15
+## Android execution update, 2026-09-15 (historical)
 
 Native Android compilation now passes with installed Java 21 / SDK 36. Installable debug APK and unsigned release AAB are available with checksums in `artifacts/android/2026-09-15/`. The old missing-Java blocker below is superseded. Native lint: 0 errors / 15 warnings; all 22 regression tests and typecheck pass. No Android device is attached. Publisher account is closed per coordinating Admin verification; owned app ID/signing remain unverified. No push or store submission.
 
@@ -16,9 +27,9 @@ See [the Android release packet](release/ANDROID-2026-09-15.md) for artifact pat
 
 Native Capacitor projects are provided in `ios/` and `android/`. This is launch preparation, not a signed release or store submission. Bundle identifier `com.wakestate.app` is provisional: confirm publisher ownership before uploading either app. Existing web users must export/import to transfer records; native storage is separate.
 
-## Launch tracker — 2026-09-10
+## Launch tracker, 2026-09-10 (historical)
 
-Evidence checked at 13:43 UTC (21:43 WITA), with verification completed during this session. This table is the current project status; earlier verification notes below are historical. Shared tracking points here from the canonical improvement backlog.
+Historical snapshot. WS-03, WS-05 and SEC-01 were closed by removing the feedback backend on 2026-10-02; Android signing and compilation have moved on since (see the 2026-10-04 update and ANDROID-RELEASE.md). Evidence checked at 13:43 UTC (21:43 WITA). Shared tracking points here from the canonical improvement backlog.
 
 | ID | Work | Status / evidence | Owner and closure condition |
 |---|---|---|---|
@@ -54,13 +65,13 @@ Capacitor 8 requires Xcode 26+ and Android Studio 2025.2.1+. Use the SDK/JDK exp
 
 - Confirm app ID, developer accounts, signing team, Android keystore, version/build numbers and ownership. Do not put signing secrets in git.
 - Replace generated native launcher/splash assets with final WakeState artwork and generate required store screenshots. Public PWA icons are retained.
-- Publish a complete, publicly accessible privacy policy and support URL. Identify publisher/contact, feedback retention/deletion procedure, hosting/Supabase providers, and applicable rights. The in-app notice is a factual starting point, not completed legal review.
-- Complete Apple App Privacy and Google Data safety declarations using actual release behavior. Do not broadly claim “no data collected”: optional feedback may include health-related role/text and service request metadata.
+- Publish a complete, publicly accessible privacy policy and support URL (WakeState section: https://www.purafieldstudio.com/privacy#wakestate). Identify publisher and contact. There is no feedback backend or Supabase anymore; feedback is an email the user chooses to send. The in-app notice is a factual starting point, not completed legal review.
+- Complete Apple App Privacy and Google Data safety declarations using actual release behavior. The app has no INTERNET permission and sends nothing, so the expected answer is no data collected and no data shared. Confirm against the merged manifest and the final build before declaring it.
 - Complete Google Health apps declaration. Retain the non-diagnostic disclaimer in the app and listing. Verify medication reference links and health-related content with an appropriate reviewer.
-- Resolve feedback abuse protection (see SECURITY.md), verify deployed RLS and headers, and deploy/test backend changes separately. No backend deployment was performed here.
+- Feedback abuse protection, RLS and backend checks no longer apply: the feedback backend was removed on 2026-10-02.
 - Inspect the final iOS privacy report. The app manifest includes the Filesystem file-timestamp reason C617.1 and is in the resource build phase; confirm all transitive SDK declarations in the archive.
 - Android disables cloud backup and device transfer through manifest and extraction rules. Verify on supported devices. iOS backup/restore behavior needs physical-device verification; the app does not claim to exclude OS backups.
-- Review external donation links against store rules for the chosen markets before submission. Current web links remain in About/Settings.
+- Donation links: hidden in native builds since 2026-10-04 and shown only on the web PWA. Confirm on device that About and Settings show no "Buy me a coffee" link.
 - Run device QA below and submit through TestFlight / Play internal testing before production.
 
 ## Device QA (must run on iOS and Android)
@@ -71,7 +82,7 @@ Capacitor 8 requires Xcode 26+ and Android Studio 2025.2.1+. Use the SDK/JDK exp
 4. Export every category; save to Files/Downloads and share to a chosen app. Restore into a disposable fresh test install and compare every record. Cancel the share sheet and file chooser gracefully.
 5. Delete test data with confirmation; restart and verify no journal or export cache remains. Preferences stay. Exported copies remain outside app control.
 6. Upgrade an installed build containing test data; verify no origin changes or loss. Verify behavior under storage pressure and denied/unavailable storage.
-7. Open feedback online/offline; verify retry, expiry, malformed request rejection, and successful submission against a test backend. Check outgoing requests to confirm no health journal payload.
+7. Tap the About feedback link; verify it opens an email draft to the support address and the app itself sends nothing. Confirm About and Settings show no donation link.
 8. Inspect final release network traffic, archive privacy report, entitlements/permissions, screenshots, and store declarations together.
 
 ## Store listing draft
@@ -82,7 +93,7 @@ Capacitor 8 requires Xcode 26+ and Android Studio 2025.2.1+. Use the SDK/JDK exp
 
 **Short description:** Track wake states, sleep, events, and medications. See your own patterns.
 
-**Description:** WakeState is a personal journal for people living with narcolepsy and related sleep–wake conditions. Record how you feel, note naps and other events, log last night's sleep, and keep a record of medications taken. Review your entries and export reports for conversations with your care team. No account is required. Health records stay in local app storage unless you export them; optional feedback is sent online. Keep regular backups. WakeState is not a medical device and does not diagnose, treat, cure, or prevent medical conditions. Consult a qualified healthcare professional for medical decisions.
+**Description:** WakeState is a personal journal for people living with narcolepsy and related sleep–wake conditions. Record how you feel, note naps and other events, log last night's sleep, and keep a record of medications taken. Review your entries and export reports for conversations with your care team. No account is required. Health records stay on your device unless you export them. The app has no account, no analytics and does not connect to the internet. Keep regular backups. WakeState is not a medical device and does not diagnose, treat, cure, or prevent medical conditions. Consult a qualified healthcare professional for medical decisions.
 
 **Reviewer notes:** No login required. Start Tracking opens the local journal. Settings provides export/import, privacy information, and deletion. The app requests no Internet or other user-facing permission (the only entry in the merged manifest is AndroidX's app-scoped signature receiver permission) and makes no network requests; external links open in the system browser and feedback opens an email draft. Tracking is local. No HealthKit or Health Connect integration is requested.
 
@@ -93,7 +104,7 @@ Capacitor 8 requires Xcode 26+ and Android Studio 2025.2.1+. Use the SDK/JDK exp
 - [Google Health apps declaration](https://support.google.com/googleplay/android-developer/answer/14738291)
 - [Google Data safety](https://support.google.com/googleplay/android-developer/answer/10787469)
 
-## Verification from this preparation pass
+## Verification from this preparation pass (historical)
 
 - TypeScript: passed.
 - Storage/security regression suite: 7/7 passed (full backup round trip, validation before writes, V1 compatibility, legacy/draft deletion, CSV escaping, local-day medication lookup, invalid backup rejection).
@@ -105,7 +116,7 @@ Capacitor 8 requires Xcode 26+ and Android Studio 2025.2.1+. Use the SDK/JDK exp
 - Android compilation: not performed; this machine reports no Java runtime. Install/configure Android Studio's JDK/SDK first.
 - Builds report a large initial JavaScript bundle warning. The continued build improvements below reduce this bundle through lazy loading; the warning remains.
 
-## Continued build improvements
+## Continued build improvements (historical)
 
 Secondary reporting, history, medication setup and feedback views now load on demand; PWA precaching and native bundling retain offline availability after installation. Screen errors show a recovery action while keeping navigation available. Save confirmation uses a small text/checkmark notification instead of animated clouds or lightning. Sleep adjustment carries across hours and is capped at 24 hours; controls have accessible names. Imports notify the home screen to refresh its counts. Delayed check-in navigation and confirmation timers are cleaned up when leaving their screens.
 
@@ -115,13 +126,13 @@ The continued production build reduced the initial JavaScript bundle from about 
 
 Follow-up verification: 17/17 tests, TypeScript, production build and native sync passed. Lint remains at 0 errors / 13 existing warnings. A fresh browser session loaded the deferred Patterns screen without runtime errors. A simulated IndexedDB quota failure showed the check-in error message and re-enabled Save. Sleep minute rollover was checked in the browser (7:00 → 6:45 → 7:00). Signed/native device testing and deployed feedback verification remain outstanding.
 
-## Final integration pass
+## Final integration pass (historical)
 
 Nap and cataplexy forms now recover from failed saves, prevent duplicate submissions while saving, and cancel delayed close callbacks when unmounted. Nap input rejects invalid/zero-length time ranges. Check-in edits/deletes, event deletes, medication-log undo, and sleep upserts/deletes now use atomic IndexedDB transactions; regression tests cover concurrent deletion/insertion and one sleep entry per date. The existing store-release gates above remain open; integration into main is not a store release.
 
 Final integration verification: 19/19 tests, TypeScript, production web build, native web build and Capacitor sync for both platforms passed. ESLint reports 0 errors and 13 existing warnings; generated native artifacts are excluded from source linting. A fresh 390×844 browser session confirmed failed nap saves show an error and re-enable Save, with no browser console errors. Native compilation/device testing and the release gates above remain outstanding.
 
-## Autonomous reliability follow-up
+## Autonomous reliability follow-up (historical)
 
 Medication setup keeps selections and re-enables Save/Skip after a failed write, guards duplicate submissions, and exposes selection state to assistive technology. Patterns now exits its loading state with a retry action when reads fail. Report counts fetch in parallel, ignore older requests, and avoid duplicate mount reads; a successful import is not mislabeled as failed merely because count refresh fails. Check-in draft effects now declare their dependencies.
 
