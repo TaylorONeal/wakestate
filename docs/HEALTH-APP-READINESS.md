@@ -9,8 +9,9 @@ WakeState is a free personal sleep-wake journal. Its sleep, symptom and medicati
 | Sleep Management | User-entered sleep records and naps |
 | Diseases and Conditions Management | Narcolepsy-focused symptom and cataplexy journaling |
 | Medication and Treatment Management | User-entered medication configuration and doses taken |
+| Medical Reference and Education | Medication descriptions, mechanisms and linked reference information |
 
-These are the draft categories to check against the final release and current console wording. Do not select no health features. No Health Connect integration, diagnosis, dose calculation, emergency monitoring, treatment recommendation or medical-device hardware integration is present in the reviewed app. This is a product-scope assessment, not a regulatory certification. Review medication reference material separately from the journal functions.
+These are the draft categories to check against the final release and current console wording. Do not select no health features. No Health Connect integration, diagnosis, dose calculation, emergency monitoring, treatment recommendation or medical-device hardware integration is present in the reviewed app. This is a product-scope assessment, not a regulatory certification. The reference library includes preset dose choices and investigational-drug information. It requires current primary-source and qualified clinical review separately from the journal functions; existing old label PDFs and general manufacturer pages do not establish current accuracy. The medication screen now distinguishes prescribed-dose recording from a dose recommendation. Do not mark this content-review gate complete based on a disclaimer.
 
 ## Copy and privacy
 
@@ -39,3 +40,9 @@ This review improves launch preparation; no Play attestation, regulatory status 
 ## Local evidence from this pass
 
 At source commit 220b41d: all 19 tests, TypeScript and web/native builds passed; lint had zero errors and eight existing warnings. `:app:processReleaseMainManifest` passed. Its task-specific merged manifest shows package com.wakestate.app, version 1.0.0/code 1, minSdk 24, targetSdk 36, allowBackup=false, no INTERNET or Health Connect permissions, and only the app-scoped signature receiver permission. This is local manifest evidence, not a signed AAB, device network test or store approval.
+
+## Medication entry reliability
+
+Quick setup now requires an explicitly entered prescribed dose, leaves the daily target unspecified unless selected, and preserves existing doses, frequencies and timings when reopened. Skipping leaves existing configuration intact. An unspecified frequency is not displayed as PRN. Detailed medication selectors persist the event value rather than stale state, and cards wait for stored entries to load before initializing their fields. Failed loading blocks edits without trapping the user on the screen.
+
+Validation: 21 tests, TypeScript, lint (zero errors; eight existing warnings) and production build passed. Browser checks with synthetic records confirmed blank-dose save prevention, exact quick-setup values after reload/edit, and detail dose/frequency/tracking state after reload. These are browser checks, not physical Android verification. The quick-log regimen and detailed medication library still use separate existing storage models; this change does not merge those workflows.
