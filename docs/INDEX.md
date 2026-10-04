@@ -5,4 +5,5 @@
 - [Security and privacy review](SECURITY.md): findings, fixes, limits, outstanding work.
 - [In-app privacy notice](../public/privacy.html): current data practices; publish a complete policy before store submission.
 
-- [Android execution packet](release/ANDROID-2026-09-15.md): compiled APK/AAB, checksums, signing blocker, store fields and backend rollout acceptance checks.
+- [Android release](ANDROID-RELEASE.md): signing, build, signer check and Play release gates. Start here for Android.
+- [Android execution packet, 2026-09-15](release/ANDROID-2026-09-15.md): historical build evidence, with a note on what changed since.
