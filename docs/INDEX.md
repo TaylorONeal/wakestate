@@ -8,4 +8,4 @@
 - [Android release](ANDROID-RELEASE.md): signing, build, signer check and Play release gates. Start here for Android.
 - [Android execution packet, 2026-09-15](release/ANDROID-2026-09-15.md): historical build evidence, with a note on what changed since.
 
-- [Health and privacy launch review](HEALTH-APP-READINESS.md): current Google policy, declaration mapping, evidence and final release checks.
+- [Health and privacy launch review](HEALTH-APP-READINESS.md): current Google policy, declaration mapping, medication-entry fixes, evidence and final release checks.
