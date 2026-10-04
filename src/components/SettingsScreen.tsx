@@ -267,7 +267,7 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
 
       {/* Version */}
       <p className="text-xs text-muted-foreground text-center">
-        Version 1.0 • Not a medical device
+        Version 1.0.0 • Not a medical device
       </p>
 
       {/* Install Instructions Modal */}
