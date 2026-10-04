@@ -1,5 +1,12 @@
 # iOS and Android launch preparation
 
+## October 5: unsigned iOS simulator compilation
+
+Local commit 9cb7379 (PR #14 source plus documentation) builds successfully with Xcode27/SDK27 for generic iOS Simulator after native web build and Capacitor sync, with CODE_SIGNING_ALLOWED=NO. Compiled identity: com.wakestate.app, 1.0.0 (1). App-level PrivacyInfo.xcprivacy is included. Source remains unchanged. Vite reports its existing large-chunk warning.
+
+This is compilation and resource-inclusion evidence only: no iOS UI/health-journal exercise, privacy network trace, signing, TestFlight or submission. Synthetic-data persistence/export/restore/deletion, accessibility and medication-reference review remain open. No health records or telemetry were introduced. Log: /tmp/wakestate-ios-prep-20261005.log. App: /tmp/wakestate-ios-prep-20261005/Build/Products/Debug-iphonesimulator/App.app.
+
+
 ## October 4, 22:56 WITA evidence reconciliation
 
 PR #14 remains open at `5d8c9fe759b5d3305b99bbcec7c7b4a3d0e93c9d`.
