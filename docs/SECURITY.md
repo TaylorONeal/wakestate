@@ -4,9 +4,9 @@
 
 ## Summary
 
-This is a source and dependency review, not a penetration test, regulatory certification, or verification of deployed services. Health records use IndexedDB plus a localStorage check-in draft; optional feedback uses Supabase. There is no app-level encryption or login gate. The UI now communicates those limits. Do not advertise HIPAA compliance, end-to-end encryption, complete anonymity, or guaranteed privacy.
+This is a source and dependency review, not a penetration test, regulatory certification, or verification of deployed services. Health records use IndexedDB plus a localStorage check-in draft. Feedback now opens a draft in the user's email app through `src/lib/support.ts`; the app has no feedback backend. There is no app-level encryption or login gate. The UI now communicates those limits. Do not advertise HIPAA compliance, end-to-end encryption, complete anonymity, or guaranteed privacy.
 
-## Fixed in this change
+## Historical findings and fixes (superseded where noted above)
 
 1. **Medium — inaccurate privacy claims / unsolicited font request.** `src/components/SettingsScreen.tsx:180`, `src/components/FeedbackScreen.tsx`, and `public/privacy.html` distinguish local journal data from feedback/network metadata. `src/main.tsx` bundles Outfit; CSS and PWA no longer contact Google Fonts. Explicit IP console logging was removed from `supabase/functions/submit-feedback/index.ts`. Provider infrastructure logs remain outside this code review.
 2. **Medium — incomplete deletion.** `src/lib/storage.ts:30` previously deleted IndexedDB records but left legacy localStorage copies, allowing fallback reads to resurrect them. Deletion now removes both, the check-in draft, and native export cache; settings remain. Actual deletion is user-confirmed; no user data was deleted during implementation.

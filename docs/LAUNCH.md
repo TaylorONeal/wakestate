@@ -1,5 +1,34 @@
 # iOS and Android launch preparation
 
+## October 5: unsigned iOS simulator compilation
+
+Local commit 9cb7379 (PR #14 source plus documentation) builds successfully with Xcode27/SDK27 for generic iOS Simulator after native web build and Capacitor sync, with CODE_SIGNING_ALLOWED=NO. Compiled identity: com.wakestate.app, 1.0.0 (1). App-level PrivacyInfo.xcprivacy is included. Source remains unchanged. Vite reports its existing large-chunk warning.
+
+This is compilation and resource-inclusion evidence only: no iOS UI/health-journal exercise, privacy network trace, signing, TestFlight or submission. Synthetic-data persistence/export/restore/deletion, accessibility and medication-reference review remain open. No health records or telemetry were introduced. Log: /tmp/wakestate-ios-prep-20261005.log. App: /tmp/wakestate-ios-prep-20261005/Build/Products/Debug-iphonesimulator/App.app.
+
+
+## October 4, 22:56 WITA evidence reconciliation
+
+PR #14 remains open at `5d8c9fe759b5d3305b99bbcec7c7b4a3d0e93c9d`.
+[CI run 37195133892](https://github.com/TaylorONeal/wakestate/actions/runs/37195133892)
+passed both unsigned-build verification and API 36 emulator capture. The capture
+script installs the debug APK and captures fresh onboarding only; it does not seed
+or test a health journal. GitHub lists an unexpired 97,798-byte capture artifact
+for merge checkout `9521560de920d03e6a7332ddd4ecc792a355069e`.
+
+The capture was downloaded and visually inspected: 1080×1920, readable onboarding
+text and start button without visible clipping, with the local-journal and
+non-diagnostic limitation present. SHA-256 matches the capture sidecar:
+`51d0f11532b407a8a06051193b3f8977400acbd52c7d70448cd6c4fb099ccc64`.
+Package dump reports version 1.0.0 (1), target API 36 and only the app-scoped
+receiver permission. This is debug-emulator evidence, not signed-release approval.
+Next: complete synthetic journal persistence/export/restore/deletion and accessibility
+QA, then capture the five populated store views. No real health records, telemetry, billing or medical claims were added.
+Physical-device testing, signing, medication reference review and final declarations
+remain separate gates. Local disk limits do not invalidate the existing remote
+emulator evidence, but it must not be relabeled as complete native acceptance.
+
+
 ## Update 2026-10-04: Play release hardening
 
 - The app has no INTERNET permission (PR #10) and makes no network requests of its own. The merged manifest keeps only AndroidX's app-scoped signature receiver permission.

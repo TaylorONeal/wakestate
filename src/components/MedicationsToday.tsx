@@ -207,7 +207,7 @@ export function MedicationsToday({ onSetupClick, refreshTrigger }: MedicationsTo
       <div className="space-y-2">
         {medStatuses.map(({ med, todayCount, targetCount, lastAdmin }) => {
           const isComplete = targetCount > 0 && todayCount >= targetCount;
-          const isPRN = targetCount === 0;
+          const isPRN = med.defaultFrequency === 'PRN';
 
           return (
             <motion.div
@@ -233,12 +233,13 @@ export function MedicationsToday({ onSetupClick, refreshTrigger }: MedicationsTo
                     <span className="text-muted-foreground ml-1.5">{med.defaultDose}</span>
                   </p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    {!isPRN && (
+                    {targetCount > 0 && (
                       <span className={todayCount > 0 ? 'text-primary' : ''}>
                         {todayCount}/{targetCount}
                       </span>
                     )}
                     {isPRN && <span>As needed</span>}
+                    {!isPRN && targetCount === 0 && <span>{todayCount} logged · no daily target</span>}
                     {lastAdmin && (
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
