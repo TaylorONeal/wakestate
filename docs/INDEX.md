@@ -9,3 +9,5 @@
 - [Android execution packet, 2026-09-15](release/ANDROID-2026-09-15.md): historical build evidence, with a note on what changed since.
 
 - [Health and privacy launch review](HEALTH-APP-READINESS.md): current Google policy, declaration mapping, medication-entry fixes, evidence and final release checks.
+
+- October 5: [unsigned iOS simulator compile evidence](LAUNCH.md#october-5-unsigned-ios-simulator-compilation), identity/resource checks and remaining device/privacy gates.
