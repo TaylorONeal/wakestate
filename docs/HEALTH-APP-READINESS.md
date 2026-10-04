@@ -35,3 +35,7 @@ Before attesting Data safety, inspect the final merged manifest, bundled SDKs, d
 - [Google Data safety guidance](https://support.google.com/googleplay/android-developer/answer/10787469)
 
 This review improves launch preparation; no Play attestation, regulatory status or store approval is asserted.
+
+## Local evidence from this pass
+
+At source commit 220b41d: all 19 tests, TypeScript and web/native builds passed; lint had zero errors and eight existing warnings. `:app:processReleaseMainManifest` passed. Its task-specific merged manifest shows package com.wakestate.app, version 1.0.0/code 1, minSdk 24, targetSdk 36, allowBackup=false, no INTERNET or Health Connect permissions, and only the app-scoped signature receiver permission. This is local manifest evidence, not a signed AAB, device network test or store approval.
