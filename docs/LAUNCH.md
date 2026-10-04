@@ -84,7 +84,7 @@ Capacitor 8 requires Xcode 26+ and Android Studio 2025.2.1+. Use the SDK/JDK exp
 
 **Description:** WakeState is a personal journal for people living with narcolepsy and related sleep–wake conditions. Record how you feel, note naps and other events, log last night's sleep, and keep a record of medications taken. Review your entries and export reports for conversations with your care team. No account is required. Health records stay in local app storage unless you export them; optional feedback is sent online. Keep regular backups. WakeState is not a medical device and does not diagnose, treat, cure, or prevent medical conditions. Consult a qualified healthcare professional for medical decisions.
 
-**Reviewer notes:** No login required. Start Tracking opens the local journal. Settings provides export/import, privacy information, and deletion. Internet is required only for optional feedback and external links; tracking is local. No HealthKit or Health Connect integration is requested.
+**Reviewer notes:** No login required. Start Tracking opens the local journal. Settings provides export/import, privacy information, and deletion. The app declares no permissions and makes no network requests; external links open in the system browser and feedback opens an email draft. Tracking is local. No HealthKit or Health Connect integration is requested.
 
 ## Official submission references
 
