@@ -12,6 +12,7 @@ import {
 import { type AppSettings } from '@/types';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { InstallInstructionsModal } from '@/components/InstallInstructionsModal';
+import { DONATION_URL, showDonationLinks } from '@/lib/donations';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -245,22 +246,24 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
         </motion.button>
       )}
 
-      {/* Buy Me a Coffee */}
-      <a
-        href="https://buymeacoffee.com/tayloroneal"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="section-card flex items-center justify-between hover:bg-surface-3 transition-colors group"
-      >
-        <div className="flex items-center gap-3">
-          <Coffee className="w-5 h-5 text-[#FFDD00]" />
-          <div className="text-left">
-            <h2 className="text-lg font-semibold group-hover:text-[#FFDD00] transition-colors">Support WakeState</h2>
-            <p className="text-sm text-muted-foreground">Buy me a coffee ☕</p>
+      {/* Buy Me a Coffee: web only, hidden in store builds */}
+      {showDonationLinks() && (
+        <a
+          href={DONATION_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="section-card flex items-center justify-between hover:bg-surface-3 transition-colors group"
+        >
+          <div className="flex items-center gap-3">
+            <Coffee className="w-5 h-5 text-[#FFDD00]" />
+            <div className="text-left">
+              <h2 className="text-lg font-semibold group-hover:text-[#FFDD00] transition-colors">Support WakeState</h2>
+              <p className="text-sm text-muted-foreground">Buy me a coffee ☕</p>
+            </div>
           </div>
-        </div>
-        <ChevronRight className="w-5 h-5 text-muted-foreground" />
-      </a>
+          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+        </a>
+      )}
 
       {/* Version */}
       <p className="text-xs text-muted-foreground text-center">
