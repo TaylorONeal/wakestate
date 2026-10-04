@@ -67,7 +67,7 @@ All must pass before the bundle goes to a Play track.
   7. Feedback link opens an email draft to the support address.
   8. Launcher icon, themed icon and splash look right; layout at small width and landscape.
 - [ ] **Native screenshots** captured from this release candidate on a real device, with build and device recorded. Follow [store/ANDROID-SCREENSHOTS.md](store/ANDROID-SCREENSHOTS.md). Web captures do not count.
-- [ ] **Data safety form:** no data collected, no data shared. Valid only while the merged manifest has no INTERNET permission.
+- [ ] **Data safety form:** no data collected, no data shared. Confirm the final merged manifest, bundled SDKs, actual network behavior, export/share flow and external email/browser behavior together. No INTERNET permission alone is not sufficient proof of the complete Data safety answer.
 - [ ] **Health apps declaration** completed in Play Console. Journaling of sleep, symptoms and medications; no diagnosis or treatment; no Health Connect. Keep the "not a medical device" disclaimer in app and listing.
 - [ ] **Privacy policy URL:** https://www.purafieldstudio.com/privacy#wakestate. Check it loads and matches the app.
 - [ ] **Support contact:** purafieldstudio@gmail.com (`src/lib/support.ts`, `public/privacy.html`).
