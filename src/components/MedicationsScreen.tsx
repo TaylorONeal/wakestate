@@ -248,13 +248,16 @@ function MedicationCard({
     }
   };
 
-  const handleFieldChange = () => {
+  const handleFieldChange = (changes: Partial<Pick<MedicationEntry, 'dose' | 'frequency'>> = {}) => {
+    // Save the event's selected value, not state from the previous render.
+    const nextDose = changes.dose ?? dose;
+    const nextFrequency = changes.frequency ?? frequency;
     if (isTracking) {
       onUpdate({
-        dose,
-        doseOther: dose === 'Other' ? doseOther : undefined,
-        frequency: frequency || undefined,
-        frequencyOther: frequency === 'other' ? frequencyOther : undefined,
+        dose: nextDose,
+        doseOther: nextDose === 'Other' ? doseOther : undefined,
+        frequency: nextFrequency || undefined,
+        frequencyOther: nextFrequency === 'other' ? frequencyOther : undefined,
         timings,
         notes,
         isTrialParticipant: isTrialMed ? isTrialParticipant : undefined,
@@ -355,10 +358,10 @@ function MedicationCard({
                 {/* Dose Dropdown */}
                 {medication.doseOptions && (
                   <div className="space-y-2">
-                    <Label className="text-sm">Dose</Label>
-                    <Select value={dose} onValueChange={(val) => { setDose(val); setTimeout(handleFieldChange, 0); }}>
+                    <Label className="text-sm">Dose on your prescription</Label>
+                    <Select value={dose} onValueChange={(val) => { setDose(val); handleFieldChange({ dose: val }); }}>
                       <SelectTrigger className="bg-background">
-                        <SelectValue placeholder="Select dose" />
+                        <SelectValue placeholder="Select your prescribed dose" />
                       </SelectTrigger>
                       <SelectContent className="bg-background border border-border z-50">
                         {medication.doseOptions.map((opt) => (
@@ -370,7 +373,7 @@ function MedicationCard({
                       <Input
                         value={doseOther}
                         onChange={(e) => setDoseOther(e.target.value)}
-                        onBlur={handleFieldChange}
+                        onBlur={() => handleFieldChange()}
                         placeholder="Enter custom dose"
                         className="bg-background mt-2"
                       />
@@ -381,7 +384,7 @@ function MedicationCard({
                 {/* Frequency Dropdown */}
                 <div className="space-y-2">
                   <Label className="text-sm">Frequency</Label>
-                  <Select value={frequency} onValueChange={(val) => { setFrequency(val as MedicationFrequency); setTimeout(handleFieldChange, 0); }}>
+                  <Select value={frequency} onValueChange={(val) => { setFrequency(val as MedicationFrequency); handleFieldChange({ frequency: val as MedicationFrequency }); }}>
                     <SelectTrigger className="bg-background">
                       <SelectValue placeholder="Select frequency" />
                     </SelectTrigger>
@@ -395,7 +398,7 @@ function MedicationCard({
                     <Input
                       value={frequencyOther}
                       onChange={(e) => setFrequencyOther(e.target.value)}
-                      onBlur={handleFieldChange}
+                      onBlur={() => handleFieldChange()}
                       placeholder="Enter custom frequency"
                       className="bg-background mt-2"
                     />
@@ -456,7 +459,7 @@ function MedicationCard({
                     id={`notes-${medication.id}`}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    onBlur={handleFieldChange}
+                    onBlur={() => handleFieldChange()}
                     placeholder="Any additional notes"
                     className="bg-background"
                   />
@@ -473,6 +476,7 @@ function MedicationCard({
 export function MedicationsScreen({ onBack }: MedicationsScreenProps) {
   const { toast } = useToast();
   const [userMedications, setUserMedications] = useState<UserMedications>({});
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Stimulants & Wake-Promoting Medications']));
 
   useEffect(() => {
@@ -480,8 +484,13 @@ export function MedicationsScreen({ onBack }: MedicationsScreenProps) {
   }, []);
 
   const loadMedications = async () => {
-    const data = await getUserMedications();
-    setUserMedications(data);
+    try {
+      const data = await getUserMedications();
+      setUserMedications(data);
+      setLoadState('ready');
+    } catch {
+      setLoadState('error');
+    }
   };
 
   const handleUpdateMedication = async (medicationId: string, data: Partial<MedicationEntry>) => {
@@ -537,11 +546,13 @@ export function MedicationsScreen({ onBack }: MedicationsScreenProps) {
 
       {/* Disclaimer */}
       <div className="text-xs text-muted-foreground bg-surface-2 rounded-lg p-3">
-        This page is for tracking only — not medical advice. Always consult your healthcare provider about medications.
+        Record only medications and doses prescribed to you. The choices here are for logging, not dose recommendations. Do not start, stop, or change a medication based on this app. Ask your healthcare professional about medication and treatment decisions.
       </div>
 
       {/* Medication Sections */}
-      {MEDICATION_SECTIONS.map((section) => (
+      {loadState === 'loading' && <p role="status">Loading your medication records…</p>}
+      {loadState === 'error' && <p role="alert">Your medication records could not be loaded. Reopen this screen to try again.</p>}
+      {loadState === 'ready' && MEDICATION_SECTIONS.map((section) => (
         <Collapsible
           key={section.title}
           open={expandedSections.has(section.title)}

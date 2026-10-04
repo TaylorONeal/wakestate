@@ -1,6 +1,6 @@
 # Android screenshot preparation
 
-This packet prepares reproducible captures; it does not contain completed Android screenshots. Use only a disposable test device or emulator with synthetic records. Do not import this fixture over a real journal: import replaces stored categories.
+This packet prepares reproducible captures. CI run 37195133892 completed an API 36 emulator capture of fresh onboarding on October 4; its artifact is `wakestate-android-capture-9521560de920d03e6a7332ddd4ecc792a355069e`. The five seeded-journal store screenshots below remain pending. The downloaded onboarding image was visually reviewed: 1080×1920, readable copy and unclipped start button, with the personal-journal/non-diagnostic limitation visible. Its SHA-256 is `51d0f11532b407a8a06051193b3f8977400acbd52c7d70448cd6c4fb099ccc64`. This is a debug-emulator QA capture, not a final store set. Use only a disposable test device or emulator with synthetic records. Do not import this fixture over a real journal: import replaces stored categories.
 
 The unsigned Android workflow also launches the built APK on a fresh API 36 emulator and captures `00-onboarding` as an artifact for visual inspection. A successful job proves a captured native launch, not completion of the five seeded listing screenshots below. Review the image before using it; the job does not import sample records or certify device behavior.
 

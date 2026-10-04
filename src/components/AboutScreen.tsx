@@ -60,13 +60,13 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
 
         <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
           <p>
-            WakeState is a <strong className="text-foreground">personal tracking and pattern-recognition tool</strong> designed specifically for people living with narcolepsy.
+            WakeState is a <strong className="text-foreground">personal sleep-wake journal</strong> designed specifically for people living with narcolepsy.
           </p>
           <p>
-            It helps you log your daily experiences — from sleepiness and cognitive fog to cataplexy events and naps — so you can spot patterns over time.
+            Log your daily experiences, from sleepiness and cognitive fog to cataplexy events and naps, and review your entries over time.
           </p>
           <p className="text-xs border-l-2 border-primary/50 pl-3 italic">
-            WakeState is not a diagnostic tool and does not provide medical advice. Always consult with your healthcare team about your symptoms.
+            WakeState is not a medical device and does not diagnose, treat, cure, or prevent any medical condition. It does not provide medical advice. Consult a qualified healthcare professional about symptoms, medications, and treatment decisions.
           </p>
         </div>
       </motion.section>
