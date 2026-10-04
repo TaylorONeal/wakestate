@@ -38,7 +38,5 @@
         </provider>
     </application>
 
-    <!-- Permissions -->
-
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- No Internet permission: the app is fully offline. External links open in the system browser. -->
 </manifest>
