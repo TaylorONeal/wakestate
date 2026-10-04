@@ -11,5 +11,5 @@ fi
 npm run build:native
 npx cap sync android
 cd android
-# Release is unsigned until a publisher-owned upload key is provided. Never substitute the debug key.
+# Release is signed only when android/keystore.properties exists (see docs/ANDROID-RELEASE.md). Never substitute the debug key.
 ./gradlew assembleDebug bundleRelease lintDebug testDebugUnitTest --console=plain "$@"
