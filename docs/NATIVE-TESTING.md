@@ -14,7 +14,7 @@ Durable test selection for Android and iOS. [LAUNCH.md](LAUNCH.md) owns results,
 | --- | --- |
 | Journal coverage | Save check-in, event, sleep and medication records, navigate away and fully restart; compare each type. Test local-day/midnight boundaries when date/time logic changes. Medication logging must not produce treatment advice. |
 | Export/recovery | Export all supported categories to Files/Downloads and inspect actual content; restore synthetic backup into a disposable clean context and compare record types/values. Invalid backup or canceled chooser preserves good data. |
-| Share/cancel | Deliver a synthetic export through the system sheet, inspect the receiving file, cancel another share and return safely. User-selected recipient sharing is distinct from app telemetry. |
+| Share/cancel | Deliver a synthetic export to local Files/Downloads through the system sheet, inspect the receiving file, cancel another share and return safely. User-selected recipient sharing is distinct from app telemetry. |
 | Deletion | Cancel deletion first; then confirm deletion of disposable synthetic records and restart. Check journal and export-cache removal; exported copies outside the app remain outside its control. Preferences remain as designed. |
 | Upgrade/storage failure | Same-identity compatible-signature upgrade with synthetic data; preserve local origin and records. Test denied/unavailable storage or failed writes with recoverable feedback after affected storage/plugin changes. |
 | Accessibility/navigation | VoiceOver/TalkBack labels/focus, enlarged text, keyboard avoidance and gesture insets on changed flows. Android Back dismisses forms before Today/exit; iOS dismissal restores the journal without losing edits. |
@@ -32,7 +32,7 @@ WakeState remains free, private and non-diagnostic. No billing/purchase suite is
 
 ## Select the smallest useful test set
 
-For a new binary on each release platform, first verify its identity and run the short core smoke below. Then test the changed behavior and its nearest failure/recovery path. The first store release still needs the uncompleted baseline; future releases may reuse explicitly linked, unchanged baseline evidence. A documentation-only correction needs link/content checks, not a fresh native build. A new failure or changed dependency can justify broader coverage; repeating a green suite on the same binary cannot close a device or store gate.
+For a new binary on each release platform, first verify its identity and run the short core smoke above. Then test the changed behavior and its nearest failure/recovery path. The first store release still needs the uncompleted baseline; future releases may reuse explicitly linked, unchanged baseline evidence. A documentation-only correction needs link/content checks, not a fresh native build. A new failure or changed dependency can justify broader coverage; repeating a green suite on the same binary cannot close a device or store gate.
 
 | Change | Additional checks |
 | --- | --- |
@@ -43,11 +43,13 @@ For a new binary on each release platform, first verify its identity and run the
 | Icons/splash only | Resource compilation plus actual cold launch and launcher appearance on affected supported device families; no journal/checklist regression marathon |
 | Privacy, support or store copy | Match final behavior and public links to declarations; inspect changed UI/metadata; no invented policy approval |
 
+Prefer local Files/Downloads for sharing tests; external recipients require specific authorization and are unnecessary for the default smoke.
+
 Use `native-app-testing` before device acceptance, reviewer instructions or recovery from device-control failure, and read the reusable lessons linked below. Synthetic records only; do not uninstall or clear a real-data installation to bypass a signature mismatch. Reconnect/keyboard input is not proof that every control works. Preserve screenshots and candidate metadata; keep device serials, accounts and private records outside this repository.
 
 ## Evidence and stop rule
 
-Record results in the existing ledger linked below, not in another tracker: timestamp, source and binary SHA-256, installed package/version/build, platform/device/OS, case, action, observed outcome, evidence reference, limitation and next action. Use **pass**, **fail**, **blocked**, or **not run**; list reused evidence and why its relevant layer is unchanged. Background/resume or browser reload does not establish native restart persistence. Compilation, signing, installation, interaction, store upload and store approval are separate outcomes.
+Record results in the existing ledger linked below, not in another tracker: timestamp, source and binary SHA-256, installed package/version/build, platform/device/OS, case, action, observed outcome, evidence reference, limitation and next action. Use **new pass**, **fail**, **blocked**, **not run**, **carried forward** or **not applicable**. For carried-forward results link prior evidence and explain why that layer is unchanged; for not-applicable cases record the absent capability or irrelevant platform. Do not label reused evidence a new pass. Background/resume or browser reload does not establish native restart persistence. Compilation, signing, installation, interaction, store upload and store approval are separate outcomes.
 
 Stop retesting a passing unchanged case unless a new change or failure invalidates it. Record a blocker once with its unblock condition and continue independent work. Do not turn a successful sideload into a Play/TestFlight delivery claim.
 
