@@ -1,5 +1,7 @@
 # WakeState documentation
 
+- [iOS native branding](LAUNCH.md#october-5-ios-placeholder-branding-replaced): existing owned crescent, reproducible asset rendering, resource-compiler checks and pending native acceptance.
+
 - [Product overview](../README.md): purpose, architecture, development commands.
 - [Mobile launch](LAUNCH.md): current launch tracker, October 4 CI evidence reconciliation, native build workflow, release gates, store copy, device QA and verified reliability improvements.
 - [Security and privacy review](SECURITY.md): findings, fixes, limits, outstanding work.
