@@ -1,5 +1,7 @@
 # WakeState agent workflow
 
+Read in order: this file, SOUL.md and USER.md if present, docs/INDEX.md, then docs/NATIVE-TESTING.md and the newest evidence/reusable lessons in docs/LAUNCH.md for native/store tasks. Read the relevant implementation before changing behavior. Use the shared `native-app-testing` skill before device acceptance, reviewer instructions or recovery from a control failure.
+
 When available, use the shared `app-delivery-process` skill for app delivery work. Discover it by name rather than assuming a machine-specific path. If unavailable, follow the repository documents below and report the fallback. User authorization controls scope; a checklist is not submission approval.
 
 | Trigger | Read and do |
@@ -11,3 +13,5 @@ When available, use the shared `app-delivery-process` skill for app delivery wor
 | Store submission | Recheck signed bundle, declarations, public support/privacy, real device QA and listing assets. Obtain applicable release authorization; do not equate business verification with app approval. |
 
 Keep account identifiers, business-verification documents, secrets, private audits and real health records out of this public repository. Record private coordination in the private GTM tracker. Report actual tests, artifacts and remaining gates without marking unrun checks complete.
+
+Use a short core smoke for each new binary/platform and the changed-layer/recovery checks in NATIVE-TESTING.md. Documentation-only work needs documentation validation, not another build. Keep mutable results in LAUNCH.md, never here. WakeState is free, private and non-diagnostic: no generic billing suite, health telemetry or real health records in QA. Current authorization controls external actions; iOS preparation does not imply submission.
