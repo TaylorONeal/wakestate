@@ -5,7 +5,7 @@ Start with [native/store testing and retest selection](NATIVE-TESTING.md), then 
 - [iOS native branding](LAUNCH.md#october-5-ios-placeholder-branding-replaced): existing owned crescent, reproducible asset rendering, resource-compiler checks and pending native acceptance.
 
 - [Product overview](../README.md): purpose, architecture, development commands.
-- [Mobile launch](LAUNCH.md): current launch tracker, October 4 CI evidence reconciliation, native build workflow, release gates, store copy, device QA and verified reliability improvements.
+- [Mobile launch](LAUNCH.md): bounded physical synthetic-check-in observation and open recovery/privacy gates; current launch tracker, October 4 CI evidence reconciliation, native build workflow, release gates, store copy, device QA and verified reliability improvements.
 - [Security and privacy review](SECURITY.md): findings, fixes, limits, outstanding work.
 - [In-app privacy notice](../public/privacy.html): current data practices; publish a complete policy before store submission.
 
