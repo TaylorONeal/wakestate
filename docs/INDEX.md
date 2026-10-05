@@ -1,5 +1,7 @@
 # WakeState documentation
 
+Start with [native/store testing and retest selection](NATIVE-TESTING.md), then [current evidence and reusable lessons](LAUNCH.md). This keeps durable instructions separate from dated results; older receipts are not current blockers.
+
 - [iOS native branding](LAUNCH.md#october-5-ios-placeholder-branding-replaced): existing owned crescent, reproducible asset rendering, resource-compiler checks and pending native acceptance.
 
 - [Product overview](../README.md): purpose, architecture, development commands.
