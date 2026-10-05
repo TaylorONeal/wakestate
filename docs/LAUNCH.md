@@ -1,5 +1,13 @@
 # iOS and Android launch preparation
 
+## October 5: iOS placeholder branding replaced
+
+The iOS catalog still contained the blue Capacitor template icon and splash. AppIcon now uses the existing Android-owned teal crescent at 1024×1024, opaque RGB. Splash uses the same vector at 160/320/480 pixels for 1×/2×/3×. The launch storyboard centers a fixed 160-point mark on the matching navy background, avoiding aspect-fill cropping across phone/tablet dimensions. Web/PWA artwork, Android assets, package IDs, privacy behavior and signing are unchanged.
+
+Rebuild with Python 3 plus CairoSVG, Pillow and the system Cairo library: `python3 scripts/render-ios-branding.py`. The renderer reads paths/colors from `android/app/src/main/res/drawable/wakestate_mark.xml` and its background color, so these iOS outputs do not become a separate logo source. On Homebrew macOS, use Homebrew Python with `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` if Cairo discovery needs it. Rendering dependencies are authoring-only; no app runtime dependency was added.
+
+Validation: all four output dimensions, opaque RGB encoding and asset references checked; icon/splash raster exports visually inspected; Xcode27 `actool` compiled the iOS Simulator catalog and `ibtool` compiled the launch storyboard at deployment target15.0 for iPhone/iPad. This is resource compilation, not a full app rebuild or native launch-screen acceptance. Inspect cold launch on iPhone/iPad before release; no iOS signing, upload or submission performed.
+
 ## October 5: unsigned iOS simulator compilation
 
 Local commit 9cb7379 (PR #14 source plus documentation) builds successfully with Xcode27/SDK27 for generic iOS Simulator after native web build and Capacitor sync, with CODE_SIGNING_ALLOWED=NO. Compiled identity: com.wakestate.app, 1.0.0 (1). App-level PrivacyInfo.xcprivacy is included. Source remains unchanged. Vite reports its existing large-chunk warning.
