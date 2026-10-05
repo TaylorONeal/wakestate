@@ -190,8 +190,8 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
             <p className="text-sm font-medium text-amber-500/90">Back up your data</p>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Since data is stored only on this device, it will be lost if you clear browser data,
-            reinstall the app, or switch devices. Export regularly to keep a backup.
+            Since data is stored only on this device, it will be lost if you clear the app's data
+            (or browser data on the web), uninstall the app, or switch devices. Export regularly to keep a backup.
           </p>
           {onNavigateToExport && (
             <Button
