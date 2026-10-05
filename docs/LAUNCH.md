@@ -1,5 +1,29 @@
 # iOS and Android launch preparation
 
+## October 5 candidate and device evidence
+
+Current sanitized snapshot from the private launch PRD. Earlier dated receipts retain their original scope; `NATIVE-TESTING.md` is the reusable plan, this file is the results ledger.
+
+| Layer | Verified evidence | Still open |
+| --- | --- | --- |
+| Android source/CI | Signed candidate source `fba61e319b49267df45fd80ce0474350ec17a3e1`, tree `687e209af60054798b08c069cd3ab8dcd451426d`, matches [CI37267268663](https://github.com/TaylorONeal/wakestate/actions/runs/37267268663), artifact11326872691. | Later main `cb7d04c` changes iOS artwork only; it is not a newly built Android candidate. |
+| Signed artifact | AAB SHA-256 `a0322eecbbb880fdf75c54f3e595432708f0d9c18d307452a3f08fd4b06b1759`; release APK `72074554cc6981609a54b7ed58ada93112c641729d816669afd01d819b66111a`. Existing upload certificate matches prior owned artifact, strict verification and payload comparison pass. | Recovery custody and provider certificate/version acceptance; private artifact custody remains in existing launch PRD. |
+| Static privacy | Compiled 1.0.0(1), min24/target36, nondebuggable, no INTERNET/native .so; backup disabled and cloud/device-transfer rules exclude stored data domains. | Runtime journal/network/backup behavior is not established by manifest inspection. |
+| Physical installation | Release APK installed on dedicated Pixel 4 XL, Android13, after package absence check; package-manager readback confirmed. | Full journal/restart/export/restore/deletion/accessibility and Play-delivered acceptance not complete. Keyboard input does not establish reliable pointer control. |
+| iOS | Earlier unsigned simulator compile succeeded. PR17 merged as `cb7d04c`; final-head CI passed at `72e13bd`, and branded icon/storyboard resource compilation/visual inspection passed. | Full new branded candidate cold launch, physical QA, signed archive, TestFlight and App Store acceptance. |
+| Provider preparation | No-collection/no-sharing Data safety draft saved with provider confirmation; icon/feature uploaded and applied. | Artwork listing persistence is uncertain until reopen, populated native screenshots and final candidate/privacy reconciliation remain. No review submission inferred. |
+
+## Reusable native-testing lessons
+
+- Onboarding-only emulator capture proves only that screen; a populated journal, restart, recovery and privacy require their own observed cases.
+- A signed installed APK is not Play delivery or runtime acceptance. Preserve source/tree/hash provenance and distinguish static no-INTERNET/backup flags from observed behavior.
+- Worktrees omit ignored signing configuration by design. Check documented primary custody and public certificate against prior owned artifacts; do not put keys or device identifiers in public docs.
+- Plain jarsigner can exit successfully on an unsigned AAB; use the pinned verifier. CI synthetic certificates validate the verifier, not release ownership.
+- Resource compilers can accept artwork that has not been cold-launched. Branded iOS resource checks do not replace physical launch evidence.
+- A saved footer can conflict with unsaved-navigation warnings. Reopen the listing and inspect persistence before calling it complete.
+- Keep obsolete feedback-backend and real health data out of the current test scope. Export/share is deliberate user action; canceled share and mail drafts must not be reported as data sent.
+
+
 ## October 5: iOS placeholder branding replaced
 
 The iOS catalog still contained the blue Capacitor template icon and splash. AppIcon now uses the existing Android-owned teal crescent at 1024×1024, opaque RGB. Splash uses the same vector at 160/320/480 pixels for 1×/2×/3×. The launch storyboard centers a fixed 160-point mark on the matching navy background, avoiding aspect-fill cropping across phone/tablet dimensions. Web/PWA artwork, Android assets, package IDs, privacy behavior and signing are unchanged.
@@ -111,16 +135,9 @@ Capacitor 8 requires Xcode 26+ and Android Studio 2025.2.1+. Use the SDK/JDK exp
 - Donation links: hidden in native builds since 2026-10-04 and shown only on the web PWA. Confirm on device that About and Settings show no "Buy me a coffee" link.
 - Run device QA below and submit through TestFlight / Play internal testing before production.
 
-## Device QA (must run on iOS and Android)
+## Device QA (iOS and Android)
 
-1. Fresh install: onboarding fits with large text; start works; TalkBack/VoiceOver labels and focus are understandable.
-2. Save check-in, event, sleep, and medication; navigate away, force close, reopen, and verify persistence. Repeat offline and across local midnight.
-3. Check keyboard avoidance, landscape, notches, safe areas, 320px width, and reduced motion. Android back dismisses forms/dialogs without accidental app exit.
-4. Export every category; save to Files/Downloads and share to a chosen app. Restore into a disposable fresh test install and compare every record. Cancel the share sheet and file chooser gracefully.
-5. Delete test data with confirmation; restart and verify no journal or export cache remains. Preferences stay. Exported copies remain outside app control.
-6. Upgrade an installed build containing test data; verify no origin changes or loss. Verify behavior under storage pressure and denied/unavailable storage.
-7. Tap the About feedback link; verify it opens an email draft to the support address and the app itself sends nothing. Confirm About and Settings show no donation link.
-8. Inspect final release network traffic, archive privacy report, entitlements/permissions, screenshots, and store declarations together.
+Use the consolidated [native/store testing plan](NATIVE-TESTING.md): core smoke for every new binary/platform, remaining first-release baseline, and change-triggered regression. Record case results in this launch ledger; do not mark browser or CI evidence as device acceptance.
 
 ## Store listing draft
 
