@@ -37,6 +37,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - run: node --test scripts/verify-android-signature.test.mjs
       - name: Verify runner Android prerequisites
         shell: bash
         run: |
