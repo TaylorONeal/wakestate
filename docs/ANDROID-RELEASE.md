@@ -44,10 +44,16 @@ Output: `android/app/build/outputs/bundle/release/app-release.aab`.
 ## 4. Verify the signer
 
 ```sh
-jarsigner -verify -verbose -certs android/app/build/outputs/bundle/release/app-release.aab
+ANDROID_UPLOAD_CERT_SHA256='REPLACE_WITH_OWNED_UPLOAD_CERTIFICATE_SHA256' \
+  npm run android:verify-signature -- android/app/build/outputs/bundle/release/app-release.aab
 ```
 
 Expect `jar verified.` and the upload certificate (not `CN=Android Debug`). Record the SHA-256 of the AAB and the certificate fingerprint with the release notes.
+
+
+The verifier requires a complete signature, one currently valid non-debug upload certificate and an exact SHA-256 certificate match. Plain `jarsigner -verify` exits zero even for an unsigned bundle, so exit status alone is insufficient. Obtain the public certificate pin independently from the approved upload identity, not from the bundle being tested. Java must be on PATH. The result records the artifact hash and certificate fingerprint; device, manifest, privacy and store gates remain separate.
+
+The standalone verifier and real Java fixture tests reuse the reviewed Alpine Pack implementation (PR12, e71feb8). Keep equivalent fixes aligned across these utility release tools; no shared credentials or signing keys are implied.
 
 ## 5. Release gates
 
