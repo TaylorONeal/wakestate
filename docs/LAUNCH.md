@@ -27,6 +27,16 @@ Private evidence for the bounded physical check-in stays outside git: `wakestate
 - Keep obsolete feedback-backend and real health data out of the current test scope. Export/share is deliberate user action; canceled share and mail drafts must not be reported as data sent.
 
 
+## October 5: current branded iOS simulator candidate
+
+Current main `25952558954024f85defd6beef70000332ea3af4` (tree `da281473847793af5b90b04ed9de5e009fb46a85`) successfully compiled after `npm run build:native`, `npx cap sync ios` and generic iOS Simulator Debug `xcodebuild` with `CODE_SIGNING_ALLOWED=NO`. This includes the merged crescent icon/launch artwork; the earlier simulator receipt below predates that artwork. Xcode27/SDK27 compiled both arm64 and x86_64 simulator slices, identity `com.wakestate.app` 1.0.0(1), minimum iOS15.0. All 33 embedded web files byte-match the current native web build. The app-level and Capacitor/Cordova privacy manifests are present; inclusion alone does not establish privacy compliance.
+
+Candidate: `/tmp/wakestate-ios-current-20261005/Build/Products/Debug-iphonesimulator/App.app`; build log: `/tmp/wakestate-ios-current-20261005.log`; provenance: `/tmp/wakestate-ios-current-20261005/candidate-provenance.json`. Bundle content SHA-256 `a82a71dc442ad63c5051df0ac54a0858a0608dcd82afeedd76cc3a73d9fa54ac` covers sorted relative file paths, a NUL separator and each file's bytes. Executable SHA-256: `1f90b80fc33ed3d7f69877bc1c6b40cc874a12c4d55c21da4a686c85eef20750`.
+
+Dependencies were reused from a lock-identical existing installation after `npm ls --depth=0` passed; Capacitor's generated local dependency-path changes were restored after compilation. No runtime, account, data or signing configuration changed. The binary has only the simulator linker's ad-hoc signature, no distribution team/signing or sealed resource signature. Vite retains its existing large-chunk warning.
+
+Next: cold-launch branding and the small new-platform smoke in `NATIVE-TESTING.md`, followed by outstanding journal recovery/export/privacy acceptance. Mac screen lock prevented native UI inspection in this run. This is compile evidence only, not iPhone/iPad behavior, archive, TestFlight, App Store submission or launch. No real health data was used.
+
 ## October 5: iOS placeholder branding replaced
 
 The iOS catalog still contained the blue Capacitor template icon and splash. AppIcon now uses the existing Android-owned teal crescent at 1024×1024, opaque RGB. Splash uses the same vector at 160/320/480 pixels for 1×/2×/3×. The launch storyboard centers a fixed 160-point mark on the matching navy background, avoiding aspect-fill cropping across phone/tablet dimensions. Web/PWA artwork, Android assets, package IDs, privacy behavior and signing are unchanged.
