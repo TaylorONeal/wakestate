@@ -18,4 +18,6 @@ Start with [native/store testing and retest selection](NATIVE-TESTING.md), then 
 
 - October 6: [iPad synthetic check-in and Timeline correction](LAUNCH.md#october-6-ipad-check-in-acceptance-and-timeline-correction): candidate-scoped save/restart observations, corrected modern Timeline and actual local CSV export acceptance, legacy/mixed source regressions and remaining native gates.
 
-- [Nap input minute precision](LAUNCH.md#october-6-nap-input-minute-precision-correction): end-only edits match displayed duration; actual-form regressions pass, native follow-up pending.
+- [Nap input minute precision](LAUNCH.md#october-6-nap-input-minute-precision-correction): end-only edits match displayed duration; actual-form regressions and bounded iPad one/two-minute end-only entry/save acceptance pass; other platform gates remain separate.
+
+- [Future backup restoration and device migration](LAUNCH.md#future-requirement-restore-backups-when-switching-devices-or-platforms): user-requested future scope; existing JSON import distinguished from unverified cross-platform restoration; no testing now.
