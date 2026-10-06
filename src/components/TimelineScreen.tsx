@@ -4,7 +4,8 @@ import { format, parseISO, isToday, isThisWeek, subDays } from 'date-fns';
 import { ChevronDown, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getCheckIns, deleteCheckIn } from '@/lib/storage';
-import { WAKE_DOMAIN_CONFIG, type CheckIn, type WakeDomainKey } from '@/types';
+import { type CheckIn } from '@/types';
+import { getCheckInDisplayDomains } from '@/lib/checkInDisplay';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +29,9 @@ const colorMap: Record<string, string> = {
   'domain-sensory': 'bg-domain-sensory',
   'domain-thermo': 'bg-domain-thermo',
   'domain-emotional': 'bg-domain-emotional',
+  'domain-anxiety': 'bg-domain-anxiety',
+  'domain-mood': 'bg-domain-mood',
+  'domain-digestive': 'bg-domain-digestive',
 };
 
 interface TimelineScreenProps {
@@ -129,10 +133,8 @@ export function TimelineScreen({ refreshTrigger }: TimelineScreenProps) {
                   {/* Mini domain bars */}
                   <div className="flex items-center gap-3">
                     <div className="flex gap-0.5">
-                      {(Object.keys(checkIn.wakeDomains) as WakeDomainKey[]).slice(0, 5).map((key) => {
-                        const value = checkIn.wakeDomains[key];
-                        const config = WAKE_DOMAIN_CONFIG[key];
-                        const bgClass = colorMap[config.color] || 'bg-primary';
+                      {getCheckInDisplayDomains(checkIn).slice(0, 5).map(({ key, value, color }) => {
+                        const bgClass = colorMap[color] || 'bg-primary';
                         
                         return (
                           <div
@@ -173,16 +175,14 @@ export function TimelineScreen({ refreshTrigger }: TimelineScreenProps) {
                             Wake State
                           </h4>
                           <div className="grid grid-cols-2 gap-2">
-                            {(Object.keys(checkIn.wakeDomains) as WakeDomainKey[]).map((key) => {
-                              const config = WAKE_DOMAIN_CONFIG[key];
-                              const value = checkIn.wakeDomains[key];
-                              const bgClass = colorMap[config.color] || 'bg-primary';
+                            {getCheckInDisplayDomains(checkIn).map(({ key, value, label, color }) => {
+                              const bgClass = colorMap[color] || 'bg-primary';
                               
                               return (
                                 <div key={key} className="flex items-center gap-2">
                                   <div className={`w-2 h-2 rounded-full ${bgClass}`} />
-                                  <span className="text-xs text-muted-foreground truncate flex-1">
-                                    {config.label.split(' —')[0]}
+                                  <span className="text-xs text-muted-foreground min-w-0 flex-1">
+                                    {label}
                                   </span>
                                   <span className="text-xs font-medium">{value}</span>
                                 </div>

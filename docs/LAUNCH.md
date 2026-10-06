@@ -1,5 +1,15 @@
 # iOS and Android launch preparation
 
+## October 6: iPad check-in acceptance and Timeline correction
+
+Existing unsigned simulator source `25952558954024f85defd6beef70000332ea3af4`, identity `com.wakestate.app` 1.0.0(1), was installed on iPad Pro 11-inch (M5), iPadOS26.2. Archived ZIP SHA-256 `7999e63e0df36d7703d8578b72f828d7976b3b38b0bcaa5498a8de82dc524847` was verified before installation. No new native build or distribution signing.
+
+At 10:01–10:03 WITA, account-free onboarding visibly explained device storage, backup exports and non-diagnostic scope. The owned crescent launcher icon and journal UI rendered. An all-1 synthetic check-in with exact note “Synthetic QA only” saved with confirmation and appeared in Timeline at10:01AM October6. Device Hub Home double-click → exposed Close WakeState removed its switcher card; relaunch retained Today count1 check-in/0events. Reopening the individual Timeline entry after restart was blocked by `noWindowsAvailable`; exact post-restart values remain unverified. Private evidence is `wakestate-ios-current/ipad-checkin-timeline-20261006.png` in the existing October5 candidate packet, not a store export.
+
+**Defect observed:** Timeline displayed legacy labels and Cataplexy1 despite the current form explaining cataplexy is event-only, and omitted Sleep Inertia. Source confirmed Timeline read compatibility `wakeDomains` instead of recorded `narcolepsyDomains`; its compatibility cataplexy value is hardcoded1. The correction prefers current recorded domains and optional overlapping scores, while keeping true legacy records readable with their original labels/values. Missing fields are not invented scores. No storage migration, record mutation, new telemetry or medical guidance is introduced. Long labels wrap instead of being truncated.
+
+Validation: `npm run validate` passed typecheck,25 tests (including4 mapping regressions), lint with8 existing warnings and production web build with existing chunk-size warning. This is source/test validation; the corrected Timeline still needs rebuilt-candidate native acceptance. Remaining first-release cases include event/sleep/medication journeys, exact record recovery, export/import/deletion/offline/privacy/accessibility, signed physical acceptance and store delivery. iOS submission remains held.
+
 ## October 5 candidate and device evidence
 
 Current sanitized snapshot from the private launch PRD. Earlier dated receipts retain their original scope; `NATIVE-TESTING.md` is the reusable plan, this file is the results ledger.
