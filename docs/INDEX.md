@@ -7,6 +7,7 @@ Start with [native/store testing and retest selection](NATIVE-TESTING.md), then 
 - [Product overview](../README.md): purpose, architecture, development commands.
 - [Mobile launch](LAUNCH.md): bounded physical synthetic-check-in observation and open recovery/privacy gates; current launch tracker, October 4 CI evidence reconciliation, native build workflow, release gates, store copy, device QA and verified reliability improvements.
 - [Security and privacy review](SECURITY.md): findings, fixes, limits, outstanding work.
+- [Store listing text](STORE-LISTING.md): draft iOS App Store fields with character counts, App Privacy and privacy-manifest status, category and age-rating rationale, and App Review notes; nothing submitted.
 - [In-app privacy notice](../public/privacy.html): current data practices; publish a complete policy before store submission.
 
 - [Android release](ANDROID-RELEASE.md): signing, build, pinned-certificate AAB verification and Play release gates. Start here for Android.
