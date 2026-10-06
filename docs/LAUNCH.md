@@ -1,5 +1,11 @@
 # iOS and Android launch preparation
 
+## October 6: nap input minute-precision correction
+
+Native review observed Start10:30 / End10:32 with a displayed duration of one minute. Source reproduction confirmed the initial start retained hidden seconds, while editing the end reset seconds to zero; date-fns truncation made10:30:42.500→10:32:00 one minute. A visible one-minute interval could similarly become zero and fail save validation. Saved events already stored HH:mm only, so existing records are not shortened or migrated by this correction.
+
+The form now initializes both endpoints at the same minute boundary. The actual form rendering regression freezes a clock with nonzero seconds and models an end-only edit; displayed one/two-minute intervals match the visible inputs. Both cases fail with the original initializer and pass with the fix. `npm run validate` passed typecheck,30 tests, lint with8 existing warnings and production build with the existing chunk-size warning. Native one/two-minute entry and save acceptance remain pending for the next coherent incremental candidate; no paid/native build or store action was performed for this change.
+
 ## October 6: iPad check-in acceptance and Timeline correction
 
 Existing unsigned simulator source `25952558954024f85defd6beef70000332ea3af4`, identity `com.wakestate.app` 1.0.0(1), was installed on iPad Pro 11-inch (M5), iPadOS26.2. Archived ZIP SHA-256 `7999e63e0df36d7703d8578b72f828d7976b3b38b0bcaa5498a8de82dc524847` was verified before installation. No new native build or distribution signing.

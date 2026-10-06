@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
-import { format, differenceInMinutes } from 'date-fns';
+import { format, differenceInMinutes, startOfMinute } from 'date-fns';
 import { Moon, Save, ChevronLeft, Info, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,8 +30,8 @@ interface NapEventFormProps {
 export function NapEventForm({ onClose, onBack, onSave }: NapEventFormProps) {
   const { toast } = useToast();
   const saveConfirmation = useSaveConfirmation();
-  const [startTime, setStartTime] = useState(new Date());
-  const [endTime, setEndTime] = useState(new Date());
+  const [startTime, setStartTime] = useState(() => startOfMinute(new Date()));
+  const [endTime, setEndTime] = useState(() => new Date(startTime));
   const [planned, setPlanned] = useState<boolean | undefined>();
   const [refreshed, setRefreshed] = useState<RefreshedLevel | undefined>();
   const [sleepInertia, setSleepInertia] = useState<SleepInertiaDuration | undefined>();
