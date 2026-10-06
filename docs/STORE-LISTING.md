@@ -56,9 +56,9 @@ Deliberately excluded: `sleep`, `wake`, `journal` (already in name/subtitle, App
 >
 > WakeState is not a medical device and does not diagnose, treat, cure, or prevent any medical condition. It records what you choose to enter and does not interpret it as medical advice. Consult a qualified healthcare professional for medical decisions.
 
-**Support URL:** UNKNOWN. The repository documents only a support email, `purafieldstudio@gmail.com` (`src/lib/support.ts`, `public/privacy.html`). App Store Connect requires an https URL in this field, so the owner must publish or designate a public support page (for example a WakeState section on purafieldstudio.com) before the form can be completed. A `mailto:` address is not accepted.
+**Support URL:** `https://www.purafieldstudio.com/support`. Publisher support page, verified live (HTTP 200) on October 6, 2026 through Vercel. It names WakeState, carries the support email and explains that in-app feedback is a draft email that sends nothing on its own.
 
-**Privacy Policy URL:** `https://www.purafieldstudio.com/privacy#wakestate` (documented in `docs/LAUNCH.md` release gates and `docs/release/ANDROID-2026-09-15.md`). Not fetched live in this pass (outbound proxy denied the host); confirm it is public and matches `public/privacy.html` before entering it. Apple also requires a privacy policy link inside the app for apps handling health data; the in-app notice at `public/privacy.html` is reachable from Settings and About.
+**Privacy Policy URL:** `https://www.purafieldstudio.com/privacy#wakestate` (documented in `docs/LAUNCH.md` release gates and `docs/release/ANDROID-2026-09-15.md`). Verified live (HTTP 200, `#wakestate` anchor present) on October 6, 2026 through Vercel; the live text matches the no-server, no-upload, on-device positioning. Confirm it still matches `public/privacy.html` before entering it. Apple also requires a privacy policy link inside the app for apps handling health data; the in-app notice at `public/privacy.html` is reachable from Settings and About.
 
 **Marketing URL (optional):** leave blank unless a public product page exists.
 
@@ -133,8 +133,8 @@ Health-data note: user-entered sleep, symptom and medication records are health 
 
 ## Items that could block or slow Apple review
 
-1. **Support URL is missing.** App Store Connect will not accept the metadata form without one. Owner action.
-2. **Privacy Policy URL not live-verified** from this environment. Confirm it resolves publicly and names the publisher and contact.
+1. **Support URL resolved.** `https://www.purafieldstudio.com/support` is live and names WakeState (verified October 6, 2026).
+2. **Privacy Policy URL verified live** on October 6, 2026; it names the publisher and contact.
 3. **Medication reference library** (mechanisms, descriptions, preset dose values, investigational drugs with efficacy-style wording such as "designed to restore orexin signaling") is the content most likely to be read as medical information under Guideline 1.4.1. `docs/HEALTH-APP-READINESS.md` already requires a separate primary-source and clinical review of this content; that gate is still open and is independent of the listing text.
 4. **Provider report wording** in `src/lib/reports.ts` ("Are there treatment adjustments to consider?") is a question for the user's clinician and is framed with a non-advice disclaimer; keep it that way and do not quote it in marketing copy.
 5. **Age rating** must not be answered None for Medical/Treatment Information (see above); an inaccurate rating is a common metadata rejection.
