@@ -43,3 +43,33 @@ describe('recorded check-in display', () => {
     expect(getCheckInDisplayDomains(partial).map(({ key, value }) => [key, value])).toEqual([['sleepPressure', 3]]);
   });
 });
+
+// The export's original 18 columns keep their positions; new fields append.
+import { exportToCSV } from './storage';
+const csvHeader = 'id,createdAt,localDate,localTime,cataplexy,microsleeps,cognitive,effort,sleepPressure,motor,sensory,thermo,emotional,anxiety,mood,digestive,tags,note,sleepInertia';
+const csvRow = (values: Array<string | number>) => values.map(value => `"${value}"`).join(',');
+const identity = ['synthetic', '2026-10-06T02:00:00Z', '2026-10-06', '10:00'];
+
+describe('check-in CSV recorded schema', () => {
+  it('exports modern values, leaves compatibility defaults blank and appends sleep inertia', () => {
+    expect(exportToCSV([modern])).toBe([
+      csvHeader, csvRow([...identity, '', 3, 4, 1, 2, '', '', '', '', '', '', '', '', '', 5]),
+    ].join('\n'));
+  });
+  it('keeps legacy columns and actual legacy values, with blank unrecorded sleep inertia', () => {
+    expect(exportToCSV([legacy])).toBe([
+      csvHeader, csvRow([...identity, 5, 2, 3, 4, 1, 1, 2, 3, 4, '', '', '', '', '', '']),
+    ].join('\n'));
+  });
+  it('exports mixed schemas consistently without rewriting source records', () => {
+    const current = { ...modern, overlappingDomains: { anxiety: 5, mood: 4, digestive: 3, thermo: 2, motor: 1, emotional: 4, sensory: 2 } };
+    const records = [legacy, current];
+    const before = JSON.stringify(records);
+    expect(exportToCSV(records)).toBe([
+      csvHeader,
+      csvRow([...identity, 5, 2, 3, 4, 1, 1, 2, 3, 4, '', '', '', '', '', '']),
+      csvRow([...identity, '', 3, 4, 1, 2, 1, 2, 2, 4, 5, 4, 3, '', '', 5]),
+    ].join('\n'));
+    expect(JSON.stringify(records)).toBe(before);
+  });
+});
