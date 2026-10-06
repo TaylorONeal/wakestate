@@ -1,3 +1,4 @@
+import { getCheckInDisplayDomains } from './checkInDisplay';
 import { clearExportCache } from './download';
 import { get, set, delMany, setMany, update } from 'idb-keyval';
 import { format } from 'date-fns';
@@ -251,28 +252,23 @@ export function exportToCSV(checkIns: CheckIn[]): string {
     'digestive',
     'tags',
     'note',
+    // Append new fields so existing column positions remain stable.
+    'sleepInertia',
   ];
   
-  const rows = checkIns.map(c => [
-    c.id,
-    c.createdAt,
-    c.localDate,
-    c.localTime,
-    c.wakeDomains.cataplexy,
-    c.wakeDomains.microsleeps,
-    c.wakeDomains.cognitive,
-    c.wakeDomains.effort,
-    c.wakeDomains.sleepPressure,
-    c.wakeDomains.motor,
-    c.wakeDomains.sensory,
-    c.wakeDomains.thermo,
-    c.wakeDomains.emotional,
-    c.contextDomains?.anxiety || '',
-    c.contextDomains?.mood || '',
-    c.contextDomains?.digestive || '',
-    c.tags.join('; '),
-    c.note || '',
-  ]);
+  const rows = checkIns.map(c => {
+    // Current records contain legacy compatibility defaults, not observations.
+    const recorded = Object.fromEntries(
+      getCheckInDisplayDomains(c).map(({ key, value }) => [key, value]),
+    );
+    return [
+      c.id, c.createdAt, c.localDate, c.localTime,
+      ...['cataplexy', 'microsleeps', 'cognitive', 'effort', 'sleepPressure',
+        'motor', 'sensory', 'thermo', 'emotional', 'anxiety', 'mood', 'digestive']
+        .map(key => recorded[key] ?? ''),
+      c.tags.join('; '), c.note || '', recorded.sleepInertia ?? '',
+    ];
+  });
   
   return [headers.join(','), ...rows.map(r => r.map(escapeCSVCell).join(','))].join('\n');
 }
