@@ -1,10 +1,27 @@
 # iOS and Android launch preparation
 
+## Future requirement: restore backups when switching devices or platforms
+
+Taylor requested this on October 6, 2026 **for future work, with no testing now**. Keep this improvement outside the current launch-fix batch. Do not treat it as a new release blocker or permission to run a restore, overwrite records, implement the feature or start a build in this turn.
+
+Current source already exposes Reports → Import Data / Import File for WakeState JSON backups (`src/components/ExportScreen.tsx`). `src/lib/storage.ts` validates before an atomic write, replaces included categories and preserves omitted categories; versioned backups include journal records, sleep, medication information and settings. This is source inspection only, not verified web-to-device or device-to-device restoration. CSV exports contain check-ins only and are not full backups.
+
+Future scope and acceptance:
+
+- Make **Restore from backup** easy to find, with clear instructions for exporting on the old device or web app and selecting that file on the new installation.
+- Support compatible WakeState JSON backups across web/PWA, Android and iOS, including supported older backup versions. Preserve record IDs, dates/times, recorded scores, notes, sleep, medication records and settings without inventing missing values.
+- Before writing, show the backup summary and exactly which existing categories would be replaced; offer a backup of current data and require explicit confirmation. Cancellation or an invalid/unsupported file must leave existing data untouched. Do not silently merge or duplicate records.
+- Clearly distinguish **full JSON backup/restore** from **CSV reports**. If partial CSV import is considered later, specify supported columns and missing-data limits separately; never present a report as a complete device backup.
+- Keep restore user-controlled and local, with no account requirement, automatic cloud sync or health telemetry. Retain accurate guidance about unencrypted exported files and user-chosen file storage.
+- When this future work is scheduled, use a small synthetic cross-platform/version compatibility check plus full-close recovery; record exact source/export version and destination candidate. No new restore test or acceptance pass was performed for this request.
+
 ## October 6: nap input minute-precision correction
 
 Native review observed Start10:30 / End10:32 with a displayed duration of one minute. Source reproduction confirmed the initial start retained hidden seconds, while editing the end reset seconds to zero; date-fns truncation made10:30:42.500→10:32:00 one minute. A visible one-minute interval could similarly become zero and fail save validation. Saved events already stored HH:mm only, so existing records are not shortened or migrated by this correction.
 
-The form now initializes both endpoints at the same minute boundary. The actual form rendering regression freezes a clock with nonzero seconds and models an end-only edit; displayed one/two-minute intervals match the visible inputs. Both cases fail with the original initializer and pass with the fix. `npm run validate` passed typecheck,30 tests, lint with8 existing warnings and production build with the existing chunk-size warning. Native one/two-minute entry and save acceptance remain pending for the next coherent incremental candidate; no paid/native build or store action was performed for this change.
+The form now initializes both endpoints at the same minute boundary. The actual form rendering regression freezes a clock with nonzero seconds and models an end-only edit; displayed one/two-minute intervals match the visible inputs. Both cases fail with the original initializer and pass with the fix. `npm run validate` passed typecheck,30 tests, lint with8 existing warnings and production build with the existing chunk-size warning. Source validation was followed by the bounded native acceptance below; no paid build or store action was performed.
+
+**Native follow-up, October 6 at 11:03–11:06 WITA:** verified unsigned simulator ZIP SHA-256 `92462b5b86591bc0aceb1c5fb8b88ed7679e39c3d896402b9458e5cf25537551`, source `bd4dab27e5a7213daf1a809affe4e1088c26ce1b`, and installed `com.wakestate.app` 1.0.0(1) on the same iPad Pro 11-inch (M5), iPadOS 26.2, preserving the synthetic journal. End-only edit with untouched Start 11:04 and End 11:05 displayed `0h 1m`; selecting Planned and saving showed “Nap logged” and increased Today events from 1 to 2. A fresh form with untouched Start 11:05 and End 11:07 displayed `0h 2m` and saved, increasing events to 3. Both changed cases **passed**. Original check-in count and logged-sleep status remained visible. Private captures `ipad-one-minute.png`, `ipad-two-minute.png`, and `ipad-three-events.png` are in the existing October 6 `wakestate-nap-minute-precision` candidate packet; mirrored frames are QA evidence, not store assets. No backup/import/restore test, data wipe, medication acceptance, or store submission was performed. Earlier unchanged Timeline/CSV evidence is carried forward, not rerun or relabeled. Android and distribution-device acceptance remain separate.
 
 ## October 6: iPad check-in acceptance and Timeline correction
 
