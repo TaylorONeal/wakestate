@@ -1,5 +1,13 @@
 # iOS and Android launch preparation
 
+## October 7: signed candidate c1cb68b replaces a0322eec
+
+- Local signed AAB built 08:13 to 08:15 WITA from current origin/main at c1cb68b; signature verified against the owned upload certificate; versionCode 1 / 1.0.0.
+- AAB sha256 `1181bb75f9c0795546a8d06ed8e3bae9dfdff3754d8d5a8c42e04972aec34004`. It includes the Timeline/CSV (#21) and nap-minute (#23) fixes and supersedes a0322eec.
+- Path: `~/repos/_share/bundles/release-candidates/2026-10-07/wakestate-c1cb68b/` with provenance.json beside it.
+- Play Console, 07:45: the com.wakestate.app record exists as Draft under the Purafield Studio LLC org, so it is no longer provisional. No release on any track yet.
+- Pixel 4 XL, 08:05: v1.0.0 code 1, installer=null (sideloaded). Next: upload to Play internal testing (owner action pending explicit approval), then Play-installed smoke and native screenshots.
+
 ## Future requirement: restore backups when switching devices or platforms
 
 Taylor requested this on October 6, 2026 **for future work, with no testing now**. Keep this improvement outside the current launch-fix batch. Do not treat it as a new release blocker or permission to run a restore, overwrite records, implement the feature or start a build in this turn.
