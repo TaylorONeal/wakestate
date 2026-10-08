@@ -7,7 +7,7 @@ The Medications screen (`src/components/MedicationsScreen.tsx`, `MEDICATION_SECT
 - Never change or delete an existing medication `id`. Saved regimens and administrations reference it. `src/components/MedicationCatalog.test.ts` locks the legacy ids. When a trial code becomes a generic or brand name, keep the old id and change `brandName`/`genericName` (for example `tak-861` is now Orzeyful).
 - Approved drugs go in an "Approved" section. Investigational drugs go in a "Clinical Trials" section. Set `trialTracking: true` on any drug where people may be in a trial or open-label extension.
 - Mark discontinued programs in the description instead of deleting them, so past trial participants keep their records.
-- No dosing advice beyond the label. No efficacy comparisons. Keep the non-diagnostic framing.
+- No dosing advice. Dose pickers list every labeled strength; descriptions never present one regimen as the label when it allows several. No efficacy comparisons. Keep the non-diagnostic framing.
 - Use primary sources only: FDA, the manufacturer, ClinicalTrials.gov, company investor releases or SEC filings. Treat aggregator sites as leads, not evidence. When status cannot be confirmed, use vaguer wording ("in clinical trials") instead of guessing.
 - Put the review month in section descriptions ("Reference as of October 2026").
 
@@ -23,6 +23,6 @@ In TaylorONeal/wakestate, re-verify the medication reference in src/components/M
 
 | Date | PR | Summary |
 | --- | --- | --- |
-| 2026-10-08 | #28 | TAK-861 became Orzeyful (oveporexton), approved Aug 5, 2026 for adults with NT1, availability pending DEA scheduling. ALKS-2680 became alixorexton (Phase 3). Added cleminorexton (ORX750). Danavorexton marked as discontinued for narcolepsy. Wakix pediatric cataplexy (Feb 2026). Vyvanse flagged as off-label. |
+| 2026-10-08 | #28 | TAK-861 became Orzeyful (oveporexton), approved Aug 5, 2026 for adults with NT1 (0.5, 1 and 2 mg tablets, twice daily), availability pending DEA scheduling. ALKS-2680 became alixorexton (Phase 3). Added cleminorexton (ORX750). Danavorexton marked as discontinued for narcolepsy. Wakix pediatric cataplexy (Feb 2026). Vyvanse flagged as off-label. |
 
 Next check: confirm Orzeyful DEA scheduling and US availability (expected October to November 2026) and update its description.

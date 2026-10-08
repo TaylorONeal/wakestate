@@ -181,9 +181,9 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         brandName: 'Orzeyful',
         genericName: 'oveporexton (formerly TAK-861)',
         mechanism: 'Orexin-2 receptor agonist (oral)',
-        description: 'FDA-approved in August 2026 for adults with narcolepsy type 1. Labeled dose is 2 mg twice daily. US availability follows DEA scheduling; check with your prescriber or the manufacturer for current status.',
+        description: 'FDA-approved in August 2026 for adults with narcolepsy type 1. Taken twice daily; the label includes more than one strength, and your prescriber sets yours. US availability follows DEA scheduling; check with your prescriber or the manufacturer for current status.',
         manufacturerUrl: 'https://www.orzeyful.com',
-        doseOptions: ['2 mg', 'Other'],
+        doseOptions: ['0.5 mg', '1 mg', '2 mg', 'Other'],
         trialTracking: true,
       },
     ],
@@ -191,7 +191,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
   {
     title: 'Orexin Receptor Agonists (Clinical Trials)',
     icon: <FlaskConical className="w-5 h-5" />,
-    description: 'Investigational orexin agonists. Only available through clinical trials. Status changes quickly; check ClinicalTrials.gov or the sponsor.',
+    description: 'Investigational orexin agonists, only available through clinical trials. Reference as of October 2026. Status changes quickly; check ClinicalTrials.gov or the sponsor.',
     medications: [
       {
         id: 'alks-2680',
