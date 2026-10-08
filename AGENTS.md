@@ -9,6 +9,7 @@ Which shared skill to use for device acceptance or delivery work, and the author
 | Android or launch-readiness work | Read `docs/LAUNCH.md` and the latest `docs/release/` packet. Check current source, CI and artifacts before repeating historical status. Keep compilation, signing, device QA and store approval separate. |
 | Code/dependency/native change | Run `npm run validate`; use unsigned Android CI for relevant changes. Inspect failures before merge. Preserve local journal storage and the free model. |
 | Screenshot, icon or store artwork work | Read `docs/store/ANDROID-SCREENSHOTS.md`. Use synthetic data on a disposable installation; inspect real captures and record platform/commit. Never label browser renders as Android screenshots. |
+| Medication list, drug names or approval status | Follow `docs/MEDICATION-REFERENCE.md` (rules plus the refresh prompt). Never change medication ids. Run it before every store release. |
 | Health data, import/export, privacy or any new network feature | Read `docs/SECURITY.md` and relevant storage tests. Preserve local records; test real import/export paths. Any new backend must be separately reviewable and never claimed as verified from source edits alone. The app currently has no backend. |
 | Store submission | Recheck signed bundle, declarations, public support/privacy, real device QA and listing assets. Obtain applicable release authorization; do not equate business verification with app approval. |
 
