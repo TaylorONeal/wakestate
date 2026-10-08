@@ -12,6 +12,8 @@ Start with [native/store testing and retest selection](NATIVE-TESTING.md), then 
 - [Android release](ANDROID-RELEASE.md): signing, build, pinned-certificate AAB verification and Play release gates. Start here for Android.
 - [Android execution packet, 2026-09-15](release/ANDROID-2026-09-15.md): historical build evidence, with a note on what changed since.
 
+- [Medication reference refresh](MEDICATION-REFERENCE.md): rules, refresh prompt and review log for the in-app narcolepsy medication list. Re-run before each store release.
+
 - [Health and privacy launch review](HEALTH-APP-READINESS.md): current Google policy, declaration mapping, medication-entry fixes, evidence and final release checks.
 
 - October 5: [current branded iOS simulator candidate](LAUNCH.md#october-5-current-branded-ios-simulator-candidate), exact payload provenance and pending native acceptance. Earlier [unsigned iOS simulator compile evidence](LAUNCH.md#october-5-unsigned-ios-simulator-compilation), identity/resource checks and remaining device/privacy gates.
