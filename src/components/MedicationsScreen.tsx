@@ -23,6 +23,8 @@ interface MedicationInfo {
   description: string;
   manufacturerUrl: string;
   doseOptions?: string[];
+  /** Show the "Participating in trial" switch (investigational drugs and open-label extensions). */
+  trialTracking?: boolean;
 }
 
 interface MedicationSection {
@@ -86,7 +88,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         brandName: 'Vyvanse',
         genericName: 'lisdexamfetamine',
         mechanism: 'Prodrug → dopamine & norepinephrine releasing agent',
-        description: 'Vyvanse is a prodrug stimulant that converts to dextroamphetamine in the body, providing longer-lasting wakefulness.',
+        description: 'Vyvanse is a prodrug stimulant that converts to dextroamphetamine in the body. It is not FDA-approved for narcolepsy, but some clinicians prescribe it off-label.',
         manufacturerUrl: 'https://www.takeda.com/what-we-do/our-medicines/',
         doseOptions: ['20 mg', '30 mg', '40 mg', '50 mg', '60 mg', '70 mg', 'Other'],
       },
@@ -128,7 +130,7 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
         brandName: 'Wakix',
         genericName: 'pitolisant',
         mechanism: 'Histamine H3 receptor antagonist/inverse agonist',
-        description: 'Wakix supports wakefulness by increasing histamine signaling in the brain through a different mechanism than stimulants.',
+        description: 'Wakix supports wakefulness by increasing histamine signaling, a different pathway than stimulants. It is not a controlled substance. Approved for daytime sleepiness and cataplexy in adults, and in children 6 and older (pediatric cataplexy added February 2026).',
         manufacturerUrl: 'https://www.wakix.com',
         doseOptions: ['8.9 mg', '17.8 mg', '35.6 mg', 'Other'],
       },
@@ -169,33 +171,54 @@ const MEDICATION_SECTIONS: MedicationSection[] = [
     ],
   },
   {
-    title: 'Orexin-Targeting Therapies (Clinical Trials / Emerging)',
-    icon: <FlaskConical className="w-5 h-5" />,
-    description: 'These therapies aim to activate orexin signaling and are currently being studied in clinical trials. Availability varies.',
+    title: 'Orexin Receptor Agonists (Approved)',
+    icon: <Sparkles className="w-5 h-5" />,
+    description: 'A newer class designed to stand in for the missing orexin signal in narcolepsy type 1. Reference as of October 2026.',
     medications: [
       {
+        // Keeps the TAK-861 id so regimens saved during the trials still match.
         id: 'tak-861',
-        brandName: 'TAK-861',
-        genericName: 'orexin agonist',
-        mechanism: 'Orexin-2 receptor agonist (investigational)',
-        description: 'TAK-861 is an investigational orexin receptor agonist designed to restore orexin signaling in narcolepsy patients.',
-        manufacturerUrl: 'https://www.takeda.com/what-we-do/research-and-development/',
+        brandName: 'Orzeyful',
+        genericName: 'oveporexton (formerly TAK-861)',
+        mechanism: 'Orexin-2 receptor agonist (oral)',
+        description: 'FDA-approved in August 2026 for adults with narcolepsy type 1. Labeled dose is 2 mg twice daily. US availability follows DEA scheduling; check with your prescriber or the manufacturer for current status.',
+        manufacturerUrl: 'https://www.orzeyful.com',
+        doseOptions: ['2 mg', 'Other'],
+        trialTracking: true,
+      },
+    ],
+  },
+  {
+    title: 'Orexin Receptor Agonists (Clinical Trials)',
+    icon: <FlaskConical className="w-5 h-5" />,
+    description: 'Investigational orexin agonists. Only available through clinical trials. Status changes quickly; check ClinicalTrials.gov or the sponsor.',
+    medications: [
+      {
+        id: 'alks-2680',
+        brandName: 'Alixorexton',
+        genericName: 'alixorexton (formerly ALKS 2680)',
+        mechanism: 'Orexin-2 receptor agonist (oral, investigational)',
+        description: 'In Phase 3 trials for narcolepsy type 1 and type 2 as of 2026, with FDA Breakthrough Therapy designation for type 1.',
+        manufacturerUrl: 'https://www.alkermes.com/research-and-development/',
+        trialTracking: true,
+      },
+      {
+        id: 'orx750',
+        brandName: 'Cleminorexton',
+        genericName: 'cleminorexton (formerly ORX750)',
+        mechanism: 'Orexin-2 receptor agonist (oral, investigational)',
+        description: 'In clinical trials for narcolepsy type 1, type 2 and idiopathic hypersomnia.',
+        manufacturerUrl: 'https://clinicaltrials.gov/search?term=ORX750',
+        trialTracking: true,
       },
       {
         id: 'danavorexton',
         brandName: 'Danavorexton (TAK-925)',
         genericName: 'orexin agonist',
         mechanism: 'Orexin-2 receptor agonist (IV, investigational)',
-        description: 'Danavorexton is an investigational intravenous orexin receptor agonist being studied for acute and chronic use.',
+        description: 'An intravenous orexin agonist studied in early trials. Takeda has discontinued its development for narcolepsy. Listed so past trial participants can keep their records.',
         manufacturerUrl: 'https://www.takeda.com/what-we-do/research-and-development/',
-      },
-      {
-        id: 'alks-2680',
-        brandName: 'ALKS-2680',
-        genericName: 'orexin agonist',
-        mechanism: 'Orexin-2 receptor agonist (oral, investigational)',
-        description: 'ALKS-2680 is an oral orexin receptor agonist in clinical development for narcolepsy type 1.',
-        manufacturerUrl: 'https://www.alkermes.com/research-and-development/',
+        trialTracking: true,
       },
     ],
   },
@@ -587,7 +610,7 @@ export function MedicationsScreen({ onBack }: MedicationsScreenProps) {
                   key={med.id}
                   medication={med}
                   entry={userMedications[med.id]}
-                  isTrialMed={section.title.includes('Clinical Trials')}
+                  isTrialMed={!!med.trialTracking}
                   onUpdate={(data) => handleUpdateMedication(med.id, data)}
                   onRemove={() => handleRemoveMedication(med.id)}
                 />
