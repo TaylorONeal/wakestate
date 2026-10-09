@@ -14,3 +14,7 @@ Which shared skill to use for device acceptance or delivery work, and the author
 | Store submission | Recheck signed bundle, declarations, public support/privacy, real device QA and listing assets. Obtain applicable release authorization; do not equate business verification with app approval. |
 
 **Release acceptance, secrets, evidence discipline, and authorization boundaries follow the shared [`NATIVE-RELEASE-POLICY.md`](https://github.com/TaylorONeal/app-launch-playbook/blob/main/NATIVE-RELEASE-POLICY.md)** in `app-launch-playbook` — don't restate it here. WakeState-specific: it's free, private and non-diagnostic — no generic billing suite, health telemetry or real health records in QA, and no backend at all currently. Keep mutable results in LAUNCH.md, never here. iOS preparation does not imply submission.
+
+## Platform independence
+
+No Lovable or Replit tooling, hosting, icons, env vars or assets (no `lovable-tagger`, `.replit`, `replit.md`, `attached_assets/`, template heart favicon, template `placeholder.svg`). CI enforces this with `scripts/check-platform-independence.sh`; run it before pushing. Details: the guard script header.
