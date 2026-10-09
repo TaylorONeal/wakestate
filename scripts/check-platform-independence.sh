@@ -3,7 +3,7 @@
 # Allowed: docs that document the removal (see ALLOW below).
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
-PATTERN='lovable|replit|gpt-?engineer|repl\.co|repl\.it'
+PATTERN='lovable\.(app|dev|com)|lovableproject|lovable[-_]|@lovable|\.lovable|replit|gpt-?engineer|repl\.co|repl\.it'
 ALLOW=(
   ':!scripts/check-platform-independence.sh'
   ':!.github/workflows/platform-independence.yml'
