@@ -11,17 +11,25 @@ ALLOW=(
   ':!docs/archive/**'
 )
 hits=$(git grep -n -i -I -E "$PATTERN" -- . "${ALLOW[@]}" || true)
-# Lovable template icon (heart favicon) and template placeholder
 bad_files=""
+# Binary lockfiles are skipped by -I, so scan them as text.
 while IFS= read -r f; do
   [ -f "$f" ] || continue
-  sum=$(sha256sum "$f" | cut -c1-64)
-  case "$f" in
-    */favicon.ico) [ "$(md5sum "$f" | cut -c1-8)" = "9f504444" ] && bad_files+="$f (Lovable template favicon)"$'\n' ;;
-    */placeholder.svg) [ "$(md5sum "$f" | cut -c1-8)" = "35707bd9" ] && bad_files+="$f (Lovable template placeholder)"$'\n' ;;
+  grep -a -i -q -E "$PATTERN" "$f" && bad_files+="$f (binary lockfile references Lovable/Replit)"$'\n'
+done < <(git ls-files | grep -E '(^|/)bun\.lockb?$' || true)
+# Lovable template icon (heart favicon) and template placeholder, at any depth including repo root.
+while IFS= read -r f; do
+  [ -f "$f" ] || continue
+  sum=$(md5sum "$f" | cut -c1-8)
+  case "$(basename "$f")" in
+    favicon.ico) [ "$sum" = "9f504444" ] && bad_files+="$f (Lovable template favicon)"$'\n' ;;
+    placeholder.svg) [ "$sum" = "35707bd9" ] && bad_files+="$f (Lovable template placeholder)"$'\n' ;;
   esac
-done < <(git ls-files | grep -E '(favicon\.ico|placeholder\.svg)$' || true)
-for f in .replit replit.md .lovable; do git ls-files --error-unmatch "$f" >/dev/null 2>&1 && bad_files+="$f (platform file)"$'\n'; done
+done < <(git ls-files | grep -E '(^|/)(favicon\.ico|placeholder\.svg)$' || true)
+# Platform files and folders, at any depth.
+while IFS= read -r f; do
+  bad_files+="$f (platform file)"$'\n'
+done < <(git ls-files | grep -E '(^|/)(\.replit|replit\.md|\.lovable/.*)$' || true)
 if [ -n "$hits$bad_files" ]; then
   echo "Platform independence check failed:" >&2
   [ -n "$hits" ] && echo "$hits" >&2
