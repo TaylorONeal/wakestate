@@ -32,6 +32,8 @@ WakeState remains free, private and non-diagnostic. No billing/purchase suite is
 
 ## Select the smallest useful test set
 
+For the October 11 check-in incident, use a disposable synthetic journal on the affected iPhone/iOS version, preserving real installations. Record installed version/build and the exact failing gesture first. Restore a synthetic old draft, change a score, scroll to Save and tap its visible center; observe confirmation, one matching Timeline record (including the draft's original date), draft removal and updated Today total. Repeat with a fresh draft, a quick second tap and Undo, then fully close/relaunch and compare the saved record. If Save does not respond, distinguish a touch that never reaches the button from a handler error or pending/rejected write using local Web Inspector; do not add health telemetry. The automatic UUID/quota/haptic tests cover recovery code, not native touch delivery. Record the result in the October 11 incident entry in `LAUNCH.md`; leave it open until reproduced and verified on the affected platform.
+
 For a new binary on each release platform, first verify its identity and run the short core smoke above. Then test the changed behavior and its nearest failure/recovery path. The first store release still needs the uncompleted baseline; future releases may reuse explicitly linked, unchanged baseline evidence. A documentation-only correction needs link/content checks, not a fresh native build. A new failure or changed dependency can justify broader coverage; repeating a green suite on the same binary cannot close a device or store gate.
 
 | Change | Additional checks |
