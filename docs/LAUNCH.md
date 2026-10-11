@@ -1,5 +1,26 @@
 # iOS and Android launch preparation
 
+## October 11: reported App Store check-in failure, save recovery patch
+
+**Incident remains open for native reproduction.** A user supplied an iPhone recording and reported an official-store installation. The recording returns to Today without a visible save confirmation; it does not identify the installed version/OS or show touch locations or runtime errors. The [public Apple listing](https://apps.apple.com/ca/app/wakestate/id6819921769), checked October 11, shows **1.0.1 live**. This supersedes older iOS prelaunch status below, but does not identify the reporter's installed build or its source hash.
+
+Source baseline: `16b2b5d` on `main`. Ordinary fresh and restored-draft saves passed in mobile WebKit. Fault injection in the actual check-in form confirmed three separate defects: record preparation was outside the save catch, so a UUID exception locked Save with an unhandled rejection; optional vibration could throw after a committed write and prevent draft cleanup/count refresh; and the submit guard reopened before delayed navigation, allowing an additional entry. These are confirmed code defects, **not proof of the original device trigger**. A missing vibration API already worked; the haptic regression models a throwing implementation.
+
+The patch puts preparation and storage in one recoverable error boundary, retains the draft and exposes a persistent inline error on failure, isolates optional haptics in the shared confirmation hook, and holds the submit guard through confirmation. Undo releases the guard. Existing record format, IndexedDB origin, UUID generation, draft timestamp and native configuration are preserved; no data migration, new telemetry or user-record deletion.
+
+Acceptance for this patch: failed preparation/write leaves zero new records and a retryable unchanged draft; retry creates exactly one entry with original values/date; optional haptic failure cannot interrupt committed-save cleanup; repeated taps while writing/confirming do not add entries; Undo still works.
+
+| Layer / case | Status | Evidence / next action |
+| --- | --- | --- |
+| Actual-form regressions | New pass | `src/components/CheckInScreen.test.ts`: 5 cases with real React rendering and synthetic IndexedDB. Original code failed the first four assertions, with unhandled UUID/haptic rejections; the patch passes. |
+| Source checks | New pass | `npm run validate`: 38 tests, typecheck, lint with 8 existing warnings, production build with existing chunk-size warning; platform-independence check passes. |
+| Native web payload | New pass | `npm run native:sync`: native bundle builds and copies to both iOS/Android. This is not an Xcode/Gradle compile or signed candidate. |
+| Mobile WebKit compiled bundle | New pass | 390×844 touch context; ordinary restored draft plus injected UUID, quota and haptic failures; retry/confirmation, exact synthetic record values, draft removal and reload persistence. No page errors. Browser reload is not native process restart. |
+| Original iPhone/store incident | Not reproduced | Preserve incident status until installed version/build, iOS version and intended failing action are established and the store-installed case is exercised on an iPhone. Do not infer native touch hit-testing from browser tests. |
+| Fixed native release | Not run | Build a candidate from the reviewed commit, preserving app identity/origin; use the focused retest in `NATIVE-TESTING.md`. Record source/binary provenance and device outcome, then seek specific store-submission authorization. No new binary uploaded or published by this patch. |
+
+Keep the submitted recording outside git: it contains user journal information. Do not advise reinstalling or clearing storage to diagnose this incident.
+
 ## October 7: signed candidate c1cb68b replaces a0322eec
 
 - Local signed AAB built 08:13 to 08:15 WITA from current origin/main at c1cb68b; signature verified against the owned upload certificate; versionCode 1 / 1.0.0.
@@ -69,6 +90,7 @@ Private evidence for the bounded physical check-in stays outside git: `wakestate
 
 ## Reusable native-testing lessons
 
+- Test failures before the storage call and after a successful write, not only rejected writes. Optional feedback cannot determine whether a save completes; keep the submit guard active until confirmation/navigation finishes. An injected failure proves that code path, not the cause of an undiagnosed device report.
 - Onboarding-only emulator capture proves only that screen; a populated journal, restart, recovery and privacy require their own observed cases.
 - A signed installed APK is not Play delivery or runtime acceptance. Preserve source/tree/hash provenance and distinguish static no-INTERNET/backup flags from observed behavior.
 - Worktrees omit ignored signing configuration by design. Check documented primary custody and public certificate against prior owned artifacts; do not put keys or device identifiers in public docs.
