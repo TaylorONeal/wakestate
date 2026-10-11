@@ -24,9 +24,11 @@ export function useSaveConfirmation() {
     setState({ isVisible: true, saveType, logType });
     
     // Haptic feedback
-    if ('vibrate' in navigator) {
-      navigator.vibrate(saveType === 'new' ? 30 : 15);
-    }
+    try {
+      if (typeof navigator.vibrate === 'function') {
+        navigator.vibrate(saveType === 'new' ? 30 : 15);
+      }
+    } catch { /* Optional haptics must never interrupt a completed journal save. */ }
     
     // Auto-hide after animation completes
     timer.current = setTimeout(() => {

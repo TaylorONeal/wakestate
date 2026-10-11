@@ -105,7 +105,8 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
   const [overlappingExpanded, setOverlappingExpanded] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showBackDialog, setShowBackDialog] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [draftRestored, setDraftRestored] = useState(false);
 
   // Load draft on mount
@@ -195,33 +196,39 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
   const handleSave = async () => {
     if (savingRef.current) return;
     savingRef.current = true;
-    setIsSaving(true);
+    setSaveState('saving');
+    setSaveError(null);
 
-    const checkInId = uuidv4();
-    const checkIn: CheckIn = {
-      id: checkInId,
-      createdAt: new Date().toISOString(),
-      localDate: format(dateTime, 'yyyy-MM-dd'),
-      localTime: format(dateTime, 'HH:mm'),
-      narcolepsyDomains,
-      overlappingDomains: overlappingExpanded ? overlappingDomains : undefined,
-      // Legacy format for backward compatibility
-      wakeDomains: toLegacyWakeDomains(narcolepsyDomains, overlappingExpanded ? overlappingDomains : defaultOverlappingDomains),
-      contextDomains: overlappingExpanded ? toLegacyContextDomains(overlappingDomains) : undefined,
-      tags: activeTags,
-      note: note.trim() || undefined,
-    };
-
+    let checkInId: string;
     try {
+      // Record preparation can fail too; it must use the same recovery path as
+      // the write so a failed UUID/date conversion never leaves Save locked.
+      checkInId = uuidv4();
+      const checkIn: CheckIn = {
+        id: checkInId,
+        createdAt: new Date().toISOString(),
+        localDate: format(dateTime, 'yyyy-MM-dd'),
+        localTime: format(dateTime, 'HH:mm'),
+        narcolepsyDomains,
+        overlappingDomains: overlappingExpanded ? overlappingDomains : undefined,
+        // Legacy format for backward compatibility
+        wakeDomains: toLegacyWakeDomains(narcolepsyDomains, overlappingExpanded ? overlappingDomains : defaultOverlappingDomains),
+        contextDomains: overlappingExpanded ? toLegacyContextDomains(overlappingDomains) : undefined,
+        tags: activeTags,
+        note: note.trim() || undefined,
+      };
       await saveCheckIn(checkIn);
     } catch {
-      toast.error('Could not save your check-in', { description: 'Your entries are still here. Check device storage and try again.' });
-      return;
-    } finally {
+      setSaveError('Could not save your check-in. Your entries are still here. Please try again.');
+      toast.error('Could not save your check-in', { description: 'Your entries are still here. Please try again.' });
       savingRef.current = false;
-      setIsSaving(false);
+      setSaveState('idle');
+      return;
     }
 
+    // Hold the duplicate-submit guard through confirmation/navigation, rather
+    // than reopening Save on the reset form immediately after the write.
+    setSaveState('saved');
     // Trigger save animation (wake-related, always new for check-ins)
     saveConfirmation.trigger('new', 'wake');
 
@@ -243,6 +250,9 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
             onSave();
           } catch {
             toast.error('Could not undo. Your saved check-in is still in the journal.');
+          } finally {
+            savingRef.current = false;
+            setSaveState('idle');
           }
         },
       },
@@ -250,12 +260,14 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     });
 
     handleReset();
-    setIsSaving(false);
     onSave();
 
     // Delay navigation to let animation complete
     if (navigationTimeoutRef.current) clearTimeout(navigationTimeoutRef.current);
     navigationTimeoutRef.current = setTimeout(() => {
+      navigationTimeoutRef.current = null;
+      savingRef.current = false;
+      setSaveState('idle');
       onNavigateToTrends();
     }, 1600);
   };
@@ -269,6 +281,7 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     setShowNote(false);
     setShowResetDialog(false);
     setDraftRestored(false);
+    setSaveError(null);
     try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* Do not interrupt a completed save. */ }
   };
 
@@ -488,25 +501,31 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.35 }}
       >
+        {saveError && (
+          <p id="check-in-save-error" role="alert" className="text-sm text-destructive">
+            {saveError}
+          </p>
+        )}
         <motion.div
           whileTap={{ scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         >
           <Button
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={saveState !== 'idle'}
+            aria-describedby={saveError ? 'check-in-save-error' : undefined}
             className="w-full h-14 text-lg font-semibold glow-primary relative overflow-hidden"
           >
             <AnimatePresence mode="wait">
               <motion.span
-                key={isSaving ? 'saving' : 'save'}
+                key={saveState}
                 className="inline-flex items-center"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.15 }}
               >
-                {isSaving ? (
+                {saveState === 'saving' ? (
                   <motion.span
                     animate={{ rotate: 360 }}
                     transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
@@ -517,7 +536,7 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
                 ) : (
                   <Save className="w-5 h-5 mr-2" />
                 )}
-                {isSaving ? 'Saving...' : 'Save Check-In'}
+                {saveState === 'saving' ? 'Saving...' : saveState === 'saved' ? 'Check-In Saved' : 'Save Check-In'}
               </motion.span>
             </AnimatePresence>
           </Button>
