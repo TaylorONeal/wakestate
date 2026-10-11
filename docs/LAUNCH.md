@@ -1,5 +1,18 @@
 # iOS and Android launch preparation
 
+## October 12: next App Store release batch
+
+Taylor requested that the check-in fix ship with the other App Store changes in the next combined WakeState release. [PR #32](https://github.com/TaylorONeal/wakestate/pull/32) is merged as `5c13500466042158271fb049bd93089144c89409`; the next iOS candidate must contain this commit. Batch remaining approved iOS fixes and listing changes into one reviewed candidate, then run the affected acceptance checks once. Do not start a separate paid build or immediate standalone submission for this fix.
+
+| ID | Work | State / evidence | Next action / owner |
+| --- | --- | --- | --- |
+| WS-IOS-NEXT-01 | Recover failed check-in saves and prevent duplicate submissions | Implemented awaiting iPhone verification; #32 merged. All 38 source tests, web validation, [Android build/emulator launch](https://github.com/TaylorONeal/wakestate/actions/runs/38115449942) and [platform-independence](https://github.com/TaylorONeal/wakestate/actions/runs/38115450016) passed. | Release engineer: include #32 in the next combined candidate; run the [focused incident retest](NATIVE-TESTING.md#select-the-smallest-useful-test-set). The original reporter's trigger remains unconfirmed. |
+| WS-IOS-NEXT-02 | Reconcile the remaining App Store batch | Ready to work; main also contains Timeline/CSV #21, nap precision #23, medication reference #28, native branding and export-compliance fixes. Their presence in the live 1.0.1 binary has not been mapped here. | Release engineer: compare the live/submitted build provenance with candidate main; retain existing fixes, identify only genuinely unshipped changes and include remaining approved listing updates. Do not relabel earlier fixes or screenshots as new. |
+| WS-IOS-NEXT-03 | Freeze and verify one iOS candidate | Not run; source remains configured as 1.0.1 (2), so it is not yet the next version/build. | Release engineer: confirm current App Store Connect versions/builds, choose the next unused release numbers, refresh the medication reference, record source/binary hashes, then build and run core smoke plus affected save/retry/Undo/restart and preserving-upgrade checks on iPhone. Preserve bundle ID, local origin and existing journal data. |
+| WS-IOS-NEXT-04 | Deliver the combined update | Prepared scope only; no new iOS archive, upload, submission or publication in this update. | Release owner: after candidate/device/privacy checks, carry this batch through the existing App Store release process and record TestFlight, submission and live states separately. |
+
+Draft release note for the save fix: “Improved check-in saving, with clearer retry feedback and protection against duplicate entries.” Final notes must reflect the verified candidate delta. Future backup/device-migration work remains deferred as requested and is not added to this batch. Android release scheduling remains separate.
+
 ## October 11: reported App Store check-in failure, save recovery patch
 
 **Incident remains open for native reproduction.** A user supplied an iPhone recording and reported an official-store installation. The recording returns to Today without a visible save confirmation; it does not identify the installed version/OS or show touch locations or runtime errors. The [public Apple listing](https://apps.apple.com/ca/app/wakestate/id6819921769), checked October 11, shows **1.0.1 live**. This supersedes older iOS prelaunch status below, but does not identify the reporter's installed build or its source hash.
