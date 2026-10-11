@@ -2,6 +2,8 @@
 
 Start with [native/store testing and retest selection](NATIVE-TESTING.md), then [current evidence and reusable lessons](LAUNCH.md). This keeps durable instructions separate from dated results; older receipts are not current blockers.
 
+- [October 11 App Store check-in incident](LAUNCH.md#october-11-reported-app-store-check-in-failure-save-recovery-patch): confirmed save recovery defects, regression evidence and the still-open native reproduction/release boundary.
+
 - [iOS native branding](LAUNCH.md#october-5-ios-placeholder-branding-replaced): existing owned crescent, reproducible asset rendering, resource-compiler checks and pending native acceptance.
 
 - [Product overview](../README.md): purpose, architecture, development commands.
