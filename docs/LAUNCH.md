@@ -8,7 +8,7 @@ The Undo finding from the 1.0.2 (3) iPhone pass below is fixed in source. **It i
 | --- | --- | --- |
 | Cause | Confirmed in source | A save clears the form and deletes the draft before the toast appears, and Undo only deleted the record. Nothing kept the entered values. |
 | Fix | In source | The save keeps the entered scores, tags, note, time and section state. After the record is deleted, Undo puts them back on the check-in form that is on screen and stores them as the draft, so they return through the existing "Draft restored" path if Undo is tapped after the post-save navigation. A failed Undo restores nothing. A second Undo tap is ignored. |
-| Source tests | Pass | `src/components/CheckInScreen.test.ts`: six new cases through the real form (same screen, failed Undo, after navigation, a later visit to the form, second tap, unused Undo window). Four of them fail on the previous source. `npm run validate` passes with 48 tests. |
+| Source tests | Pass | `src/components/CheckInScreen.test.ts`: seven new cases through the real form (same screen, failed Undo, after navigation, a later visit to the form, settings loading after Undo, second tap, unused Undo window). Four of them fail on the previous source. `npm run validate` passes with 49 tests. |
 | Device | Not run | No iPhone, iPad or Android check of this change. Add "save, Undo, values are back, save again writes them" to the 1.0.3 acceptance pass, once on the form and once after the move to Patterns. |
 
 Known limits: if Undo is tapped while a later, different entry is being typed on the form, the undone values replace it. If draft storage is unavailable and no check-in form is on screen, the undone values cannot be kept.
