@@ -274,6 +274,38 @@ describe('Undo gives the entered values back', () => {
     expect(JSON.parse(localStorage.getItem(draftKey)!)).toEqual(entered);
   });
 
+  it('keeps the restored overlapping section when settings load after Undo', async () => {
+    const withOverlapping = {
+      ...draft, overlappingExpanded: true,
+      overlappingDomains: { ...draft.overlappingDomains, anxiety: 4, mood: 3 },
+    };
+    localStorage.setItem(draftKey, JSON.stringify(withOverlapping));
+    await navigateAway();
+    await mount();
+    await clickSave();
+    expect(await storage.getCheckIns()).toHaveLength(1);
+    await navigateAway();
+
+    // A fresh form whose settings read is still pending when Undo is tapped.
+    let finishSettings: () => void;
+    const settingsPending = new Promise<void>(resolve => { finishSettings = resolve; });
+    const actualGetSettings = storage.getSettings;
+    vi.spyOn(storage, 'getSettings').mockImplementation(async () => {
+      await settingsPending;
+      return { ...(await actualGetSettings()), showContextByDefault: false };
+    });
+    await mount();
+    await clickUndo();
+    await act(async () => { finishSettings(); await settingsPending; });
+
+    expect(JSON.parse(localStorage.getItem(draftKey)!)).toEqual(withOverlapping);
+    expect(sliders()).toHaveLength(12);
+    await clickSave();
+    const entries = await storage.getCheckIns();
+    expect(entries).toHaveLength(1);
+    expect(entries[0].overlappingDomains).toEqual(withOverlapping.overlappingDomains);
+  });
+
   it('ignores a second Undo tap so later edits are not overwritten', async () => {
     const remove = vi.spyOn(storage, 'deleteCheckIn');
     await enterAndSave();
