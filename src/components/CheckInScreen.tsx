@@ -125,7 +125,11 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
   const [saveError, setSaveError] = useState<string | null>(null);
   const [draftRestored, setDraftRestored] = useState(false);
 
+  // Once entered values are applied, the default-section preference must not
+  // replace their section state when its read settles later.
+  const draftAppliedRef = useRef(false);
   const applyDraft = useCallback((draft: CheckInDraft) => {
+    draftAppliedRef.current = true;
     setDateTime(new Date(draft.dateTime));
     setNarcolepsyDomains(draft.narcolepsyDomains);
     setOverlappingDomains(draft.overlappingDomains);
@@ -151,7 +155,7 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
       }
     } else {
       getSettings().then((settings: AppSettings) => {
-        setOverlappingExpanded(settings.showContextByDefault);
+        if (!draftAppliedRef.current) setOverlappingExpanded(settings.showContextByDefault);
       }).catch(() => { /* Keep the default preferences when storage is unavailable. */ });
     }
   }, [applyDraft]);
