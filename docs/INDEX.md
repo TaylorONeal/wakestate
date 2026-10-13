@@ -2,6 +2,8 @@
 
 Start with [native/store testing and retest selection](NATIVE-TESTING.md), then [current evidence and reusable lessons](LAUNCH.md). This keeps durable instructions separate from dated results; older receipts are not current blockers.
 
+- [Undo restores the entered values](LAUNCH.md#october-13-undo-restores-the-entered-values-source-only-for-103): fixed in source for 1.0.3, not in any store build, device check still to run.
+
 - [iOS 1.0.2 (3) submitted](LAUNCH.md#october-13-ios-102-3-built-tested-and-submitted-to-app-review): what 1.0.1 already contains, the one unshipped fix, version label fix, iPhone acceptance results, upload and App Review submission. Release is manual and still open.
 
 - [Next App Store release batch](LAUNCH.md#october-12-next-app-store-release-batch): merged check-in fix #32, remaining-change reconciliation, one combined iOS candidate and native acceptance before delivery.
