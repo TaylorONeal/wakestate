@@ -2,7 +2,7 @@
 
 Start with [native/store testing and retest selection](NATIVE-TESTING.md), then [current evidence and reusable lessons](LAUNCH.md). This keeps durable instructions separate from dated results; older receipts are not current blockers.
 
-- [iOS 1.0.2 (3) candidate](LAUNCH.md#october-13-ios-102-3-candidate-prepared): what 1.0.1 already contains, the one unshipped fix, version label fix and remaining device gates.
+- [iOS 1.0.2 (3) submitted](LAUNCH.md#october-13-ios-102-3-built-tested-and-submitted-to-app-review): what 1.0.1 already contains, the one unshipped fix, version label fix, iPhone acceptance results, upload and App Review submission. Release is manual and still open.
 
 - [Next App Store release batch](LAUNCH.md#october-12-next-app-store-release-batch): merged check-in fix #32, remaining-change reconciliation, one combined iOS candidate and native acceptance before delivery.
 
