@@ -24,5 +24,6 @@ In TaylorONeal/wakestate, re-verify the medication reference in src/components/M
 | Date | PR | Summary |
 | --- | --- | --- |
 | 2026-10-08 | #28 | TAK-861 became Orzeyful (oveporexton), approved Aug 5, 2026 for adults with NT1 (0.5, 1 and 2 mg tablets, twice daily), availability pending DEA scheduling. ALKS-2680 became alixorexton (Phase 3). Added cleminorexton (ORX750). Danavorexton marked as discontinued for narcolepsy. Wakix pediatric cataplexy (Feb 2026). Vyvanse flagged as off-label. |
+| 2026-10-13 | iOS 1.0.2 prep | Open item only: orzeyful.com still shows coming soon, pending DEA scheduling, expected by November 2026. No text change. Full list not re-verified. |
 
 Next check: confirm Orzeyful DEA scheduling and US availability (expected October to November 2026) and update its description.
