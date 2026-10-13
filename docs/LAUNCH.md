@@ -2,7 +2,7 @@
 
 ## October 13: iOS 1.0.2 (3) built, tested and submitted to App Review
 
-Taylor approved building 1.0.2 with the check-in fix on October 13, then the merge, upload and App Review submission later the same morning. The sections below record source preparation, the signed candidate and iPhone acceptance, and delivery, in that order. Approval and release are not recorded yet.
+Taylor approved building 1.0.2 with the check-in fix on October 13, then the merge, upload and App Review submission later the same morning. The sections below record source preparation, the signed candidate and iPhone acceptance, and delivery, in that order. Apple's App Review approval and the release are not recorded yet.
 
 | ID | Result | Evidence |
 | --- | --- | --- |
