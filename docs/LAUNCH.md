@@ -1,5 +1,35 @@
 # iOS and Android launch preparation
 
+## October 13: iOS 1.0.2 (3) candidate prepared
+
+Taylor approved building 1.0.2 with the check-in fix on October 13. This entry covers source preparation only. Archive, upload, iPhone acceptance and App Review submission are recorded separately as they happen.
+
+| ID | Result | Evidence |
+| --- | --- | --- |
+| WS-IOS-NEXT-02 | Reconciled. The live 1.0.1 (2) binary was built from `0acb214` (local branch `release/ios-1.0.1` at `c52829c`, same tree), uploaded October 8 04:10 PDT. Main has four commits after it: favicon (#30, web asset), agent docs (#31), the check-in fix (#32) and release docs (#33). The only behavior change not yet shipped is #32. Timeline/CSV #21, nap precision #23, medication reference #28, native branding and the export-compliance key are already in 1.0.1. | App Store Connect builds API October 13: build 2 uploaded 2026-10-08, versions 1.0.0 and 1.0.1 both Ready for Sale. |
+| WS-IOS-NEXT-03 | Source frozen for the candidate: `MARKETING_VERSION` 1.0.2, `CURRENT_PROJECT_VERSION` 3 (first unused numbers). `npm run validate` passes with 42 tests. | This change. |
+| Settings version label | Fixed. 1.0.1 shipped with a hard-coded "Version 1.0.0". Settings now shows the installed binary's version and build on native (`@capacitor/app` `getInfo`) and the bundle version on web, so a user or reviewer can tell which build is installed. This matters for the October 11 incident, where the recording could not identify the build. | `src/lib/appVersion.ts`, `src/lib/appVersion.test.ts` (4 cases). |
+| Medication reference | Open item checked only: the manufacturer page still lists Orzeyful as coming soon, pending DEA scheduling, expected by November 2026, which matches the current description. The full list was last verified October 8 (#28) and was not re-verified today. | https://www.orzeyful.com, read October 13. |
+
+### Signed candidate and iPhone acceptance (October 13, 09:29 to 09:45 WITA)
+
+Source `ab0f92cf24c86560899e02e62d5eace5b72b18d6` (tree `1a9b360f9d67957ec4f8cc88c7cc435c4fbbaebc`), built in a clean detached worktree on the release Mac. App Store IPA SHA-256 `fa4347e370b62f5779e91e9b8a20356b6eec9bc6c4f6da0e40f5671431a3498d`, `com.wakestate.app` 1.0.2 (3), signed Apple Distribution, team 3S98UN76JW, profile "wakestate AppStore Dist 2026-10-07". **Not uploaded.** Later commits on this branch are documentation only.
+
+Device: iPhone 12 mini, iOS 27.0.1, driven through Xcode Device Hub. The installed binary was a development-signed Release build of the same source (an App Store-signed IPA cannot be installed directly). Synthetic records only. Screenshots 01 to 11 are kept outside git on the release Mac.
+
+| Case | Result | Observed |
+| --- | --- | --- |
+| Installed identity | New pass | Settings footer reads "Version 1.0.2 (3)". `devicectl` reports 1.0.2 / 3. |
+| Restored draft, then save | New pass | Draft entered at 9:35 (scores 3 / 2), process terminated, relaunched at 9:37. "Draft restored" shown with the same values and the 9:35 time. One score changed to 4, one tap on the visible center of Save: button showed "Check-In Saved", toast "Recorded at 9:35 AM" with Undo. Timeline showed exactly one record at 9:35 with 3 / 2 / 4 / 1 / 1. The next form opened fresh at 9:38, so the draft was removed. |
+| Quick repeated taps | New pass | Fresh form, three taps on Save in a row. Exactly one new record (two total). Tap spacing was automated and not measured. |
+| Undo | New pass, with a finding | Save then Undo inside the toast window: "Check-in removed", Save became available again, record count unchanged. One more Save then wrote exactly one record. Finding: the form is reset after a save, so Undo removes the record but does not bring the entered scores back; saving again writes default scores. This is existing behavior, also in 1.0.1, and is not changed by this candidate. |
+| Full restart | New pass | Process terminated and relaunched: the same three records, same times and values. |
+| Preserving upgrade | New pass (development-signed proxy) | Installed a development build of 1.0.1 (2) from `0acb214` over the same container: three records present. Saved a fourth on 1.0.1, installed 1.0.2 (3) over it: four records present, version label 1.0.2 (3). This is not the App Store-signed 1.0.1 to 1.0.2 path; TestFlight over a store install is the only way to exercise that. |
+| Native failure injection | Not run | UUID, quota and haptic failures are covered by the five `CheckInScreen.test.ts` cases, not on the device. |
+| Original reported incident | Not reproduced | An ordinary save also succeeded on the 1.0.1 build on this phone. This candidate fixes three confirmed defects; it is not proof that the reporter's trigger is fixed. The incident stays open until the reporter confirms on 1.0.2 or the trigger is identified. |
+
+Still open before delivery: upload to App Store Connect, App Review submission and release, each needing Taylor's specific authorization. Proposed release note from the verified delta: "Improved check-in saving, with clearer retry feedback and protection against duplicate entries. Settings now shows the installed version." Follow-up for a later release: make Undo restore the entered values, or relabel it "Remove". Android is unchanged: version 1.0.0 (1) is in Play review and does not contain #32.
+
 ## October 12: next App Store release batch
 
 Taylor requested that the check-in fix ship with the other App Store changes in the next combined WakeState release. [PR #32](https://github.com/TaylorONeal/wakestate/pull/32) is merged as `5c13500466042158271fb049bd93089144c89409`; the next iOS candidate must contain this commit. Batch remaining approved iOS fixes and listing changes into one reviewed candidate, then run the affected acceptance checks once. Do not start a separate paid build or immediate standalone submission for this fix.

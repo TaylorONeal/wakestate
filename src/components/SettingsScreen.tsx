@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { WEB_VERSION, getAppVersionLabel } from '@/lib/appVersion';
 
 interface SettingsScreenProps {
   onNavigateToAbout?: () => void;
@@ -35,12 +36,16 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
     theme: 'midnight',
   });
   const [showInstallModal, setShowInstallModal] = useState(false);
+  const [versionLabel, setVersionLabel] = useState(WEB_VERSION);
   const [isClearing, setIsClearing] = useState(false);
   const [showClearDataDialog, setShowClearDataDialog] = useState(false);
   const { canInstall, isInstalled, promptInstall } = usePWAInstall();
 
   useEffect(() => {
     loadSettings();
+    let active = true;
+    getAppVersionLabel().then((label) => { if (active) setVersionLabel(label); });
+    return () => { active = false; };
   }, []);
 
   const loadSettings = async () => {
@@ -267,7 +272,7 @@ export function SettingsScreen({ onNavigateToAbout, onNavigateToMedications, onN
 
       {/* Version */}
       <p className="text-xs text-muted-foreground text-center">
-        Version 1.0.0 • Not a medical device
+        Version {versionLabel} • Not a medical device
       </p>
 
       {/* Install Instructions Modal */}
