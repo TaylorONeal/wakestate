@@ -1,5 +1,5 @@
 import { CheckInDraftSchema } from '@/lib/validation';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
@@ -73,6 +73,11 @@ const toLegacyContextDomains = (overlapping: OverlappingDomains): ContextDomains
 });
 
 const DRAFT_STORAGE_KEY = 'wakestate_checkin_draft_v2';
+// The Undo toast outlives the form that saved: the screen navigates away about
+// 1.6 s after a save while the toast stays for 5 s. Undo therefore hands the
+// entered values to whichever check-in form is on screen, and also stores them
+// as the draft so they are waiting when no form is.
+const UNDO_RESTORE_EVENT = 'wakestate:checkin-undo-restore';
 
 interface CheckInDraft {
   dateTime: string;
@@ -81,6 +86,17 @@ interface CheckInDraft {
   activeTags: string[];
   note: string;
   overlappingExpanded: boolean;
+}
+
+// Returns whether the values were stored as the draft.
+function restoreEnteredValues(entered: CheckInDraft): boolean {
+  let stored = false;
+  try {
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(entered));
+    stored = true;
+  } catch { /* A form that is on screen still receives the values below. */ }
+  window.dispatchEvent(new CustomEvent<CheckInDraft>(UNDO_RESTORE_EVENT, { detail: entered }));
+  return stored;
 }
 
 interface CheckInScreenProps {
@@ -109,21 +125,24 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
   const [saveError, setSaveError] = useState<string | null>(null);
   const [draftRestored, setDraftRestored] = useState(false);
 
+  const applyDraft = useCallback((draft: CheckInDraft) => {
+    setDateTime(new Date(draft.dateTime));
+    setNarcolepsyDomains(draft.narcolepsyDomains);
+    setOverlappingDomains(draft.overlappingDomains);
+    setActiveTags(draft.activeTags);
+    setNote(draft.note);
+    setShowNote(draft.note.length > 0);
+    setOverlappingExpanded(draft.overlappingExpanded);
+    setDraftRestored(true);
+  }, []);
+
   // Load draft on mount
   useEffect(() => {
     let savedDraft: string | null = null;
     try { savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY); } catch { /* Tracking can still be used if draft storage is unavailable. */ }
     if (savedDraft) {
       try {
-        const draft = CheckInDraftSchema.parse(JSON.parse(savedDraft)) as CheckInDraft;
-        setDateTime(new Date(draft.dateTime));
-        setNarcolepsyDomains(draft.narcolepsyDomains);
-        setOverlappingDomains(draft.overlappingDomains);
-        setActiveTags(draft.activeTags);
-        setNote(draft.note);
-        setShowNote(draft.note.length > 0);
-        setOverlappingExpanded(draft.overlappingExpanded);
-        setDraftRestored(true);
+        applyDraft(CheckInDraftSchema.parse(JSON.parse(savedDraft)) as CheckInDraft);
         toast.info('Draft restored', {
           description: 'Your previous check-in was recovered',
         });
@@ -135,7 +154,14 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
         setOverlappingExpanded(settings.showContextByDefault);
       }).catch(() => { /* Keep the default preferences when storage is unavailable. */ });
     }
-  }, []);
+  }, [applyDraft]);
+
+  // Put the values of an undone check-in back on this form.
+  useEffect(() => {
+    const onUndoRestore = (event: Event) => applyDraft((event as CustomEvent<CheckInDraft>).detail);
+    window.addEventListener(UNDO_RESTORE_EVENT, onUndoRestore);
+    return () => window.removeEventListener(UNDO_RESTORE_EVENT, onUndoRestore);
+  }, [applyDraft]);
 
   // Check if form has unsaved changes
   const hasChanges = (() => {
@@ -199,6 +225,16 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
     setSaveState('saving');
     setSaveError(null);
 
+    // What the person entered, kept for Undo because the form is cleared below.
+    const entered: CheckInDraft = {
+      dateTime: dateTime.toISOString(),
+      narcolepsyDomains,
+      overlappingDomains,
+      activeTags,
+      note,
+      overlappingExpanded,
+    };
+    let undone = false;
     let checkInId: string;
     try {
       // Record preparation can fail too; it must use the same recovery path as
@@ -238,6 +274,9 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
       action: {
         label: 'Undo',
         onClick: async () => {
+          // A second tap must not overwrite edits made since the first.
+          if (undone) return;
+          undone = true;
           // Cancel navigation if still pending
           if (navigationTimeoutRef.current) {
             clearTimeout(navigationTimeoutRef.current);
@@ -246,9 +285,13 @@ export function CheckInScreen({ onEventClick, onSave, onNavigateToTrends, onBack
           // Delete the saved check-in
           try {
             await deleteCheckIn(checkInId);
-            toast.info('Check-in removed');
+            // Only after the record is gone, so a failed Undo never shows the
+            // values as if they were unsaved again.
+            const stored = restoreEnteredValues(entered);
+            toast.info('Check-in removed', stored ? { description: 'Your entries are back on the check-in form.' } : undefined);
             onSave();
           } catch {
+            undone = false;
             toast.error('Could not undo. Your saved check-in is still in the journal.');
           } finally {
             savingRef.current = false;
