@@ -1,5 +1,18 @@
 # iOS and Android launch preparation
 
+## October 13: iOS 1.0.2 (3) candidate prepared
+
+Taylor approved building 1.0.2 with the check-in fix on October 13. This entry covers source preparation only. Archive, upload, iPhone acceptance and App Review submission are recorded separately as they happen.
+
+| ID | Result | Evidence |
+| --- | --- | --- |
+| WS-IOS-NEXT-02 | Reconciled. The live 1.0.1 (2) binary was built from `0acb214` (local branch `release/ios-1.0.1` at `c52829c`, same tree), uploaded October 8 04:10 PDT. Main has four commits after it: favicon (#30, web asset), agent docs (#31), the check-in fix (#32) and release docs (#33). The only behavior change not yet shipped is #32. Timeline/CSV #21, nap precision #23, medication reference #28, native branding and the export-compliance key are already in 1.0.1. | App Store Connect builds API October 13: build 2 uploaded 2026-10-08, versions 1.0.0 and 1.0.1 both Ready for Sale. |
+| WS-IOS-NEXT-03 | Source frozen for the candidate: `MARKETING_VERSION` 1.0.2, `CURRENT_PROJECT_VERSION` 3 (first unused numbers). `npm run validate` passes with 42 tests. | This change. |
+| Settings version label | Fixed. 1.0.1 shipped with a hard-coded "Version 1.0.0". Settings now shows the installed binary's version and build on native (`@capacitor/app` `getInfo`) and the bundle version on web, so a user or reviewer can tell which build is installed. This matters for the October 11 incident, where the recording could not identify the build. | `src/lib/appVersion.ts`, `src/lib/appVersion.test.ts` (4 cases). |
+| Medication reference | Open item checked only: the manufacturer page still lists Orzeyful as coming soon, pending DEA scheduling, expected by November 2026, which matches the current description. The full list was last verified October 8 (#28) and was not re-verified today. | https://www.orzeyful.com, read October 13. |
+
+Still open before delivery: signed archive and source/binary hashes, the focused incident retest on iPhone (restored draft, quick second tap, Undo, full restart, preserving upgrade over 1.0.1 with synthetic records), final release notes from the verified delta, and specific submission authorization. Android is unchanged: version 1.0.0 (1) is in Play review and does not contain #32.
+
 ## October 12: next App Store release batch
 
 Taylor requested that the check-in fix ship with the other App Store changes in the next combined WakeState release. [PR #32](https://github.com/TaylorONeal/wakestate/pull/32) is merged as `5c13500466042158271fb049bd93089144c89409`; the next iOS candidate must contain this commit. Batch remaining approved iOS fixes and listing changes into one reviewed candidate, then run the affected acceptance checks once. Do not start a separate paid build or immediate standalone submission for this fix.
