@@ -1,8 +1,8 @@
 # iOS and Android launch preparation
 
-## October 13: iOS 1.0.2 (3) candidate prepared
+## October 13: iOS 1.0.2 (3) built, tested and submitted to App Review
 
-Taylor approved building 1.0.2 with the check-in fix on October 13. This entry covers source preparation only. Archive, upload, iPhone acceptance and App Review submission are recorded separately as they happen.
+Taylor approved building 1.0.2 with the check-in fix on October 13, then the merge, upload and App Review submission later the same morning. The sections below record source preparation, the signed candidate and iPhone acceptance, and delivery, in that order. Approval and release are not recorded yet.
 
 | ID | Result | Evidence |
 | --- | --- | --- |
@@ -28,7 +28,21 @@ Device: iPhone 12 mini, iOS 27.0.1, driven through Xcode Device Hub. The install
 | Native failure injection | Not run | UUID, quota and haptic failures are covered by the five `CheckInScreen.test.ts` cases, not on the device. |
 | Original reported incident | Not reproduced | An ordinary save also succeeded on the 1.0.1 build on this phone. This candidate fixes three confirmed defects; it is not proof that the reporter's trigger is fixed. The incident stays open until the reporter confirms on 1.0.2 or the trigger is identified. |
 
-Still open before delivery: upload to App Store Connect, App Review submission and release, each needing Taylor's specific authorization. Proposed release note from the verified delta: "Improved check-in saving, with clearer retry feedback and protection against duplicate entries. Settings now shows the installed version." Follow-up for a later release: make Undo restore the entered values, or relabel it "Remove". Android is unchanged: version 1.0.0 (1) is in Play review and does not contain #32.
+### Delivery (October 13)
+
+Taylor approved the merge, the upload and the App Review submission in chat at 10:02 WITA. Release was not part of that approval.
+
+| Step | State | Evidence |
+| --- | --- | --- |
+| Source merged | Done | PR #34 squash-merged to `main` as `f1df615`. The binary was built from `ab0f92c`; the merge adds documentation only on top of that tree. |
+| Privacy delta vs 1.0.1 | Checked, unchanged | No new runtime dependency (`jsdom` is test-only), no usage-description keys, no entitlement change, native diff is version numbers only, `ITSAppUsesNonExemptEncryption` false. App privacy answers were not edited. |
+| Upload | Done 10:07 WITA | `altool` validate then upload of the IPA with SHA-256 `fa4347e3...a3498d`: "UPLOAD SUCCEEDED with no errors". Build 3 processed to VALID at 10:09. |
+| Version record | Done | App Store version 1.0.2 created with build 3 attached, release type **Manual**, What's New: "Improved check-in saving, with clearer retry feedback and protection against duplicate entries. Settings now shows the installed version." Review notes carried over from 1.0.1 with one added sentence describing this update. |
+| App Review | Submitted 10:11 WITA (02:11 UTC) | Version state Waiting for Review. 1.0.1 stays Ready for Sale until 1.0.2 is released. |
+| Release | Not done | Manual release. Needs Taylor's yes after approval, or a switch to automatic release. |
+| TestFlight | Not used | No tester install of build 3. The App Store-signed upgrade path is therefore still unexercised. |
+
+Follow-up for a later release: make Undo restore the entered values, or relabel it "Remove". The October 11 incident stays open until the reporter confirms on 1.0.2 or the trigger is identified. Android is unchanged: version 1.0.0 (1) is in Play review and does not contain #32.
 
 ## October 12: next App Store release batch
 
