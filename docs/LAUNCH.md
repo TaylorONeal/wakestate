@@ -1,5 +1,13 @@
 # iOS and Android launch preparation
 
+## October 15: provider state and public listing reconciled
+
+At 00:07 UTC (08:07 WITA), the coordinating release agent read authenticated App Store Connect: WakeState **1.0.3 READY_FOR_SALE**, with 1.0.2 also READY_FOR_SALE. In the same read-only check, the [public US Apple lookup](https://itunes.apple.com/lookup?id=6819921769&country=us) still returned **1.0.2**. These are distinct observations: Apple provider approval/release state is confirmed for 1.0.3; public US 1.0.3 availability was not yet verified. The [US Google Play URL](https://play.google.com/store/apps/details?id=com.wakestate.app&hl=en_US&gl=US) returned HTTP 404; this does not establish availability in every country or internal-track state.
+
+This receipt supersedes the older current-state statements below that 1.0.2 is still awaiting review/manual release or that no 1.0.3 store build exists. Their original source, binary, device and submission evidence remains historical evidence with its stated scope. Current main is `4fc7504` (PR #37, configured for 1.0.3 build 4), but this observation alone does **not** map Apple's released 1.0.3 binary to that source, the Undo fix or a native acceptance pass.
+
+Next: the existing release owner should reconcile the 1.0.3 attached build ID/source/artifact and its device evidence, then verify public 1.0.3 propagation. Do not rebuild, resubmit, repeat the earlier manual-release action or claim the Undo fix is shipped based only on the version state. The reported check-in incident remains open until the reporter confirms resolution or its trigger is identified. This documentation update made no provider, device, release or campaign changes.
+
 ## October 13: Undo restores the entered values (source only, for 1.0.3)
 
 The Undo finding from the 1.0.2 (3) iPhone pass below is fixed in source. **It is not in any store build**: 1.0.2 (3), in App Review, and the live 1.0.1 still clear the form on Undo. Merging deploys the web app; the iOS fix ships with 1.0.3 and Android with its next build. No version or build number change, no native project change.
