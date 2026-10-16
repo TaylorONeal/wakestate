@@ -1,12 +1,26 @@
 # iOS and Android launch preparation
 
+## October 16: public US 1.0.3 availability verified
+
+The public US lookup now returns **1.0.3**, superseding the October 15 propagation uncertainty below. This is storefront availability evidence only; released-binary source mapping and native acceptance remain unknown.
+
+| Layer / candidate | Observed at (UTC) | Scope and actual result | Evidence / next action |
+| --- | --- | --- | --- |
+| Public Apple / iOS 1.0.3 | 2026-10-16 02:37:34 | Independent US lookup returned track `6819921769`, bundle `com.wakestate.app`, version **1.0.3**, with `currentVersionReleaseDate` `2026-10-14T23:55:51Z`. | [Public US Apple lookup](https://itunes.apple.com/lookup?id=6819921769&country=us). US public availability verified; other storefronts and installed behavior were not checked. |
+| Apple provider / iOS 1.0.3 | 2026-10-16 02:36 | Coordinating release agent's authenticated App Store Connect read returned **1.0.3 READY_FOR_SALE**. | Provider observation supplied by the coordinating release agent; existing release owner retains provider/device control. |
+| Public Google Play / Android candidate unknown | 2026-10-16 02:37 | US listing URL returned **HTTP 404**. | [US Google Play URL](https://play.google.com/store/apps/details?id=com.wakestate.app&hl=en_US&gl=US). Other countries, internal tracks and delivery remain unknown. |
+
+The public Apple observation was processed through the shared `release_evidence.py` helper with source commit explicitly `unknown`. Its commit-mismatch flag is retained as unknown released-binary mapping, not converted into source acceptance. Inspected remote main was `4fc75041a572f2ae69ca418405a655652275cc3c`; documentation checkout was clean at `2a1767a9ce6ab06aa32d29701fd16f9ea824c5bc`. No new build, test, device or capture observation was supplied. Earlier candidate-scoped evidence remains historical and does not establish 1.0.3 native acceptance or inclusion of the Undo fix.
+
+Next: the existing release owner should reconcile the attached 1.0.3 build ID, artifact/source and device evidence. The reported check-in incident remains open until the reporter confirms resolution or its trigger is identified. Utility owner review is required before this documentation PR is merged. This update made no provider, device, release or campaign changes.
+
 ## October 15: provider state and public listing reconciled
 
 At 00:07 UTC (08:07 WITA), the coordinating release agent read authenticated App Store Connect: WakeState **1.0.3 READY_FOR_SALE**, with 1.0.2 also READY_FOR_SALE. In the same read-only check, the [public US Apple lookup](https://itunes.apple.com/lookup?id=6819921769&country=us) still returned **1.0.2**. These are distinct observations: Apple provider approval/release state is confirmed for 1.0.3; public US 1.0.3 availability was not yet verified. The [US Google Play URL](https://play.google.com/store/apps/details?id=com.wakestate.app&hl=en_US&gl=US) returned HTTP 404; this does not establish availability in every country or internal-track state.
 
 This receipt supersedes the older current-state statements below that 1.0.2 is still awaiting review/manual release or that no 1.0.3 store build exists. Their original source, binary, device and submission evidence remains historical evidence with its stated scope. Current main is `4fc7504` (PR #37, configured for 1.0.3 build 4), but this observation alone does **not** map Apple's released 1.0.3 binary to that source, the Undo fix or a native acceptance pass.
 
-Next: the existing release owner should reconcile the 1.0.3 attached build ID/source/artifact and its device evidence, then verify public 1.0.3 propagation. Do not rebuild, resubmit, repeat the earlier manual-release action or claim the Undo fix is shipped based only on the version state. The reported check-in incident remains open until the reporter confirms resolution or its trigger is identified. This documentation update made no provider, device, release or campaign changes.
+Next at this observation: the existing release owner should reconcile the 1.0.3 attached build ID/source/artifact and its device evidence, then verify public 1.0.3 propagation (public US availability is now verified in the October 16 receipt above). Do not rebuild, resubmit, repeat the earlier manual-release action or claim the Undo fix is shipped based only on the version state. The reported check-in incident remains open until the reporter confirms resolution or its trigger is identified. This documentation update made no provider, device, release or campaign changes.
 
 ## October 13: Undo restores the entered values (source only, for 1.0.3)
 
