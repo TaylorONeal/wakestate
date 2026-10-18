@@ -1,5 +1,13 @@
 # iOS and Android launch preparation
 
+## October 18: public US Google Play availability verified
+
+At 05:13 UTC, the [public US Google Play listing](https://play.google.com/store/apps/details?id=com.wakestate.app&hl=en&gl=US) returned HTTP 200, **WakeState: Sleep-Wake Journal**, publisher **Purafield Studio LLC**, an Install control and structured offer price **0 USD / InStock**. This supersedes the earlier public 404 observations. Apple remains publicly available as 1.0.3. No provider write or release action was performed.
+
+The observation was processed with `release_evidence.py` against clean documentation HEAD `2a56c8057949e8f76e8f3640085fddb3bfa405ab`. Android version/build/source were explicitly unknown; the helper's commit-mismatch flag preserves that uncertainty. This establishes US listing availability only, not every country, a fresh Play installation, persistence or the inclusion of later source fixes. No Android device is attached. Existing candidate-scoped evidence keeps its original scope.
+
+Next: add the verified Google link to the prepared website listing (the public page lacked it at this check); retain the utility owner's device/release control. No campaign sends. Utility owner review is required before merging this receipt PR.
+
 ## October 16: public US 1.0.3 availability verified
 
 The public US lookup now returns **1.0.3**, superseding the October 15 propagation uncertainty below. This is storefront availability evidence only; released-binary source mapping and native acceptance remain unknown.
