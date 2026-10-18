@@ -2,6 +2,8 @@
 
 Start with [native/store testing and retest selection](NATIVE-TESTING.md), then [current evidence and reusable lessons](LAUNCH.md). This keeps durable instructions separate from dated results; older receipts are not current blockers.
 
+- [October 18 Google Play availability](LAUNCH.md#october-18-public-us-google-play-availability-verified): public US free listing verified; Android binary/source and fresh device acceptance unknown.
+
 - [October 16 public US availability](LAUNCH.md#october-16-public-us-103-availability-verified): public Apple lookup now returns 1.0.3; released-binary mapping and native acceptance remain unknown.
 
 - [October 15 historical provider/public status](LAUNCH.md#october-15-provider-state-and-public-listing-reconciled): ASC 1.0.3 READY_FOR_SALE; public US lookup still 1.0.2 at the check; binary/source and Undo acceptance mapping remain unverified.
