@@ -17,9 +17,23 @@ This is a source and dependency review, not a penetration test, regulatory certi
 
 ## Remaining findings / release gates
 
-### SEC-01 — Medium: feedback challenge can be decoded and replayed
+### SEC-01 (closed by removal, 2026-10-02; formerly Medium): feedback challenge could be decoded and replayed
 
-Evidence: `supabase/functions/get-challenge/index.ts:71` base64-encodes `answer:timestamp:signature`; `submit-feedback/index.ts:48` decodes it. HMAC provides integrity, not secrecy; bots can read the answer and replay a valid token. The rate-limit map at `submit-feedback/index.ts:9` is process-local and resets on cold start. Consequence: spam, database growth, and service cost; this does not itself expose health journals. Replace with managed abuse prevention or a server-stored one-use challenge and durable rate limits before public launch. Do not invent stronger protection by merely hiding the answer in the UI. Gateway protections may exist but were not verified.
+Status: closed by removal. This finding applied to the removed Supabase feedback backend
+(`supabase/functions/get-challenge`, `supabase/functions/submit-feedback`), which was deleted on
+2026-10-02 along with the Supabase client. With no backend, there is no challenge endpoint and no
+submission endpoint, so the replay risk described below no longer exists in the app. Feedback now
+opens a draft in the user's email app through `src/lib/support.ts`; nothing is sent automatically.
+
+Historical evidence (pre-removal, retained for the record): `get-challenge/index.ts:71`
+base64-encoded `answer:timestamp:signature`; `submit-feedback/index.ts:48` decoded it. HMAC provided
+integrity, not secrecy; bots could read the answer and replay a valid token. The rate-limit map was
+process-local and reset on cold start. Consequence was spam, database growth, and service cost; it did
+not expose health journals.
+
+No action remains unless a backend feedback path is reintroduced, in which case abuse prevention
+(managed challenge, server-stored one-use tokens, durable rate limits) must be designed in from the
+start, not retrofitted.
 
 ### SEC-02 — Medium: local journal is accessible to same-origin scripts/unlocked device
 
@@ -31,11 +45,11 @@ No deployment headers were present in this repository. Verify HTTPS, `X-Content-
 
 ### SEC-04 — Medium: privacy operations and native device validation incomplete
 
-A complete store policy needs publisher contact, feedback retention/deletion process, and accurate provider disclosures. Verify live feedback RLS (source migrations restrict reads to admins and remove public inserts), infrastructure logs, iOS device backup behavior, and native export/delete behavior on devices. Android backup exclusions and an iOS required-reason manifest are included but do not constitute certification. Exported copies and submitted feedback cannot be removed by local Clear Data.
+A complete store policy needs publisher contact, feedback retention/deletion process, and accurate provider disclosures. The feedback backend was removed 2026-10-02, so there is no live feedback RLS to verify. Still open: publisher contact, feedback retention/deletion process, accurate provider disclosures, infrastructure logs, iOS device backup behavior, and native export/delete behavior on devices. Android backup exclusions and an iOS required-reason manifest are included but do not constitute certification. Exported copies and submitted feedback cannot be removed by local Clear Data.
 
 ### SEC-05 — Fixed locally: request-size enforcement during streaming
 
-`supabase/functions/_shared/request-body.ts` counts actual bytes while reading and cancels oversized streams at 8 KiB. Invalid UTF-8, malformed JSON, null and array payloads return 400; oversized requests return 413. Tests cover multibyte text and chunked streams without Content-Length. Deploy the updated feedback function to apply this protection. Gateway-level limits and durable rate limiting remain advisable; SEC-01 is still open.
+`supabase/functions/_shared/request-body.ts` counts actual bytes while reading and cancels oversized streams at 8 KiB. Invalid UTF-8, malformed JSON, null and array payloads return 400; oversized requests return 413. Tests cover multibyte text and chunked streams without Content-Length. This was fixed for the removed Supabase feedback function; with the backend removed on 2026-10-02, there is nothing to deploy, and SEC-01 is closed by removal.
 
 ## Scope limitations
 
@@ -47,6 +61,6 @@ Concurrent check-in, event and medication inserts now use single IndexedDB read/
 
 The integration pass also makes edits/deletes and sleep upserts atomic, so an undo or deletion cannot overwrite a concurrently inserted journal record. Event-form save errors preserve entered values and permit retry. No server deployment, authentication-policy change, or store submission is included.
 
-Feedback response validation and challenge expiry/retry handling are now covered locally. The interface no longer implies a selected answer has been verified; SEC-01 remains open because client lifecycle fixes do not prevent automated submissions or token replay.
+Feedback response validation and challenge expiry/retry handling are now covered locally. The interface no longer implies a selected answer has been verified; SEC-01 is closed by removal (2026-10-02): the challenge mechanism no longer exists in the app.
 
 Android execution September 15: actual debug APK and unsigned AAB compile; manifest/package inspection confirms target 36 and no health sensor permissions. Production RLS/header/abuse protection remain unverified; exact read-only inspection and rollout acceptance checks are staged in `docs/release/ANDROID-2026-09-15.md`. No auth configuration or licenses changed.

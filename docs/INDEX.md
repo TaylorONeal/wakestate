@@ -31,3 +31,8 @@ Start with [native/store testing and retest selection](NATIVE-TESTING.md), then 
 - [Nap input minute precision](LAUNCH.md#october-6-nap-input-minute-precision-correction): end-only edits match displayed duration; actual-form regressions and bounded iPad one/two-minute end-only entry/save acceptance pass; other platform gates remain separate.
 
 - [Future backup restoration and device migration](LAUNCH.md#future-requirement-restore-backups-when-switching-devices-or-platforms): user-requested future scope; existing JSON import distinguished from unverified cross-platform restoration; no testing now.
+
+- [Architecture](ARCHITECTURE.md): system map, local-first data model, native layer.
+- [Analytics](ANALYTICS.md): no analytics of any kind; documented absence.
+- [Backup and restore](BACKUP.md): OS backup scope, JSON export/import procedure.
+- [Medication catalog](MEDICATION-CATALOG.md): narcolepsy medication list summary and governance.
