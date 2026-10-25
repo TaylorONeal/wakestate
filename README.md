@@ -211,3 +211,21 @@ flowchart TB
 ```
 
 See docs/ARCHITECTURE.md for the full deep dive with storage, flow, and export/import diagrams.
+
+---
+
+## Related
+
+[SleepConverter](https://github.com/TaylorONeal/SleepConverter) converts SleepON and
+Go2Sleep ring exports into a CSV that SleepHQ accepts, offline and in one click.
+
+## More from me
+
+I'm Taylor O'Neal. I work in product and analytics, teach at Miami University, and put the
+tools I actually use into the open.
+
+- [tayloroneal.com](https://www.tayloroneal.com) for what I'm working on and how to reach me
+- [@businesstaylor](https://x.com/businesstaylor) on X, where I post build notes
+- [@grizzpm](https://www.youtube.com/@grizzpm) on YouTube
+
+If this saved you time, a star helps other people find it. Issues and PRs are welcome.
