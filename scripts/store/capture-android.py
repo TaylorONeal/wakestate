@@ -20,7 +20,7 @@ def main():
     if subprocess.check_output(adb + ['get-state'], text=True).strip() != 'device':
         raise SystemExit('Selected device is not available.')
     focus = subprocess.check_output(adb + ['shell', 'dumpsys', 'window'], text=True)
-    if not any(re.search(r'(mCurrentFocus|mFocusedApp).*\bcom\.wakestate\.app/', line) for line in focus.splitlines()):
+    if not any(re.search(r'(mCurrentFocus|mFocusedApp).*\bcom\.wakestate\.app(\.dev)?/', line) for line in focus.splitlines()):
         raise SystemExit('WakeState must be visible in the foreground. No screenshot captured.')
     png = subprocess.check_output(adb + ['exec-out', 'screencap', '-p'])
     if png[:8] != b'\x89PNG\r\n\x1a\n' or png[12:16] != b'IHDR' or len(png) < 24:
@@ -36,7 +36,7 @@ def main():
     target.write_bytes(png)
     metadata.write_text(json.dumps({
         'source': 'adb exec-out screencap -p', 'platform': 'Android',
-        'package': 'com.wakestate.app', 'shot': args.shot,
+        'package': 'com.wakestate.app.dev', 'shot': args.shot,
         'capturedAt': datetime.now(timezone.utc).isoformat(),
         'width': width, 'height': height, 'sha256': hashlib.sha256(png).hexdigest(),
         'reviewStatus': 'pending: inspect for synthetic data only, clipping, permissions and notifications',
