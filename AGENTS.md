@@ -36,3 +36,6 @@ Never sideload a build that uses the Play app ID `com.wakestate.app`. Google Pla
 - The activity class keeps the real namespace: launch with `adb shell am start -n com.wakestate.app.dev/com.wakestate.app.MainActivity`. Check what is on a device with `adb shell pm list packages -i | grep com.wakestate.app` (`installer=com.android.vending` is Play, `null` is a sideload).
 - If an old sideload under `com.wakestate.app` is on a device, uninstall it once and reinstall from Play.
 
+## Secrets
+
+Never write a secret into any file: code, config, docs, notes, prompts, submission notes, logs or commit messages. That covers API keys (RevenueCat and Stripe `sk_` keys included), Supabase service role keys and JWT secrets, access tokens (Codemagic, Vercel, GitHub, Expo), deploy keys, and the contents of `.p8` or `.pem` files. Write where the secret lives instead, for example "RevenueCat dashboard > API keys" or "Supabase secrets", and read it from an environment variable. The secret-scan check (`.github/workflows/secret-scan.yml`, rules in `.gitleaks.toml`) fails any pull request that adds one. If a real secret was ever committed, removing it is not enough: say so, so the key gets rotated.
