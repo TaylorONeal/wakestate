@@ -2,7 +2,7 @@
 
 Read in order: this file, SOUL.md and USER.md if present, docs/INDEX.md, then docs/NATIVE-TESTING.md and the newest evidence/reusable lessons in docs/LAUNCH.md for native/store tasks. Read the relevant implementation before changing behavior.
 
-Which shared skill to use for device acceptance or delivery work, and the authorization rule for submission, are in `NATIVE-RELEASE-POLICY.md` (linked below) — not restated here.
+For device acceptance or delivery work, use your tool's native app testing or store readiness skill if it has one. If none is available, follow `docs/NATIVE-TESTING.md` and say so.
 
 | Trigger | Read and do |
 | --- | --- |
@@ -13,7 +13,14 @@ Which shared skill to use for device acceptance or delivery work, and the author
 | Health data, import/export, privacy or any new network feature | Read `docs/SECURITY.md` and relevant storage tests. Preserve local records; test real import/export paths. Any new backend must be separately reviewable and never claimed as verified from source edits alone. The app currently has no backend. |
 | Store submission | Recheck signed bundle, declarations, public support/privacy, real device QA and listing assets. Obtain applicable release authorization; do not equate business verification with app approval. |
 
-**Release acceptance, secrets, evidence discipline, and authorization boundaries follow the shared [`NATIVE-RELEASE-POLICY.md`](https://github.com/TaylorONeal/app-launch-playbook/blob/main/NATIVE-RELEASE-POLICY.md)** in `app-launch-playbook` — don't restate it here. WakeState-specific: it's free, private and non-diagnostic — no generic billing suite, health telemetry or real health records in QA, and no backend at all currently. Keep mutable results in LAUNCH.md, never here. iOS preparation does not imply submission.
+## Release rules
+
+- **A browser build is not native acceptance.** Web builds, CI compiles, simulator runs and browser screenshots are not device, signing, privacy or store acceptance. Keep Android, iOS and web evidence separate. Compiled, signed, uploaded, installed from the store, device-observed, submitted, in review and live are separate states; don't collapse them into "done".
+- **No secrets or private documents in the repo.** No signing keys, credentials, API tokens, account or business-verification identifiers, identity documents or real health records.
+- **Evidence is a row.** Date, commit or artifact hash, device and OS, case, status, evidence reference, next action. Keep mutable results in `docs/LAUNCH.md`, never in this file. Run a smoke test per new binary or platform and expand by what changed; a docs-only change needs docs validation only. Record a blocker once, with what would unblock it.
+- **Irreversible store actions need the maintainer's explicit approval for that action.** Submission, signing-key creation, agreements and Create/Save/Publish/Submit in a store console. A passing checklist or green CI is not approval.
+
+WakeState-specific: it's free, private and non-diagnostic. No generic billing suite, no health telemetry or real health records in QA, and no backend at all currently. iOS preparation does not imply submission.
 
 ## Platform independence
 
@@ -21,7 +28,7 @@ No hosted app-builder tooling, hosting, icons, env vars or assets (no builder pl
 
 ## Android dev app ID (sideloaded builds)
 
-Never sideload a build that uses the Play app ID `com.wakestate.app`. Google Play re-signs every release with its own key, so a copy installed over USB, adb or from a CI/Codemagic APK under the Play ID has a different signature, and Play can't update it until it is uninstalled (Nov 10 2026: most of Taylor's Pixel apps failed to update for this reason).
+Never sideload a build that uses the Play app ID `com.wakestate.app`. Google Play re-signs every release with its own key, so a copy installed over USB, adb or from a CI/Codemagic APK under the Play ID has a different signature, and Play can't update it until it is uninstalled.
 
 - Debug builds always install as `com.wakestate.app.dev`, named "WakeState Dev", beside the Play copy. Set in `android/app/build.gradle` (`buildTypes.debug.applicationIdSuffix`); the launcher label comes from the `appLabel` manifest placeholder.
 - A release-variant QA APK that will be sideloaded must be built with `ANDROID_DEV_ID=1` (or `-PandroidDevId=1`), which gives it the same `.dev` ID.
