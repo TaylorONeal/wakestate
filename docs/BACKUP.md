@@ -67,6 +67,6 @@ Export a JSON backup regularly: after any period of journaling you would not wan
 
 ## Cross-Device Restore: Planned, Not Yet Built
 
-`docs/LAUNCH.md` records: "Future requirement: restore backups when switching devices or platforms." Taylor's 2026-10-06 instruction on it: "**for future work, with no testing now**. Keep this improvement outside the current launch-fix batch."
+`docs/LAUNCH.md` records: "Future requirement: restore backups when switching devices or platforms." The maintainer's 2026-10-06 instruction on it: "**for future work, with no testing now**. Keep this improvement outside the current launch-fix batch."
 
 Recorded state: the requirement is acknowledged and parked. It has **no owner, no plan, and no testing** as of 2026-10-20. Next step is an owner decision: either plan it (define the cross-device import UX and verify the V2 schema round-trips across platforms) or explicitly defer it again with a recorded reason. Do not claim it works until a restore is tested on real devices.

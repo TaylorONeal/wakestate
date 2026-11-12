@@ -148,4 +148,4 @@ The PWA is a static Vite build on Vercel (`docs/HOSTING.md`): Vercel runs `npm c
 
 ## Read Order for Agents
 
-Per `AGENTS.md`: AGENTS.md, then `docs/INDEX.md`, then `docs/NATIVE-TESTING.md` and the newest evidence in `docs/LAUNCH.md`. Release acceptance, secrets, and authorization boundaries follow the shared `NATIVE-RELEASE-POLICY.md` in `app-launch-playbook` (not restated here). Platform independence is CI-enforced by `scripts/check-platform-independence.sh`.
+Per `AGENTS.md`: AGENTS.md, then `docs/INDEX.md`, then `docs/NATIVE-TESTING.md` and the newest evidence in `docs/LAUNCH.md`. Release acceptance, secrets, and authorization boundaries follow the release rules in `AGENTS.md`. Platform independence is CI-enforced by `scripts/check-platform-independence.sh`.
