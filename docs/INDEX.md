@@ -2,9 +2,15 @@
 
 Start with [native/store testing and retest selection](NATIVE-TESTING.md), then [current evidence and reusable lessons](LAUNCH.md). This keeps durable instructions separate from dated results; older receipts are not current blockers.
 
-- [Undo restores the entered values](LAUNCH.md#october-13-undo-restores-the-entered-values-source-only-for-103): fixed in source for 1.0.3, not in any store build, device check still to run.
+- [October 18 Google Play availability](LAUNCH.md#october-18-public-us-google-play-availability-verified): public US free listing verified; Android binary/source and fresh device acceptance unknown.
 
-- [iOS 1.0.2 (3) submitted](LAUNCH.md#october-13-ios-102-3-built-tested-and-submitted-to-app-review): what 1.0.1 already contains, the one unshipped fix, version label fix, iPhone acceptance results, upload and App Review submission. Release is manual and still open.
+- [October 16 public US availability](LAUNCH.md#october-16-public-us-103-availability-verified): public Apple lookup now returns 1.0.3; released-binary mapping and native acceptance remain unknown.
+
+- [October 15 historical provider/public status](LAUNCH.md#october-15-provider-state-and-public-listing-reconciled): ASC 1.0.3 READY_FOR_SALE; public US lookup still 1.0.2 at the check; binary/source and Undo acceptance mapping remain unverified.
+
+- [Undo restores the entered values](LAUNCH.md#october-13-undo-restores-the-entered-values-source-only-for-103): historical source-fix receipt; use the October 16 status above for provider/public state. Released-binary inclusion and device acceptance are not established by that status.
+
+- [iOS 1.0.2 (3) submitted](LAUNCH.md#october-13-ios-102-3-built-tested-and-submitted-to-app-review): what 1.0.1 already contains, the one unshipped fix, version label fix, iPhone acceptance results, upload and App Review submission. Historical manual-release/submission receipt; superseded provider status is above.
 
 - [Next App Store release batch](LAUNCH.md#october-12-next-app-store-release-batch): merged check-in fix #32, remaining-change reconciliation, one combined iOS candidate and native acceptance before delivery.
 
