@@ -15,7 +15,7 @@ Known limits: if Undo is tapped while a later, different entry is being typed on
 
 ## October 13: iOS 1.0.2 (3) built, tested and submitted to App Review
 
-Taylor approved building 1.0.2 with the check-in fix on October 13, then the merge, upload and App Review submission later the same morning. The sections below record source preparation, the signed candidate and iPhone acceptance, and delivery, in that order. Apple's App Review approval and the release are not recorded yet.
+The maintainer approved building 1.0.2 with the check-in fix on October 13, then the merge, upload and App Review submission later the same morning. The sections below record source preparation, the signed candidate and iPhone acceptance, and delivery, in that order. Apple's App Review approval and the release are not recorded yet.
 
 | ID | Result | Evidence |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ Device: iPhone 12 mini, iOS 27.0.1, driven through Xcode Device Hub. The install
 
 ### Delivery (October 13)
 
-Taylor approved the merge, the upload and the App Review submission in chat at 10:02 WITA. Release was not part of that approval.
+The maintainer approved the merge, the upload and the App Review submission in chat at 10:02 WITA. Release was not part of that approval.
 
 | Step | State | Evidence |
 | --- | --- | --- |
@@ -52,14 +52,14 @@ Taylor approved the merge, the upload and the App Review submission in chat at 1
 | Upload | Done 10:07 WITA | `altool` validate then upload of the IPA with SHA-256 `fa4347e3...a3498d`: "UPLOAD SUCCEEDED with no errors". Build 3 processed to VALID at 10:09. |
 | Version record | Done | App Store version 1.0.2 created with build 3 attached, release type **Manual**, What's New: "Improved check-in saving, with clearer retry feedback and protection against duplicate entries. Settings now shows the installed version." Review notes carried over from 1.0.1 with one added sentence describing this update. |
 | App Review | Submitted 10:11 WITA (02:11 UTC) | Version state Waiting for Review. 1.0.1 stays Ready for Sale until 1.0.2 is released. |
-| Release | Not done | Manual release. Needs Taylor's yes after approval, or a switch to automatic release. |
+| Release | Not done | Manual release. Needs the maintainer's yes after approval, or a switch to automatic release. |
 | TestFlight | Not used | No tester install of build 3. The App Store-signed upgrade path is therefore still unexercised. |
 
 Follow-up for a later release: make Undo restore the entered values, or relabel it "Remove" (restoring is now [fixed in source](#october-13-undo-restores-the-entered-values-source-only-for-103), not yet in a store build). The October 11 incident stays open until the reporter confirms on 1.0.2 or the trigger is identified. Android is unchanged: version 1.0.0 (1) is in Play review and does not contain #32.
 
 ## October 12: next App Store release batch
 
-Taylor requested that the check-in fix ship with the other App Store changes in the next combined WakeState release. [PR #32](https://github.com/TaylorONeal/wakestate/pull/32) is merged as `5c13500466042158271fb049bd93089144c89409`; the next iOS candidate must contain this commit. Batch remaining approved iOS fixes and listing changes into one reviewed candidate, then run the affected acceptance checks once. Do not start a separate paid build or immediate standalone submission for this fix.
+The maintainer requested that the check-in fix ship with the other App Store changes in the next combined WakeState release. [PR #32](https://github.com/TaylorONeal/wakestate/pull/32) is merged as `5c13500466042158271fb049bd93089144c89409`; the next iOS candidate must contain this commit. Batch remaining approved iOS fixes and listing changes into one reviewed candidate, then run the affected acceptance checks once. Do not start a separate paid build or immediate standalone submission for this fix.
 
 | ID | Work | State / evidence | Next action / owner |
 | --- | --- | --- | --- |
@@ -101,7 +101,7 @@ Keep the submitted recording outside git: it contains user journal information. 
 
 ## Future requirement: restore backups when switching devices or platforms
 
-Taylor requested this on October 6, 2026 **for future work, with no testing now**. Keep this improvement outside the current launch-fix batch. Do not treat it as a new release blocker or permission to run a restore, overwrite records, implement the feature or start a build in this turn.
+The maintainer requested this on October 6, 2026 **for future work, with no testing now**. Keep this improvement outside the current launch-fix batch. Do not treat it as a new release blocker or permission to run a restore, overwrite records, implement the feature or start a build in this turn.
 
 Current source already exposes Reports → Import Data / Import File for WakeState JSON backups (`src/components/ExportScreen.tsx`). `src/lib/storage.ts` validates before an atomic write, replaces included categories and preserves omitted categories; versioned backups include journal records, sleep, medication information and settings. This is source inspection only, not verified web-to-device or device-to-device restoration. CSV exports contain check-ins only and are not full backups.
 
