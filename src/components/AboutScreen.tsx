@@ -187,7 +187,7 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
         </div>
 
         <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-          I built WakeState because it could help me better understand my own narcolepsy and help others in the communities I'm part of. If it helps you notice patterns or explain your experience more clearly, that's the goal.
+          I built WakeState as someone living with a sleep disorder, to better understand my own patterns and help others in the communities I'm part of. If it helps you notice patterns or explain your experience more clearly, that's the goal.
         </p>
 
         {showDonationLinks() && (
